@@ -1,53 +1,56 @@
 {
-    "name": "yii2/template",
-    "type": "library",
-    "description": "_____",
+    "name": "yii2-extensions/localeurls",
+    "description": "Automatic locale/language management for URLs.",
     "keywords": [
-        "_____"
+        "yii2",
+        "i18n",
+        "locale"
     ],
-    "license": "mit",
+    "type": "yii2-extension",
+    "license": "MIT",
     "minimum-stability": "dev",
-    "prefer-stable": true,
     "require": {
         "php": ">=8.1",
-        "yiisoft/yii2": "^2.2"
+        "ext-mbstring": "*",
+        "yiisoft/yii2": "^2.2",
+        "yiisoft/yii2-bootstrap5": "^2.0"
     },
     "require-dev": {
         "maglnet/composer-require-checker": "^4.6",
-        "phpunit/phpunit": "^10.2",
+        "phpunit/phpunit": "^10.4",
         "yii2-extensions/phpstan": "dev-main"
-    },
-    "autoload": {
-        "psr-4": {
-            "yii\\template\\": "src"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "yii\\template\\tests\\": "tests"
-        }
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-main": "1.0.x-dev"
-        }
-    },
-    "config": {
-        "sort-packages": true,
-        "allow-plugins": {
-            "yiisoft/yii2-composer": true
-        }
-    },
-    "scripts": {
-        "check-dependencies": "composer-require-checker",
-        "mutation": "roave-infection-static-analysis-plugin",
-        "phpstan": "phpstan",
-        "test": "phpunit"
     },
     "repositories": [
         {
             "type": "composer",
             "url": "https://asset-packagist.org"
         }
-    ]
+    ],
+    "autoload": {
+        "psr-4": {
+            "yii\\localeurls\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "yii\\tests\\": "tests"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "1.0.x-dev"
+        },
+        "config-plugin-options": {
+            "source-directory": "config"
+        },
+        "config-plugin": {
+            "params-web": "params-web.php",
+            "yii2-localeurls": "components.php"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "yiisoft/yii2-composer": true
+        }
+    }
 }
