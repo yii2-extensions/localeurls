@@ -9,7 +9,6 @@ return [
     'components' => [
         'urlManager' => [
             'languages' => $params['yii2.localeurls.languages'],
-        ]
+        ],
     ],
 ];
-

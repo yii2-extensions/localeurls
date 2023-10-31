@@ -139,7 +139,7 @@ final class EventTest extends TestCase
         $this->assertTrue($this->eventExpected);
         $this->assertEquals($this->expectedLanguage, $event->language);
         $this->assertEquals($this->expectedOldLanguage, $event->oldLanguage);
-        
+
         $this->eventFired = true;
     }
 }
