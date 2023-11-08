@@ -45,7 +45,7 @@
         },
         "config-plugin": {
             "params-web": "params-web.php",
-            "yii2-localeurls": "components.php"
+            "yii2-localeurls": "extension.php"
         }
     },
     "config": {
