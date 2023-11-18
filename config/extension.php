@@ -8,7 +8,8 @@ declare(strict_types=1);
 return [
     'components' => [
         'urlManager' => [
-            'languages' => $params['yii2.localeurls.languages'],
+            'languages' => $params['yii2.localeurls.languages'] === []
+                ? ['en-US'] : $params['yii2.localeurls.languages'],
         ],
     ],
 ];
