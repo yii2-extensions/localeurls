@@ -13,6 +13,9 @@
     <a href="https://github.com/yii2-extensions/localeurls/actions/workflows/build.yml" target="_blank">
         <img src="https://github.com/yii2-extensions/localeurls/actions/workflows/build.yml/badge.svg" alt="PHPUnit">
     </a>
+    <a href="https://github.com/yii2-extensions/localeurls/actions/workflows/compatibility.yml" target="_blank">
+        <img src="https://github.com/yii2-extensions/localeurls/actions/workflows/compatibility.yml/badge.svg" alt="PHPUnit">
+    </a>    
     <a href="https://codecov.io/gh/yii2-extensions/localeurls" target="_blank">
         <img src="https://codecov.io/gh/yii2-extensions/localeurls/graph/badge.svg?token=hLDHtLBgqV" alt="Codecov">
     </a>      
