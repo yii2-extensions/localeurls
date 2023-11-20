@@ -1,5 +1,5 @@
 {
     "symbol-whitelist": [
-        "YII2_LOCALEURLS_TEST"
+        "YII_ENV"
     ]
 }
