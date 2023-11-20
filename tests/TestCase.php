@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace yii\tests;
+namespace Yii2\Extensions\LocaleUrls\Test;
 
+use Yii2\Extensions\LocaleUrls\UrlLanguageManager;
 use Yii;
 use yii\base\Exception;
-use yii\helpers\ArrayHelper;
 use yii\di\Container;
-use yii\localeurls\UrlLanguageManager;
+use yii\helpers\ArrayHelper;
 use yii\web\Application;
 
 abstract class TestCase extends \PHPUnit\Framework\TestCase

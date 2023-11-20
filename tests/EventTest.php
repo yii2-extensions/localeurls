@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace yii\tests;
+namespace Yii2\Extensions\LocaleUrls\Test;
 
-use yii\localeurls\LanguageChangedEvent;
+use Yii2\Extensions\LocaleUrls\LanguageChangedEvent;
 
 final class EventTest extends TestCase
 {

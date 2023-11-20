@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace yii\tests;
+namespace Yii2\Extensions\LocaleUrls\Test;
 
 final class RedirectWithScriptNameTest extends RedirectTest
 {

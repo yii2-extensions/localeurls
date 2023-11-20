@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-namespace yii\localeurls;
-
-defined('YII2_LOCALEURLS_TEST') || define('YII2_LOCALEURLS_TEST', false);
+namespace Yii2\Extensions\LocaleUrls;
 
 use Yii;
 use yii\base\Exception;
@@ -693,7 +691,7 @@ class UrlLanguageManager extends \yii\web\UrlManager
         Yii::debug("Redirecting to $url.", __METHOD__);
         Yii::$app->getResponse()->redirect($url, $this->languageRedirectCode);
 
-        if (YII2_LOCALEURLS_TEST) {
+        if (YII_ENV === 'test') {
             // Response::redirect($url) above will call `Url::to()` internally.
             // So to really test for the same final redirect URL here, we need
             // to call Url::to(), too.
