@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 error_reporting(-1);
-define('YII_ENABLE_ERROR_HANDLER', false);
 
-define('YII_DEBUG', true);
+defined('YII_DEBUG') or define('YII_DEBUG', false);
+define('YII_ENABLE_ERROR_HANDLER', false);
 define('YII_ENV', 'test');
 
 // require composer autoloader if available
