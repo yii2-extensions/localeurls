@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace yii\localeurls;
+namespace Yii2\Extensions\LocaleUrls;
 
 use yii\base\Event;
 

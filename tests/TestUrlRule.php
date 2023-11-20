@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace yii\tests;
+namespace Yii2\Extensions\LocaleUrls\Test;
 
 use Yii;
 use yii\web\UrlRuleInterface;
@@ -43,7 +43,7 @@ final class TestUrlRule implements UrlRuleInterface
         $url = ['/ruleclass/test', 'slugLanguage' => $language];
         Yii::$app->response->redirect($url);
 
-        if (YII2_LOCALEURLS_TEST) {
+        if (YII_ENV === 'test') {
             // Response::redirect($url) above will call `Url::to()` internally.
             // So to really test for the same final redirect URL here, we need
             // to call Url::to(), too.

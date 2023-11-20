@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use yii\localeurls\UrlLanguageManager;
+use Yii2\Extensions\LocaleUrls\UrlLanguageManager;
 
 return [
     'yii2.urlManager.class' => UrlLanguageManager::class,

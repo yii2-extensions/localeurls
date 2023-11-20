@@ -6,8 +6,7 @@ error_reporting(-1);
 define('YII_ENABLE_ERROR_HANDLER', false);
 
 define('YII_DEBUG', true);
-define('YII_ENV_TEST', true);
-define('YII2_LOCALEURLS_TEST', true);
+define('YII_ENV', 'test');
 
 // require composer autoloader if available
 require(__DIR__ . '/../vendor/autoload.php');
