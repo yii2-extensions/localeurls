@@ -754,7 +754,7 @@ abstract class AbstractRedirect extends TestCase
         array $cookie = [],
         array $server = [],
     ): void {
-        $this->tearDown();
+        $this->clear();
         $this->mockUrlLanguageManager($urlLanguageManager);
 
         if (empty($session) === false) {

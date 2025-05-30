@@ -557,7 +557,7 @@ abstract class AbstractUrlCreation extends TestCase
      */
     private function performUrlCreationTest(string $requestUrl, array $urlManager, array $routes): void
     {
-        $this->tearDown();
+        $this->clear();
         $this->mockUrlLanguageManager($urlManager);
         $this->mockRequest($requestUrl);
 

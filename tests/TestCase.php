@@ -44,7 +44,15 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
 
     protected function tearDown(): void
     {
+        $this->clear();
+
+        parent::tearDown();
+    }
+
+    protected function clear(): void
+    {
         $_COOKIE = [];
+        $_SESSION = [];
         $_SERVER = $this->_server;
 
         if (isset(Yii::$app)) {
@@ -54,8 +62,6 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         }
 
         $this->urlManager = [];
-
-        parent::tearDown();
     }
 
     /**
