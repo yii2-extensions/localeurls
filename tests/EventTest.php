@@ -2,20 +2,47 @@
 
 declare(strict_types=1);
 
-namespace Yii2\Extensions\LocaleUrls\Test;
+namespace yii2\extensions\localeurls\tests;
 
-use Yii2\Extensions\LocaleUrls\LanguageChangedEvent;
+use PHPUnit\Framework\Attributes\Group;
+use yii2\extensions\localeurls\LanguageChangedEvent;
 
+/**
+ * Test suite for {@see LanguageChangedEvent} event functionality and behavior.
+ *
+ * Verifies that language change events are triggered and handled within the LocaleUrls extension's URL language
+ * management system.
+ *
+ * These tests ensure that the event system correctly detects language changes from various sources (cookies, sessions,
+ * URLs) and fires the appropriate events with the correct data.
+ *
+ * The test scenarios validate that language persistence mechanisms work as expected and that events are only triggered
+ * when actual language changes occur, preventing unnecessary event firing for identical language states.
+ *
+ * Test coverage.
+ * - Cookie-based language change detection and event firing.
+ * - Event data validation (new language, old language properties).
+ * - Event handler execution and callback functionality.
+ * - Language persistence behavior (cookies, sessions).
+ * - Language persistence disabling functionality.
+ * - No-change scenarios where events shouldn't fire.
+ * - Session-based language change detection and event firing.
+ * - URL-based language detection and initial language setting.
+ *
+ * @copyright Copyright (C) 2023 Terabytesoftw.
+ * @license https://opensource.org/license/bsd-3-clause BSD 3-Clause License.
+ */
+#[Group('locale-urls')]
 final class EventTest extends TestCase
 {
-    protected $eventExpected = true;
-    protected $eventFired = false;
-    protected $expectedLanguage;
-    protected $expectedOldLanguage;
+    protected bool $eventExpected = true;
 
-    /**
-     * @inheritdoc
-     */
+    protected bool $eventFired = false;
+
+    protected string|null $expectedLanguage = null;
+
+    protected string|null $expectedOldLanguage = null;
+
     protected function tearDown(): void
     {
         parent::tearDown();
@@ -36,9 +63,93 @@ final class EventTest extends TestCase
 
         $this->expectedLanguage = 'fr';
 
-        $this->assertFalse($this->eventFired);
+        $this->assertFalse(
+            $this->eventFired,
+            'Language changed event should not be fired before making the request when no language is persisted.'
+        );
+
         $this->mockRequest('/fr/site/page');
-        $this->assertTrue($this->eventFired);
+
+        $this->assertTrue(
+            $this->eventFired,
+            'Language changed event should be fired when no language is persisted and a language is detected from URL.'
+        );
+    }
+
+    public function testFiresNotIfNoCookieLanguageChange(): void
+    {
+        $_COOKIE['_language'] = 'fr';
+
+        $this->mockUrlLanguageManager(
+            [
+                'languages' => ['fr', 'en', 'de'],
+                'on languageChanged' => [$this, 'languageChangedHandler'],
+            ],
+        );
+
+        $this->assertFalse(
+            $this->eventFired,
+            'Language changed event should not be fired before making the request when cookie language matches URL ' .
+            'language.',
+        );
+
+        $this->mockRequest('/fr/site/page');
+
+        $this->assertFalse(
+            $this->eventFired,
+            'Language changed event should not be fired when cookie language matches URL language.',
+        );
+    }
+
+    public function testFiresNotIfNoSessionLanguageChange(): void
+    {
+        @session_start();
+        $_SESSION['_language'] = 'fr';
+
+        $this->mockUrlLanguageManager(
+            [
+                'languages' => ['fr', 'en', 'de'],
+                'on languageChanged' => [$this, 'languageChangedHandler'],
+            ],
+        );
+
+        $this->assertFalse(
+            $this->eventFired,
+            'Language changed event should not be fired before making the request when session language matches URL ' .
+            'language.',
+        );
+
+        $this->mockRequest('/fr/site/page');
+
+        $this->assertFalse(
+            $this->eventFired,
+            'Language changed event should not be fired when session language matches URL language.',
+        );
+    }
+
+    public function testFiresNotIfPersistenceDisabled(): void
+    {
+        $this->mockUrlLanguageManager(
+            [
+                'languages' => ['fr', 'en', 'de'],
+                'on languageChanged' => [$this, 'languageChangedHandler'],
+                'enableLanguagePersistence' => false,
+            ],
+        );
+
+        $this->expectedLanguage = 'fr';
+
+        $this->assertFalse(
+            $this->eventFired,
+            'Language changed event should not be fired before making the request when persistence is disabled.',
+        );
+
+        $this->mockRequest('/fr/site/page');
+
+        $this->assertFalse(
+            $this->eventFired,
+            'Language changed event should not be fired when language persistence is disabled.',
+        );
     }
 
     public function testFiresOnCookieLanguageChange(): void
@@ -55,14 +166,23 @@ final class EventTest extends TestCase
         $this->expectedLanguage = 'fr';
         $this->expectedOldLanguage = 'de';
 
-        $this->assertFalse($this->eventFired);
+        $this->assertFalse(
+            $this->eventFired,
+            'Language changed event should not be fired before making the request with different language.',
+        );
+
         $this->mockRequest('/fr/site/page');
-        $this->assertTrue($this->eventFired);
+
+        $this->assertTrue(
+            $this->eventFired,
+            'Language changed event should be fired when URL language differs from cookie language.',
+        );
     }
 
     public function testFiresOnSessionLanguageChange(): void
     {
         @session_start();
+
         $_SESSION['_language'] = 'de';
 
         $this->mockUrlLanguageManager(
@@ -75,67 +195,21 @@ final class EventTest extends TestCase
         $this->expectedLanguage = 'fr';
         $this->expectedOldLanguage = 'de';
 
-        $this->assertFalse($this->eventFired);
-        $this->mockRequest('/fr/site/page');
-        $this->assertTrue($this->eventFired);
-    }
-
-    public function testFiresNotIfNoCookieLanguageChange(): void
-    {
-        $_COOKIE['_language'] = 'fr';
-
-        $this->mockUrlLanguageManager(
-            [
-                'languages' => ['fr', 'en', 'de'],
-                'on languageChanged' => [$this, 'languageChangedHandler'],
-            ],
+        $this->assertFalse(
+            $this->eventFired,
+            'Language changed event should not be fired before making the request with different language.',
         );
 
-        $this->assertFalse($this->eventFired);
         $this->mockRequest('/fr/site/page');
-        $this->assertFalse($this->eventFired);
-    }
 
-    public function testFiresNotIfNoSessionLanguageChange(): void
-    {
-        @session_start();
-        $_SESSION['_language'] = 'fr';
-
-        $this->mockUrlLanguageManager(
-            [
-                'languages' => ['fr', 'en', 'de'],
-                'on languageChanged' => [$this, 'languageChangedHandler'],
-            ],
+        $this->assertTrue(
+            $this->eventFired,
+            'Language changed event should be fired when URL language differs from session language.',
         );
-
-        $this->assertFalse($this->eventFired);
-        $this->mockRequest('/fr/site/page');
-        $this->assertFalse($this->eventFired);
     }
 
-    public function testFiresNotIfPersistenceDisabled(): void
+    public function languageChangedHandler(LanguageChangedEvent $event): void
     {
-        $this->mockUrlLanguageManager(
-            [
-                'languages' => ['fr', 'en', 'de'],
-                'on languageChanged' => [$this, 'languageChangedHandler'],
-                'enableLanguagePersistence' => false,
-            ],
-        );
-
-        $this->expectedLanguage = 'fr';
-
-        $this->assertFalse($this->eventFired);
-        $this->mockRequest('/fr/site/page');
-        $this->assertFalse($this->eventFired);
-    }
-
-    /**
-     * Event handler
-     */
-    public function languageChangedHandler($event): void
-    {
-        $this->assertInstanceOf(LanguageChangedEvent::class, $event);
         $this->assertTrue($this->eventExpected);
         $this->assertEquals($this->expectedLanguage, $event->language);
         $this->assertEquals($this->expectedOldLanguage, $event->oldLanguage);

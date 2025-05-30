@@ -7,33 +7,28 @@
         "i18n",
         "locale"
     ],
-    "license": "MIT",
+    "license": "BSD-3-Clause",
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": ">=8.1",
+        "php": ">=8.2",
         "ext-mbstring": "*",
         "yiisoft/yii2": "22.0.x-dev"
     },
     "require-dev": {
         "maglnet/composer-require-checker": "^4.6",
         "phpstan/phpstan": "^2.1",
-        "phpunit/phpunit": "^10.5"
+        "phpunit/phpunit": "^10.5",
+        "rector/rector": "^2.0"
     },
-    "repositories": [
-        {
-            "type": "composer",
-            "url": "https://asset-packagist.org"
-        }
-    ],
     "autoload": {
         "psr-4": {
-            "Yii2\\Extensions\\LocaleUrls\\": "src"
+            "yii2\\extensions\\localeurls\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Yii2\\Extensions\\LocaleUrls\\Tests\\": "tests"
+            "yii2\\extensions\\localeurls\\tests\\": "tests"
         }
     },
     "config": {
@@ -45,6 +40,7 @@
     "scripts": {
         "check-dependencies": "./vendor/bin/composer-require-checker check",
         "static": "./vendor/bin/phpstan analyse src --memory-limit=512M",
+        "rector": "./vendor/bin/rector process src",
         "tests": "./vendor/bin/phpunit"
     }
 }

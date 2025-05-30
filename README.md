@@ -50,12 +50,12 @@ to the require-dev section of your `composer.json` file.
 
 ## Configuration
 
-To use this extension, you need to configure the `localeUrls` component in your application configuration file. 
+To use this extension, you need to configure the `urlManager` component in your application configuration file. 
 
 ```php
 'components' => [
     'urlManager' => [
-        'class' => Yii2\Extensions\LocaleUrls\UrlLanguageManager::class,
+        'class' => yii2\extensions\localeurls\UrlLanguageManager::class,
         'languages' => [
             'en' => 'en-US',
             'es' => 'es-ES',

@@ -2,25 +2,27 @@
 
 declare(strict_types=1);
 
-namespace Yii2\Extensions\LocaleUrls\Test;
+namespace yii2\extensions\localeurls\tests\stub;
 
 use Yii;
 use yii\base\Exception;
 use yii\helpers\Url;
 use yii\web\UrlRuleInterface;
 
-final class TestUrlRule implements UrlRuleInterface
+final class UrlRule implements UrlRuleInterface
 {
     public function createUrl($manager, $route, $params)
     {
         if ($route === 'ruleclass/test') {
             $language = $params['slugLanguage'] ?? Yii::$app->language;
+
             return match ($language) {
                 'de' => 'ruleclass-deutsch',
                 'fr' => 'ruleclass-francais',
                 default => 'ruleclass-english',
             };
         }
+
         return false;
     }
 
@@ -28,6 +30,7 @@ final class TestUrlRule implements UrlRuleInterface
     {
         $language = Yii::$app->language;
         $pathInfo = $request->pathInfo;
+
         if ($pathInfo === 'ruleclass-deutsch') {
             $slugLanguage = 'de';
         } elseif ($pathInfo === 'ruleclass-francais') {
@@ -41,16 +44,19 @@ final class TestUrlRule implements UrlRuleInterface
         if ($language === $slugLanguage) {
             return ['ruleclass/test', []];
         }
+
         // Redirect to correct slug language
         $url = ['/ruleclass/test', 'slugLanguage' => $language];
         Yii::$app->response->redirect($url);
 
         if (YII_ENV === 'test') {
-            // Response::redirect($url) above will call `Url::to()` internally.
-            // So to really test for the same final redirect URL here, we need
-            // to call Url::to(), too.
+            /**
+             * Response::redirect($url) above will call `Url::to()` internally.
+             * So to really test for the same final redirect URL here, we need to call Url::to(), too.
+             */
             throw new Exception(Url::to($url));
         }
+
         Yii::$app->end();
 
         return false;

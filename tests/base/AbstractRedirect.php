@@ -2,43 +2,53 @@
 
 declare(strict_types=1);
 
-namespace Yii2\Extensions\LocaleUrls\Test;
+namespace yii2\extensions\localeurls\tests\base;
 
+use PHPUnit\Framework\Attributes\Group;
 use Yii;
 use yii\base\Exception;
 use yii\helpers\Url;
+use yii\web\UrlNormalizer;
 use yii\web\UrlNormalizerRedirectException;
+use yii2\extensions\localeurls\tests\stub\UrlRule;
+use yii2\extensions\localeurls\tests\TestCase;
 
-class RedirectTest extends TestCase
+/**
+ * Base class for redirect tests in the Yii2 LocaleUrls extension.
+ *
+ * Provides comprehensive tests for URL redirection, ensuring correct language detection and redirect behavior across
+ * multiple sources and configuration scenarios.
+ *
+ * This class validates the LocaleUrls redirection system by simulating requests with different language sources, such
+ * as cookies, sessions, headers, and GeoIP data.
+ *
+ * It covers normalization, language code handling, custom URL rules, suffix management, and parameter preservation
+ * during redirects.
+ *
+ * Test coverage.
+ * - Cookie-based language detection and redirection behavior.
+ * - Custom URL rule processing and redirection logic.
+ * - Default language handling in URLs (with and without language codes).
+ * - GeoIP-based language detection and automatic redirection.
+ * - Language code case conversion (uppercase to lowercase).
+ * - Language persistence configuration effects on redirection.
+ * - Parameter preservation during URL redirection.
+ * - Session-based language detection and redirection behavior.
+ * - Suffix handling in URL normalization and redirection.
+ * - URL normalization with different language code configurations.
+ * - UrlNormalizerRedirectException handling and proper redirect execution.
+ * - Wildcard language pattern matching and redirection.
+ *
+ * @copyright Copyright (C) 2023 Terabytesoftw.
+ * @license https://opensource.org/license/bsd-3-clause BSD 3-Clause License.
+ */
+#[Group('locale-urls')]
+abstract class AbstractRedirect extends TestCase
 {
     /**
-     * @var array the set of test configurations to test. Each entry is an
-     * array with this structure:
-     *
-     * ```php
-     * [
-     *     'urlLaguageManager' => [
-     *         // UrlLanguageManager settings for this test
-     *     ],
-     *     'redirects' => [
-     *         // List of expected redirecs in the form `$fromUrl => $to`.
-     *         // $to can be:
-     *         //   - a string with a URL that should be redirected to,
-     *         //   - `false` if there should be no redirect
-     *         //   - an array with the expected redirect URL as first element
-     *         //     and further parameters to set:
-     *         //     [
-     *         //       $to,               // redirect URL as string
-     *         //       'request' => ... , // request properties
-     *         //       'session' => ... , // session data
-     *         //       'cookie' => ... ,  // cookie data
-     *         //       'server' => ... ,  // $_SERVER data
-     *         //     ]
-     *     ],
-     * ]
-     * ```
+     * @var array Set of test configurations to test.
      */
-    public $testConfigs = [
+    public array $testConfigs = [
         // No URL code for default language
         [
             'urlLanguageManager' => [
@@ -53,7 +63,7 @@ class RedirectTest extends TestCase
                     '/custom' => 'test/action',
                     '/slug/<name>' => 'test/slug',
                     [
-                        'class' => TestUrlRule::class,
+                        'class' => UrlRule::class,
                     ],
                     [
                         'pattern' => '/slash',
@@ -184,7 +194,7 @@ class RedirectTest extends TestCase
                     '/custom' => 'test/action',
                     '/slug/<name>' => 'test/slug',
                     [
-                        'class' => TestUrlRule::class,
+                        'class' => UrlRule::class,
                     ],
                     [
                         'pattern' => '/slash',
@@ -442,7 +452,7 @@ class RedirectTest extends TestCase
                 'languages' => ['en-US', 'en', 'de'],
                 'suffix' => '/',
                 'normalizer' => [
-                    'class' => '\yii\web\UrlNormalizer',
+                    'class' => UrlNormalizer::class,
                 ],
                 'rules' => [
                     '/custom' => 'test/action',
@@ -505,7 +515,7 @@ class RedirectTest extends TestCase
             'urlLanguageManager' => [
                 'languages' => ['en-US', 'en', 'de'],
                 'normalizer' => [
-                    'class' => '\yii\web\UrlNormalizer',
+                    'class' => UrlNormalizer::class,
                 ],
                 'rules' => [
                     '/custom' => 'test/action',
@@ -578,7 +588,7 @@ class RedirectTest extends TestCase
                 'enableDefaultLanguageUrlCode' => true,
                 'suffix' => '/',
                 'normalizer' => [
-                    'class' => '\yii\web\UrlNormalizer',
+                    'class' => UrlNormalizer::class,
                 ],
                 'rules' => [
                     '/custom' => 'test/action',
@@ -646,7 +656,7 @@ class RedirectTest extends TestCase
                 ],
                 'enableDefaultLanguageUrlCode' => true,
                 'normalizer' => [
-                    'class' => '\yii\web\UrlNormalizer',
+                    'class' => UrlNormalizer::class,
                 ],
                 'rules' => [
                     '/custom' => 'test/action',
@@ -705,10 +715,11 @@ class RedirectTest extends TestCase
         ],
     ];
 
-    public function testRedirects(): void
+    public function testRedirectUrlsWithMultipleConfigurations(): void
     {
         foreach ($this->testConfigs as $config) {
             $urlLanguageManager = $config['urlLanguageManager'] ?? [];
+
             foreach ($config['redirects'] as $from => $to) {
                 if (is_array($to)) {
                     foreach ($to as $params) {
@@ -734,67 +745,78 @@ class RedirectTest extends TestCase
         }
     }
 
-    /**
-     * Tests for a redirect
-     *
-     * @param string $from the request URL
-     * @param mixed $to the expected redirect URL or a falsey value for no redirect
-     * @param array $urlLanguageManager the urlLanguageManager configuration
-     * @param array $request the configuration for the request component
-     * @param array $session the session variables
-     * @param array $cookie the cookies
-     */
-    public function performRedirectTest(
-        $from,
-        mixed $to,
-        $urlLanguageManager,
-        $request = [],
-        $session = [],
-        $cookie = [],
-        $server = [],
+    private function performRedirectTest(
+        string $from,
+        string|false|null $to,
+        array $urlLanguageManager,
+        array $request = [],
+        array $session = [],
+        array $cookie = [],
+        array $server = [],
     ): void {
-        $this->tearDown();
+        $this->resetEnvironment();
         $this->mockUrlLanguageManager($urlLanguageManager);
-        if (!empty($session)) {
+
+        if (empty($session) === false) {
             @session_start();
+
             $_SESSION = $session;
         }
-        if (!empty($cookie)) {
+
+        if (empty($cookie) === false) {
             $_COOKIE = $cookie;
         }
-        if (!empty($server)) {
+
+        if (empty($server) === false) {
             foreach ($server as $key => $value) {
                 $_SERVER[$key] = $value;
             }
         }
-        $configMessage = print_r([
-            'from' => $from,
-            'to' => $to,
-            'urlManager' => $urlLanguageManager,
-            'request' => $request,
-            'session' => $session,
-            'cookie' => $cookie,
-            'server' => $server,
-        ], true);
+
+        $configMessage = print_r(
+            [
+                'from' => $from,
+                'to' => $to,
+                'urlManager' => $urlLanguageManager,
+                'request' => $request,
+                'session' => $session,
+                'cookie' => $cookie,
+                'server' => $server,
+            ],
+            true,
+        );
+
         try {
             $this->mockRequest($from, $request);
-            if ($to) {
-                $this->fail("No redirect:\n$configMessage");
-            }
         } catch (UrlNormalizerRedirectException $e) {
             $url = $e->url;
+
             if (is_array($url)) {
                 if (isset($url[0])) {
                     // ensure the route is absolute
                     $url[0] = '/' . ltrim((string) $url[0], '/');
                 }
+
                 $url += Yii::$app->request->getQueryParams();
             }
-            $message = "UrlNormalizerRedirectException:\n$configMessage";
-            $this->assertEquals($this->prepareUrl($to), Url::to($url, $e->scheme), $message);
+
+            $this->assertSame(
+                $this->prepareUrl($to),
+                Url::to($url, $e->scheme),
+                "UrlNormalizerRedirectException redirect URL should match expected URL. Configuration: {$configMessage}",
+            );
         } catch (Exception $e) {
-            $message = "Redirection:\n$configMessage";
-            $this->assertEquals($this->prepareUrl($to), $e->getMessage(), $message);
+            if ($to === false || $to === null) {
+                $this->fail(
+                    "Expected redirect from '$from' to '$to' but no redirect occurred. Configuration: $configMessage"
+                );
+            }
+
+            $this->assertSame(
+                $this->prepareUrl($to),
+                $e->getMessage(),
+                "Exception redirect URL should match expected URL. Configuration: {$configMessage}",
+            );
         }
     }
 }
