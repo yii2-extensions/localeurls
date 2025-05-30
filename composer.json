@@ -18,7 +18,8 @@
     "require-dev": {
         "maglnet/composer-require-checker": "^4.6",
         "phpstan/phpstan": "^2.1",
-        "phpunit/phpunit": "^10.5"
+        "phpunit/phpunit": "^10.5",
+        "rector/rector": "^2.0"
     },
     "repositories": [
         {
@@ -45,6 +46,7 @@
     "scripts": {
         "check-dependencies": "./vendor/bin/composer-require-checker check",
         "static": "./vendor/bin/phpstan analyse src --memory-limit=512M",
+        "rector": "./vendor/bin/rector process src",
         "tests": "./vendor/bin/phpunit"
     }
 }

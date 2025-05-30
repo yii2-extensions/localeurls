@@ -352,7 +352,7 @@ class UrlLanguageManager extends UrlManager
     {
         if ($this->ignoreLanguageUrlPatterns) {
             $params = (array) $params;
-            $route = trim($params[0], '/');
+            $route = trim((string) $params[0], '/');
 
             foreach ($this->ignoreLanguageUrlPatterns as $pattern => $v) {
                 if (preg_match($pattern, $route)) {
@@ -393,7 +393,7 @@ class UrlLanguageManager extends UrlManager
                 }
 
                 if (!$this->keepUppercaseLanguageCode) {
-                    $language = strtolower($language);
+                    $language = strtolower((string) $language);
                 }
 
                 /**
@@ -486,8 +486,8 @@ class UrlLanguageManager extends UrlManager
         foreach ($this->languages as $k => $v) {
             $value = is_string($k) ? $k : $v;
 
-            if (str_ends_with($value, '-*')) {
-                $lng = substr($value, 0, -2);
+            if (str_ends_with((string) $value, '-*')) {
+                $lng = substr((string) $value, 0, -2);
 
                 $parts[] = "{$lng}\-[a-z]{2,3}";
                 $parts[] = $lng;
@@ -497,7 +497,7 @@ class UrlLanguageManager extends UrlManager
         }
 
         // order by length to make longer patterns match before short patterns, for example, put "en-GB" before "en"
-        usort($parts, fn($a, $b) => mb_strlen($b) <=> mb_strlen($a));
+        usort($parts, fn($a, $b): int => mb_strlen((string) $b) <=> mb_strlen((string) $a));
 
         $pattern = implode('|', $parts);
 
@@ -760,7 +760,7 @@ class UrlLanguageManager extends UrlManager
 
         $result = $this->languages[$key];
 
-        return $hasDash ? explode('-', $result, 2) : [$result, null];
+        return $hasDash ? explode('-', (string) $result, 2) : [$result, null];
     }
 
     /**
