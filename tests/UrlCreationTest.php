@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace yii2\extensions\localeurls\tests;
 
-
 use JsonException;
 use PHPUnit\Framework\Attributes\Group;
 use yii2\extensions\localeurls\tests\stub\UrlRule;
@@ -574,7 +573,7 @@ class UrlCreationTest extends TestCase
                         $schema . '://' . $host . $this->prepareUrl($relativeUrl),
                         Url::to($route),
                         'Absolute URL should be generated correctly as relative URL when forced with \'false\' ' .
-                        "parameter  for route: " . json_encode($route, JSON_THROW_ON_ERROR),
+                        'parameter  for route: ' . json_encode($route, JSON_THROW_ON_ERROR),
                     );
                 } else {
                     $this->assertEquals(

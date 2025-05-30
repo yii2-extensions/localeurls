@@ -130,7 +130,6 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         Yii::$app->request->resolve();
     }
 
-
     /**
      * Configures the URL language manager component for testing scenarios.
      *

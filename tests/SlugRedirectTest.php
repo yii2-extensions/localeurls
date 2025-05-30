@@ -106,7 +106,7 @@ class SlugRedirectTest extends TestCase
         $this->mockRequest(
             '/foo/baz/bar',
             [
-                'acceptableLanguages' => ['de']
+                'acceptableLanguages' => ['de'],
             ],
         );
     }
