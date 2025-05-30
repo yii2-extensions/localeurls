@@ -717,7 +717,7 @@ class RedirectTest extends TestCase
      * Tests for a redirect
      *
      * @param string $from Request URL.
-     * @param string|false|null $to Expected redirect URL or a falsey value for no redirect.
+     * @param false|string|null $to Expected redirect URL or a falsey value for no redirect.
      * @param array $urlLanguageManager UrlLanguageManager configuration.
      * @param array $request Configuration for the request component.
      * @param array $session Session variables.
