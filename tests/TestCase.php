@@ -201,6 +201,12 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         return $this->baseUrl . $url;
     }
 
+    /**
+     * Resets the PHP and Yii environment to a clean state after each test.
+     *
+     * Restores global variables and application state to ensure test isolation and prevent side effects between test
+     * cases.
+     */
     protected function resetEnvironment(): void
     {
         $_COOKIE = [];
