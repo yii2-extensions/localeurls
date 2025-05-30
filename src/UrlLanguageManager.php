@@ -12,6 +12,7 @@ use yii\helpers\Url;
 use yii\web\Cookie;
 use yii\web\NotFoundHttpException;
 use yii\web\Request;
+use yii\web\UrlManager;
 use yii\web\UrlNormalizerRedirectException;
 
 use function array_map;
@@ -42,7 +43,7 @@ use function usort;
  * transparently. It also can persist the language in the user session and optionally in a cookie. It also adds the
  * language parameter to any created URL.
  */
-class UrlLanguageManager extends Yii\web\UrlManager
+class UrlLanguageManager extends UrlManager
 {
     public const EVENT_LANGUAGE_CHANGED = 'languageChanged';
 
