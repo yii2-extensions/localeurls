@@ -44,24 +44,9 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
 
     protected function tearDown(): void
     {
-        $this->clear();
+        $this->resetEnvironment();
 
         parent::tearDown();
-    }
-
-    protected function clear(): void
-    {
-        $_COOKIE = [];
-        $_SESSION = [];
-        $_SERVER = $this->_server;
-
-        if (isset(Yii::$app)) {
-            Yii::$app->session->destroy();
-            Yii::$app = null;
-            Yii::$container = new Container();
-        }
-
-        $this->urlManager = [];
     }
 
     /**
@@ -214,5 +199,20 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         }
 
         return $this->baseUrl . $url;
+    }
+
+    protected function resetEnvironment(): void
+    {
+        $_COOKIE = [];
+        $_SESSION = [];
+        $_SERVER = $this->_server;
+
+        if (isset(Yii::$app)) {
+            Yii::$app->session->destroy();
+            Yii::$app = null;
+            Yii::$container = new Container();
+        }
+
+        $this->urlManager = [];
     }
 }

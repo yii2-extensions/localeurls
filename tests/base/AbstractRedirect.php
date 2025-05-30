@@ -754,7 +754,7 @@ abstract class AbstractRedirect extends TestCase
         array $cookie = [],
         array $server = [],
     ): void {
-        $this->clear();
+        $this->resetEnvironment();
         $this->mockUrlLanguageManager($urlLanguageManager);
 
         if (empty($session) === false) {
@@ -788,12 +788,6 @@ abstract class AbstractRedirect extends TestCase
 
         try {
             $this->mockRequest($from, $request);
-
-            if ($to) {
-                $this->fail(
-                    "Expected redirect from '$from' to '$to' but no redirect occurred. Configuration: $configMessage"
-                );
-            }
         } catch (UrlNormalizerRedirectException $e) {
             $url = $e->url;
 
@@ -812,6 +806,12 @@ abstract class AbstractRedirect extends TestCase
                 "UrlNormalizerRedirectException redirect URL should match expected URL. Configuration: {$configMessage}",
             );
         } catch (Exception $e) {
+            if ($to === false || $to === null) {
+                $this->fail(
+                    "Expected redirect from '$from' to '$to' but no redirect occurred. Configuration: $configMessage"
+                );
+            }
+
             $this->assertEquals(
                 $this->prepareUrl($to),
                 $e->getMessage(),
