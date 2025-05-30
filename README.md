@@ -13,11 +13,17 @@
     <a href="https://github.com/yii2-extensions/localeurls/actions/workflows/build.yml" target="_blank">
         <img src="https://github.com/yii2-extensions/localeurls/actions/workflows/build.yml/badge.svg" alt="PHPUnit">
     </a>
-    <a href="https://github.com/yii2-extensions/localeurls/actions/workflows/compatibility.yml" target="_blank">
-        <img src="https://github.com/yii2-extensions/localeurls/actions/workflows/compatibility.yml/badge.svg" alt="PHPUnit">
+    <a href="https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml" target="_blank">        
+        <img src="https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml/badge.svg" alt="Static Analysis">
+    </a>
+    <a href="https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml" target="_blank">
+        <img src="https://img.shields.io/badge/PHPStan%20level-5-blue" alt="PHPStan Level">
     </a>    
     <a href="https://codecov.io/gh/yii2-extensions/localeurls" target="_blank">
         <img src="https://codecov.io/gh/yii2-extensions/localeurls/graph/badge.svg?token=hLDHtLBgqV" alt="Codecov">
+    </a>
+    <a href="https://github.styleci.io/repos/711867018?branch=main" target="_blank">
+        <img src="https://github.styleci.io/repos/711867018/shield?branch=main" alt="StyleCI">
     </a>      
 </p>
 
@@ -39,13 +45,7 @@ or add
 
 to the require-dev section of your `composer.json` file.  
 
-## Quality code
-
-[![static-analysis](https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml/badge.svg)](https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml)
-[![phpstan-level](https://img.shields.io/badge/PHPStan%20level-5-blue)](https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml)
-[![style-ci](https://github.styleci.io/repos/711867018/shield?branch=main)](https://github.styleci.io/repos/711867018?branch=main)
-
-# Configuration
+## Configuration
 
 To use this extension, you need to configure the `localeUrls` component in your application configuration file. 
 
