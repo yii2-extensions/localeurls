@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Yii2\Extensions\LocaleUrls\Test;
 
+use PHPUnit\Framework\Attributes\Group;
 use Yii;
 use yii\helpers\Url;
 
 /**
  * Generic tests for UrlManager.
  */
+#[Group('locale-urls')]
 class UrlLanguageManagerTest extends TestCase
 {
     public function testSetsDefaultLanguageIfNoLanguageSpecified(): void

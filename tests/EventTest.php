@@ -4,18 +4,20 @@ declare(strict_types=1);
 
 namespace Yii2\Extensions\LocaleUrls\Test;
 
+use PHPUnit\Framework\Attributes\Group;
 use Yii2\Extensions\LocaleUrls\LanguageChangedEvent;
 
+#[Group('locale-urls')]
 final class EventTest extends TestCase
 {
-    protected $eventExpected = true;
-    protected $eventFired = false;
-    protected $expectedLanguage;
-    protected $expectedOldLanguage;
+    protected bool $eventExpected = true;
 
-    /**
-     * @inheritdoc
-     */
+    protected bool $eventFired = false;
+
+    protected string|null $expectedLanguage = null;
+
+    protected string|null $expectedOldLanguage = null;
+
     protected function tearDown(): void
     {
         parent::tearDown();
@@ -130,9 +132,6 @@ final class EventTest extends TestCase
         $this->assertFalse($this->eventFired);
     }
 
-    /**
-     * Event handler
-     */
     public function languageChangedHandler($event): void
     {
         $this->assertInstanceOf(LanguageChangedEvent::class, $event);

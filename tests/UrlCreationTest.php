@@ -4,31 +4,14 @@ declare(strict_types=1);
 
 namespace Yii2\Extensions\LocaleUrls\Test;
 
+use PHPUnit\Framework\Attributes\Group;
 use yii\helpers\Url;
 
+#[Group('locale-urls')]
 class UrlCreationTest extends TestCase
 {
     /**
-     * @var array the set of test configurations to test. Each entry is an
-     * array with this structure:
-     *
-     * ```php
-     * [
-     *     'urlManager' => [
-     *         // UrlManager settings for this test
-     *     ],
-     *     'urls' => [
-     *         // Key is a request URL
-     *         '/some/request/url' => [
-     *             // The URLs to create during this request indexed by the
-     *             // expected result. If expected URL starts with
-     *             // 'http://localhost' the URL is created as absolute URL.
-     *             '/expected/url' => ['some/route', 'param1'=> 'value1'],
-     *             ...
-     *         ],
-     *     ],
-     * ]
-     * ```
+     * @var array Set of test configurations to test.
      */
     public $testConfigs = [
         [
@@ -536,25 +519,33 @@ class UrlCreationTest extends TestCase
     /**
      * Tests URL creation during a specific request
      *
-     * @param array $requestUrl the requested URL
+     * @param string $requestUrl the requested URL
      * @param array $urlManager the urlManager configuration
      * @param array $routes to create URL for indexed by the expected URL
      */
-    public function performUrlCreationTest($requestUrl, $urlManager, $routes): void
+    public function performUrlCreationTest(string $requestUrl, array $urlManager, array $routes): void
     {
         $this->tearDown();
         $this->mockUrlLanguageManager($urlManager);
         $this->mockRequest($requestUrl);
+
         foreach ($routes as $url => $route) {
             if (preg_match('#^(https?)://([^/]*)(.*)#', $url, $matches)) {
                 $schema = $matches[1];
                 $host = $matches[2];
                 $relativeUrl = $matches[3];
+
                 if ($route[0] === false) {
                     array_shift($route);
-                    $this->assertEquals($schema . '://' . $host . $this->prepareUrl($relativeUrl), Url::to($route));
+                    $this->assertEquals(
+                        $schema . '://' . $host . $this->prepareUrl($relativeUrl),
+                        Url::to($route),
+                    );
                 } else {
-                    $this->assertEquals($schema . '://' . $host . $this->prepareUrl($relativeUrl), Url::to($route, $schema));
+                    $this->assertEquals(
+                        $schema . '://' . $host . $this->prepareUrl($relativeUrl),
+                        Url::to($route, $schema),
+                    );
                 }
             } else {
                 $this->assertEquals($this->prepareUrl($url), Url::to($route));

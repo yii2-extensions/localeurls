@@ -16,19 +16,19 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
     /**
      * @var array UrlManager component configuration for each test method
      */
-    protected $urlManager = [];
+    protected array $urlManager = [];
 
     /**
      * @var bool show script name configuration for each test method
      */
-    protected $showScriptName = false;
+    protected bool $showScriptName = false;
 
     /**
      * @var string the base URL to use
      */
-    protected $baseUrl = '';
+    protected string $baseUrl = '';
 
-    protected $_server;
+    protected mixed $_server = null;
 
     protected function setUp(): void
     {

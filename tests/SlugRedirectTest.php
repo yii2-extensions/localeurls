@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Yii2\Extensions\LocaleUrls\Test;
 
+use PHPUnit\Framework\Attributes\Group;
+
+#[Group('locale-urls')]
 class SlugRedirectTest extends TestCase
 {
     public function mockUrlLanguageManager($config = []): void

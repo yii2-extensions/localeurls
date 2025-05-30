@@ -4,41 +4,19 @@ declare(strict_types=1);
 
 namespace Yii2\Extensions\LocaleUrls\Test;
 
+use PHPUnit\Framework\Attributes\Group;
 use Yii;
 use yii\base\Exception;
 use yii\helpers\Url;
 use yii\web\UrlNormalizerRedirectException;
 
+#[Group('locale-urls')]
 class RedirectTest extends TestCase
 {
     /**
-     * @var array the set of test configurations to test. Each entry is an
-     * array with this structure:
-     *
-     * ```php
-     * [
-     *     'urlLaguageManager' => [
-     *         // UrlLanguageManager settings for this test
-     *     ],
-     *     'redirects' => [
-     *         // List of expected redirecs in the form `$fromUrl => $to`.
-     *         // $to can be:
-     *         //   - a string with a URL that should be redirected to,
-     *         //   - `false` if there should be no redirect
-     *         //   - an array with the expected redirect URL as first element
-     *         //     and further parameters to set:
-     *         //     [
-     *         //       $to,               // redirect URL as string
-     *         //       'request' => ... , // request properties
-     *         //       'session' => ... , // session data
-     *         //       'cookie' => ... ,  // cookie data
-     *         //       'server' => ... ,  // $_SERVER data
-     *         //     ]
-     *     ],
-     * ]
-     * ```
+     * @var array Set of test configurations to test.
      */
-    public $testConfigs = [
+    public array $testConfigs = [
         // No URL code for default language
         [
             'urlLanguageManager' => [
@@ -709,6 +687,7 @@ class RedirectTest extends TestCase
     {
         foreach ($this->testConfigs as $config) {
             $urlLanguageManager = $config['urlLanguageManager'] ?? [];
+
             foreach ($config['redirects'] as $from => $to) {
                 if (is_array($to)) {
                     foreach ($to as $params) {
@@ -737,45 +716,53 @@ class RedirectTest extends TestCase
     /**
      * Tests for a redirect
      *
-     * @param string $from the request URL
-     * @param mixed $to the expected redirect URL or a falsey value for no redirect
-     * @param array $urlLanguageManager the urlLanguageManager configuration
-     * @param array $request the configuration for the request component
-     * @param array $session the session variables
-     * @param array $cookie the cookies
+     * @param string $from Request URL.
+     * @param mixed $to Expected redirect URL or a falsey value for no redirect.
+     * @param array $urlLanguageManager UrlLanguageManager configuration.
+     * @param array $request Configuration for the request component.
+     * @param array $session Session variables.
+     * @param array $cookie Cookies.
      */
     public function performRedirectTest(
-        $from,
+        string $from,
         mixed $to,
-        $urlLanguageManager,
-        $request = [],
-        $session = [],
-        $cookie = [],
-        $server = [],
+        array $urlLanguageManager,
+        array $request = [],
+        array $session = [],
+        array $cookie = [],
+        array $server = [],
     ): void {
         $this->tearDown();
         $this->mockUrlLanguageManager($urlLanguageManager);
+
         if (!empty($session)) {
             @session_start();
             $_SESSION = $session;
         }
+
         if (!empty($cookie)) {
             $_COOKIE = $cookie;
         }
+
         if (!empty($server)) {
             foreach ($server as $key => $value) {
                 $_SERVER[$key] = $value;
             }
         }
-        $configMessage = print_r([
-            'from' => $from,
-            'to' => $to,
-            'urlManager' => $urlLanguageManager,
-            'request' => $request,
-            'session' => $session,
-            'cookie' => $cookie,
-            'server' => $server,
-        ], true);
+
+        $configMessage = print_r(
+            [
+                'from' => $from,
+                'to' => $to,
+                'urlManager' => $urlLanguageManager,
+                'request' => $request,
+                'session' => $session,
+                'cookie' => $cookie,
+                'server' => $server,
+            ],
+            true,
+        );
+
         try {
             $this->mockRequest($from, $request);
             if ($to) {
