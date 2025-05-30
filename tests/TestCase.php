@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace yii2\extensions\localeurls\tests;
 
-use yii2\extensions\localeurls\UrlLanguageManager;
 use Yii;
 use yii\base\Exception;
 use yii\base\InvalidConfigException;
@@ -12,6 +11,7 @@ use yii\di\Container;
 use yii\helpers\ArrayHelper;
 use yii\web\Application;
 use yii\web\NotFoundHttpException;
+use yii2\extensions\localeurls\UrlLanguageManager;
 
 abstract class TestCase extends \PHPUnit\Framework\TestCase
 {

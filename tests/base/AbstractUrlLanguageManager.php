@@ -6,11 +6,11 @@ namespace yii2\extensions\localeurls\tests\base;
 
 use PHPUnit\Framework\Attributes\Group;
 use Yii;
-use yii2\extensions\localeurls\tests\TestCase;
 use yii\base\Exception;
 use yii\base\InvalidConfigException;
 use yii\helpers\Url;
 use yii\web\NotFoundHttpException;
+use yii2\extensions\localeurls\tests\TestCase;
 
 /**
  * Base class for language-aware URL manager and language detection tests in the Yii2 LocaleUrls extension.
