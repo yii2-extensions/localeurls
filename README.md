@@ -10,6 +10,9 @@
     <a href="https://www.php.net/releases/8.1/en.php" target="_blank">
         <img src="https://img.shields.io/badge/PHP-%3E%3D8.1-787CB5" alt="php-version">
     </a>
+    <a href="https://github.com/yiisoft/yii2/tree/22.0" target="_blank">
+        <img src="https://img.shields.io/badge/Yii2%20-22-blue" alt="Yii2 version">
+    </a>
     <a href="https://github.com/yii2-extensions/localeurls/actions/workflows/build.yml" target="_blank">
         <img src="https://github.com/yii2-extensions/localeurls/actions/workflows/build.yml/badge.svg" alt="PHPUnit">
     </a>
@@ -63,10 +66,6 @@ To use this extension, you need to configure the `localeUrls` component in your 
     ],    
 ],
 ```
-
-## Support versions Yii2
-
-[![Yii22](https://img.shields.io/badge/Yii2%20version-22-blue)](https://github.com/yiisoft/yii2/tree/22.0)
 
 ## Testing
 
