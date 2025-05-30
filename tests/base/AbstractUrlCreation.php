@@ -2,28 +2,28 @@
 
 declare(strict_types=1);
 
-namespace yii2\extensions\localeurls\tests;
+namespace yii2\extensions\localeurls\tests\base;
 
 use JsonException;
 use PHPUnit\Framework\Attributes\Group;
-use yii2\extensions\localeurls\tests\stub\UrlRule;
 use yii\base\Exception;
 use yii\base\InvalidConfigException;
 use yii\helpers\Url;
 use yii\web\NotFoundHttpException;
+use yii2\extensions\localeurls\tests\stub\UrlRule;
+use yii2\extensions\localeurls\tests\TestCase;
 
 /**
- * Test suite for URL creation and route parsing with language-aware URLs in the LocaleUrls extension.
+ * Base class for URL creation and parsing tests in the Yii2 LocaleUrls extension.
  *
- * Verifies that the URL manager correctly generates and parses URLs with language codes, supporting multiple language
- * configurations, aliases, custom rules, and parameter extraction for both relative and absolute URLs.
+ * Provides comprehensive tests for language-aware URL generation and route parsing, ensuring correct handling of
+ * language codes, aliases, custom rules, and parameter extraction across multiple configuration scenarios.
  *
- * These tests ensure that the URL creation logic handles language code normalization, alias resolution, suffix
- * management, and query string preservation, as well as correct mapping of custom and slug-based routes.
+ * This class validates the LocaleUrls URL manager by simulating URL creation and parsing with different language
+ * configurations, including alias mapping, suffix management, and query string preservation.
  *
- * This test class focuses on scenarios where URLs are generated or parsed with or without language codes, validating
- * the correct extraction of route and parameters, and ensuring that language-specific and aliased routes are handled
- * consistently across different URL patterns and configurations.
+ * It covers normalization, language code detection, custom and slug-based route mapping, and the consistent extraction
+ * of routes and parameters for both relative and absolute URLs.
  *
  * Test coverage.
  * - Aliased language code handling and mapping to canonical language codes.
@@ -40,7 +40,7 @@ use yii\web\NotFoundHttpException;
  * @license https://opensource.org/license/bsd-3-clause BSD 3-Clause License.
  */
 #[Group('locale-urls')]
-class UrlCreationTest extends TestCase
+abstract class AbstractUrlCreation extends TestCase
 {
     /**
      * @var array Set of test configurations to test.

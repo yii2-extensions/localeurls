@@ -2,32 +2,31 @@
 
 declare(strict_types=1);
 
-namespace yii2\extensions\localeurls\tests;
+namespace yii2\extensions\localeurls\tests\base;
 
 use PHPUnit\Framework\Attributes\Group;
 use Yii;
+use yii2\extensions\localeurls\tests\TestCase;
 use yii\base\Exception;
 use yii\base\InvalidConfigException;
 use yii\helpers\Url;
 use yii\web\NotFoundHttpException;
 
 /**
- * Test suite for language detection, persistence, and URL parsing.
+ * Base class for language-aware URL manager and language detection tests in the Yii2 LocaleUrls extension.
  *
- * Validates the behavior of the language manager in scenarios involving language code extraction from URLs, cookies,
- * sessions, and HTTP headers, as well as configuration options for disabling detection, persistence, or storage
- * mechanisms.
+ * Provides comprehensive tests for language code extraction, persistence, and normalization, ensuring correct handling
+ * of language selection, alias mapping, disabling of detection or persistence, and robust fallback logic across
+ * multiple configuration scenarios.
  *
- * These tests ensure that language selection, alias resolution, wildcard and script code handling, and language code
- * normalization are performed correctly and that disabling or customizing persistence (via session or cookie) works as
- * expected.
+ * This class validates the LocaleUrls language manager by simulating language detection and persistence using cookies,
+ * sessions, and HTTP headers, as well as configuration options for disabling or customizing these mechanisms.
  *
- * The test class covers edge cases such as invalid language codes in cookies or sessions disabled locale URLs, ignored
- * URL patterns, and the absence of configured languages, ensuring robust and predictable language management in all
- * supported configurations.
+ * It covers normalization, alias and wildcard code handling, script code and case normalization, and the consistent
+ * extraction and fallback of language codes for both relative and absolute URLs.
  *
  * Test coverage.
- * - Consistency of language state across request, session, and cookie.
+ * - Consistent language state across request, session, and cookie.
  * - Default language selection and fallback logic.
  * - Disabling language cookie, session, or both independently.
  * - Disabling language detection and persistence.
@@ -41,7 +40,7 @@ use yii\web\NotFoundHttpException;
  * @license https://opensource.org/license/bsd-3-clause BSD 3-Clause License.
  */
 #[Group('locale-urls')]
-class UrlLanguageManagerTest extends TestCase
+abstract class AbstractUrlLanguageManager extends TestCase
 {
     /**
      * @throws Exception if an unexpected error occurs during execution.
@@ -230,8 +229,8 @@ class UrlLanguageManagerTest extends TestCase
                 'languages' => ['en-US', 'en', 'de'],
             ],
         );
-        $this->mockRequest('/site/page');
         $this->expectNotToPerformAssertions();
+        $this->mockRequest('/site/page');
     }
 
     /**
@@ -250,8 +249,8 @@ class UrlLanguageManagerTest extends TestCase
                 'languages' => ['en-US', 'en', 'de'],
             ],
         );
-        $this->mockRequest('/site/page');
         $this->expectNotToPerformAssertions();
+        $this->mockRequest('/site/page');
     }
 
     /**

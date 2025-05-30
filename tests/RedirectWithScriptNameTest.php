@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace yii2\extensions\localeurls\tests;
 
 use PHPUnit\Framework\Attributes\Group;
+use yii2\extensions\localeurls\tests\base\AbstractRedirect;
 
 /**
  * Test suite for URL redirection functionality with script name configuration enabled.
@@ -30,7 +31,7 @@ use PHPUnit\Framework\Attributes\Group;
  * @license https://opensource.org/license/bsd-3-clause BSD 3-Clause License.
  */
 #[Group('locale-urls')]
-final class RedirectWithScriptNameTest extends RedirectTest
+final class RedirectWithScriptNameTest extends AbstractRedirect
 {
     protected bool $showScriptName = true;
 }

@@ -2,44 +2,51 @@
 
 declare(strict_types=1);
 
-namespace yii2\extensions\localeurls\tests;
+namespace yii2\extensions\localeurls\tests\base;
 
 use PHPUnit\Framework\Attributes\Group;
+use yii\base\Exception;
+use yii\base\InvalidConfigException;
+use yii\web\NotFoundHttpException;
+use yii2\extensions\localeurls\tests\TestCase;
 
 /**
- * Test suite for URL redirection functionality with slug-based routing and language detection.
+ * Base class for slug redirect tests in the Yii2 LocaleUrls extension.
  *
- * Verifies that URL redirection logic correctly handles slug-based routes with language detection from multiple sources
- * including HTTP headers, cookies, sessions, and GeoIP data, ensuring proper language code normalization and URL
- * formation.
+ * Provides comprehensive tests for URL redirection involving slug-based routes, ensuring correct language detection,
+ * normalization, and redirect behavior across multiple sources and configuration scenarios.
  *
- * These tests validate redirection behavior in scenarios where URLs contain slug segments and require language
- * processing, including default language handling, case normalization, wildcard pattern matching, and parameter
- * preservation during redirects.
+ * This class validates the LocaleUrls redirection system by simulating requests with slug segments and different
+ * language sources, such as cookies, sessions, headers, and GeoIP data.
  *
- * This test class focuses specifically on slug redirection scenarios where language codes need to be detected,
- * normalized, and applied to URLs containing path segments that represent content slugs or identifiers.
+ * It covers normalization, language code handling, custom URL rules, suffix management, and parameter preservation
+ * during redirects for URLs containing slugs or identifiers.
  *
  * Test coverage.
  * - Accept-Language header processing with slug URLs and language priority handling.
- * - Cookie-based language detection with slug path preservation.
- * - Country alias resolution in slug-based URLs (for example, 'at' to 'de-AT').
- * - Default language handling with slug URLs (with and without language codes).
- * - GeoIP-based language detection with slug path redirection.
- * - Language code case normalization (uppercase to lowercase conversion).
- * - Language persistence and detection hierarchy with slug-based routing.
+ * - Cookie-based language detection and redirection with slug path preservation.
+ * - Country alias and wildcard pattern resolution in slug-based URLs (for example, 'at' to 'de-AT', 'es-*').
+ * - Default language handling in slug URLs (with and without language codes).
+ * - GeoIP-based language detection and automatic redirection with slug segments.
+ * - Language code case conversion (uppercase to lowercase normalization).
+ * - Language persistence configuration effects on slug redirection.
  * - Parameter and query string preservation during slug URL redirection.
- * - Session-based language detection with slug path handling.
- * - Suffix management in slug URLs (trailing slash handling).
+ * - Session-based language detection and redirection with slug path handling.
+ * - Suffix handling in slug URL normalization and redirection (trailing slash management).
  * - URL ignore pattern matching with slug-based routes.
- * - Wildcard language pattern matching with slug URLs (for example, 'es-*' patterns).
+ * - Wildcard language pattern matching and redirection for slug URLs.
  *
  * @copyright Copyright (C) 2023 Terabytesoftw.
  * @license https://opensource.org/license/bsd-3-clause BSD 3-Clause License.
  */
 #[Group('locale-urls')]
-class SlugRedirectTest extends TestCase
+abstract class AbstractSlugRedirect extends TestCase
 {
+    /**
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws NotFoundHttpException
+     */
     public function testRedirectsIfDefaultLanguageInUrlAndDefaultLanguageUsesNoSuffix(): void
     {
         $this->expectRedirect('/foo/baz/bar');
@@ -53,6 +60,11 @@ class SlugRedirectTest extends TestCase
         $this->mockRequest('/en/foo/baz/bar');
     }
 
+    /**
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws NotFoundHttpException
+     */
     public function testRedirectsIfDefaultLanguageInUrlAndDefaultLanguageUsesNoSuffixAndTrailingSlashEnabled(): void
     {
         $this->expectRedirect('/foo/baz/bar/');
@@ -67,6 +79,11 @@ class SlugRedirectTest extends TestCase
         $this->mockRequest('/en/foo/baz/bar/');
     }
 
+    /**
+     * @throws Exception
+     * @throws NotFoundHttpException
+     * @throws InvalidConfigException
+     */
     public function testRedirectsIfLanguageWithUpperCaseCountryInUrl(): void
     {
         $this->expectRedirect('/es-bo/foo/baz/bar');
@@ -80,6 +97,11 @@ class SlugRedirectTest extends TestCase
         $this->mockRequest('/es-BO/foo/baz/bar');
     }
 
+    /**
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws NotFoundHttpException
+     */
     public function testRedirectsIfLanguageWithUpperCaseWildcardCountryInUrl(): void
     {
         $this->expectRedirect('/es-bo/foo/baz/bar');
@@ -93,6 +115,11 @@ class SlugRedirectTest extends TestCase
         $this->mockRequest('/es-BO/foo/baz/bar');
     }
 
+    /**
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws NotFoundHttpException
+     */
     public function testRedirectsIfNoLanguageInUrlAndAcceptedLanguageMatches(): void
     {
         $this->expectRedirect('/de/foo/baz/bar');
@@ -111,6 +138,11 @@ class SlugRedirectTest extends TestCase
         );
     }
 
+    /**
+     * @throws Exception
+     * @throws NotFoundHttpException
+     * @throws InvalidConfigException
+     */
     public function testRedirectsIfNoLanguageInUrlAndAcceptedLanguageMatchesLanguageAndCountryAlias(): void
     {
         $this->expectRedirect('/de/foo/baz/bar');
@@ -129,6 +161,11 @@ class SlugRedirectTest extends TestCase
         );
     }
 
+    /**
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws NotFoundHttpException
+     */
     public function testRedirectsIfNoLanguageInUrlAndAcceptedLanguageMatchesWildcard(): void
     {
         $this->expectRedirect('/de/foo/baz/bar');
@@ -147,6 +184,11 @@ class SlugRedirectTest extends TestCase
         );
     }
 
+    /**
+     * @throws Exception
+     * @throws NotFoundHttpException
+     * @throws InvalidConfigException
+     */
     public function testRedirectsIfNoLanguageInUrlAndAcceptedLanguageWithCountryMatches(): void
     {
         $this->expectRedirect('/de-at/foo/baz/bar');
@@ -165,6 +207,11 @@ class SlugRedirectTest extends TestCase
         );
     }
 
+    /**
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws NotFoundHttpException
+     */
     public function testRedirectsIfNoLanguageInUrlAndAcceptedLanguageWithCountryMatchesCountryAlias(): void
     {
         $this->expectRedirect('/at/foo/baz/bar');
@@ -183,6 +230,11 @@ class SlugRedirectTest extends TestCase
         );
     }
 
+    /**
+     * @throws Exception
+     * @throws NotFoundHttpException
+     * @throws InvalidConfigException
+     */
     public function testRedirectsIfNoLanguageInUrlAndAcceptedLanguageWithCountryMatchesLanguage(): void
     {
         $this->expectRedirect('/de/foo/baz/bar');
@@ -201,6 +253,11 @@ class SlugRedirectTest extends TestCase
         );
     }
 
+    /**
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws NotFoundHttpException
+     */
     public function testRedirectsIfNoLanguageInUrlAndAcceptedLanguageWithCountryMatchesWildcard(): void
     {
         $this->expectRedirect('/de-at/foo/baz/bar');
@@ -219,6 +276,11 @@ class SlugRedirectTest extends TestCase
         );
     }
 
+    /**
+     * @throws Exception
+     * @throws NotFoundHttpException
+     * @throws InvalidConfigException
+     */
     public function testRedirectsIfNoLanguageInUrlAndAcceptedLanguageWithLowercaseCountryMatches(): void
     {
         $this->expectRedirect('/de-at/foo/baz/bar');
@@ -237,6 +299,11 @@ class SlugRedirectTest extends TestCase
         );
     }
 
+    /**
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws NotFoundHttpException
+     */
     public function testRedirectsIfNoLanguageInUrlAndDefaultLanguageUsesSuffix(): void
     {
         $this->expectRedirect('/en/foo/baz/bar');
@@ -251,6 +318,11 @@ class SlugRedirectTest extends TestCase
         $this->mockRequest('/foo/baz/bar');
     }
 
+    /**
+     * @throws Exception
+     * @throws NotFoundHttpException
+     * @throws InvalidConfigException
+     */
     public function testRedirectsIfNoLanguageInUrlAndGeoIpMatches(): void
     {
         $this->expectRedirect('/de/foo/baz/bar');
@@ -270,6 +342,11 @@ class SlugRedirectTest extends TestCase
         $this->mockRequest('/foo/baz/bar');
     }
 
+    /**
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws NotFoundHttpException
+     */
     public function testRedirectsIfNoLanguageInUrlAndGeoIpMatchesWildcard(): void
     {
         $this->expectRedirect('/de/foo/baz/bar');
@@ -289,6 +366,11 @@ class SlugRedirectTest extends TestCase
         $this->mockRequest('/foo/baz/bar');
     }
 
+    /**
+     * @throws Exception
+     * @throws NotFoundHttpException
+     * @throws InvalidConfigException
+     */
     public function testRedirectsIfNoLanguageInUrlAndGeoIpWithCountryMatches(): void
     {
         $this->expectRedirect('/de-at/foo/baz/bar');
@@ -308,6 +390,11 @@ class SlugRedirectTest extends TestCase
         $this->mockRequest('/foo/baz/bar');
     }
 
+    /**
+     * @throws Exception
+     * @throws NotFoundHttpException
+     * @throws InvalidConfigException
+     */
     public function testRedirectsIfNoLanguageInUrlAndGeoIpWithCountryMatchesCountryAlias(): void
     {
         $this->expectRedirect('/at/foo/baz/bar');
@@ -327,6 +414,11 @@ class SlugRedirectTest extends TestCase
         $this->mockRequest('/foo/baz/bar');
     }
 
+    /**
+     * @throws Exception
+     * @throws NotFoundHttpException
+     * @throws InvalidConfigException
+     */
     public function testRedirectsIfNoLanguageInUrlAndGeoIpWithCountryMatchesWildcard(): void
     {
         $this->expectRedirect('/de-at/foo/baz/bar');
@@ -346,6 +438,11 @@ class SlugRedirectTest extends TestCase
         $this->mockRequest('/foo/baz/bar');
     }
 
+    /**
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws NotFoundHttpException
+     */
     public function testRedirectsIfNoLanguageInUrlAndLanguageInCookie(): void
     {
         $this->expectRedirect('/de/foo/baz/bar');
@@ -361,6 +458,11 @@ class SlugRedirectTest extends TestCase
         $this->mockRequest('/foo/baz/bar');
     }
 
+    /**
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws NotFoundHttpException
+     */
     public function testRedirectsIfNoLanguageInUrlAndLanguageInCookieMatchesWildcard(): void
     {
         $this->expectRedirect('/de/foo/baz/bar');
@@ -376,6 +478,11 @@ class SlugRedirectTest extends TestCase
         $this->mockRequest('/foo/baz/bar');
     }
 
+    /**
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws NotFoundHttpException
+     */
     public function testRedirectsIfNoLanguageInUrlAndLanguageInSession(): void
     {
         $this->expectRedirect('/de/foo/baz/bar');
@@ -393,6 +500,11 @@ class SlugRedirectTest extends TestCase
         $this->mockRequest('/foo/baz/bar');
     }
 
+    /**
+     * @throws Exception
+     * @throws NotFoundHttpException
+     * @throws InvalidConfigException
+     */
     public function testRedirectsIfNoLanguageInUrlAndLanguageInSessionMatchesWildcard(): void
     {
         $this->expectRedirect('/de/foo/baz/bar');
@@ -410,6 +522,11 @@ class SlugRedirectTest extends TestCase
         $this->mockRequest('/foo/baz/bar');
     }
 
+    /**
+     * @throws Exception
+     * @throws NotFoundHttpException
+     * @throws InvalidConfigException
+     */
     public function testRedirectsIfUrlDoesNotMatchIgnoresUrls(): void
     {
         $this->expectRedirect('/foo/baz/bar');
@@ -426,6 +543,11 @@ class SlugRedirectTest extends TestCase
         $this->mockRequest('/en/foo/baz/bar');
     }
 
+    /**
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws NotFoundHttpException
+     */
     public function testRedirectsRootToDefaultLanguageIfDefaultLanguageUsesSuffixAndTrailingSlashEnabled(): void
     {
         $this->expectRedirect('/en/');
@@ -441,6 +563,11 @@ class SlugRedirectTest extends TestCase
         $this->mockRequest('/');
     }
 
+    /**
+     * @throws Exception
+     * @throws InvalidConfigException
+     * @throws NotFoundHttpException
+     */
     public function testRedirectsToRootIfOnlyDefaultLanguageInUrlAndDefaultLanguageUsesNoSuffixAndTrailingSlashEnabled(): void
     {
         $this->expectRedirect('/');

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace yii2\extensions\localeurls\tests;
 
 use PHPUnit\Framework\Attributes\Group;
+use yii2\extensions\localeurls\tests\base\AbstractUrlLanguageManager;
 
 /**
  * Test suite for language detection, persistence, and URL parsing with both script name and base URL configuration.
@@ -27,7 +28,7 @@ use PHPUnit\Framework\Attributes\Group;
  * @license https://opensource.org/license/bsd-3-clause BSD 3-Clause License.
  */
 #[Group('locale-urls')]
-final class UrlLanguageManagerWithScriptNameAndBaseUrlTest extends UrlLanguageManagerTest
+final class UrlLanguageManagerWithScriptNameAndBaseUrlTest extends AbstractUrlLanguageManager
 {
     /**
      * @var string Base URL prefix for test scenarios.

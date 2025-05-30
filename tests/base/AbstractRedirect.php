@@ -2,28 +2,28 @@
 
 declare(strict_types=1);
 
-namespace yii2\extensions\localeurls\tests;
+namespace yii2\extensions\localeurls\tests\base;
 
 use PHPUnit\Framework\Attributes\Group;
 use Yii;
-use yii2\extensions\localeurls\tests\stub\UrlRule;
 use yii\base\Exception;
 use yii\helpers\Url;
 use yii\web\UrlNormalizer;
 use yii\web\UrlNormalizerRedirectException;
+use yii2\extensions\localeurls\tests\stub\UrlRule;
+use yii2\extensions\localeurls\tests\TestCase;
 
 /**
- * Test suite for URL redirection functionality and behavior in the LocaleUrls extension.
+ * Base class for redirect tests in the Yii2 LocaleUrls extension.
  *
- * Verifies that URL redirection logic correctly handles language detection from multiple sources and applies proper
- * redirect rules based on language configuration and user preferences.
+ * Provides comprehensive tests for URL redirection, ensuring correct language detection and redirect behavior across
+ * multiple sources and configuration scenarios.
  *
- * These tests ensure that the redirection system processes various scenarios including default language handling,
- * language detection from cookies, sessions, headers, and GeoIP data, as well as URL normalization with different
- * language configurations.
+ * This class validates the LocaleUrls redirection system by simulating requests with different language sources, such
+ * as cookies, sessions, headers, and GeoIP data.
  *
- * The test scenarios validate complex redirection patterns including language persistence, uppercase/lowercase
- * handling, custom URL rules, suffix management, and parameter preservation during redirects.
+ * It covers normalization, language code handling, custom URL rules, suffix management, and parameter preservation
+ * during redirects.
  *
  * Test coverage.
  * - Cookie-based language detection and redirection behavior.
@@ -43,7 +43,7 @@ use yii\web\UrlNormalizerRedirectException;
  * @license https://opensource.org/license/bsd-3-clause BSD 3-Clause License.
  */
 #[Group('locale-urls')]
-class RedirectTest extends TestCase
+abstract class AbstractRedirect extends TestCase
 {
     /**
      * @var array Set of test configurations to test.
