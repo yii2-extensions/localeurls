@@ -47,7 +47,7 @@ final class TestUrlRule implements UrlRuleInterface
             // Response::redirect($url) above will call `Url::to()` internally.
             // So to really test for the same final redirect URL here, we need
             // to call Url::to(), too.
-            throw new \yii\base\Exception(\yii\helpers\Url::to($url));
+            throw new Yii\base\Exception(Yii\helpers\Url::to($url));
         }
         Yii::$app->end();
 

@@ -779,7 +779,7 @@ class RedirectTest extends TestCase
             if ($to) {
                 $this->fail("No redirect:\n$configMessage");
             }
-        } catch (\yii\web\UrlNormalizerRedirectException $e) {
+        } catch (Yii\web\UrlNormalizerRedirectException $e) {
             $url = $e->url;
             if (is_array($url)) {
                 if (isset($url[0])) {
@@ -790,7 +790,7 @@ class RedirectTest extends TestCase
             }
             $message = "UrlNormalizerRedirectException:\n$configMessage";
             $this->assertEquals($this->prepareUrl($to), Url::to($url, $e->scheme), $message);
-        } catch (\yii\base\Exception $e) {
+        } catch (Yii\base\Exception $e) {
             $message = "Redirection:\n$configMessage";
             $this->assertEquals($this->prepareUrl($to), $e->getMessage(), $message);
         }

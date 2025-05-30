@@ -26,7 +26,6 @@ use function is_string;
 use function mb_strlen;
 use function mb_substr;
 use function preg_match;
-use function property_exists;
 use function rtrim;
 use function str_contains;
 use function str_ends_with;
@@ -43,7 +42,7 @@ use function usort;
  * transparently. It also can persist the language in the user session and optionally in a cookie. It also adds the
  * language parameter to any created URL.
  */
-class UrlLanguageManager extends \yii\web\UrlManager
+class UrlLanguageManager extends Yii\web\UrlManager
 {
     public const EVENT_LANGUAGE_CHANGED = 'languageChanged';
 
@@ -235,7 +234,7 @@ class UrlLanguageManager extends \yii\web\UrlManager
                 // Check if a normalizer wants to redirect
                 $normalized = false;
 
-                if ($this->normalizer!==false) {
+                if ($this->normalizer !== false) {
                     try {
                         parent::parseRequest($request);
                     } catch (UrlNormalizerRedirectException $e) {
@@ -284,7 +283,7 @@ class UrlLanguageManager extends \yii\web\UrlManager
 
             if (
                 // Only add language if it's not empty and ...
-                $language!=='' && (
+                $language !== '' && (
                     // ... it's not the default language or default language uses URL code ...
                     !$isDefaultLanguage || $this->enableDefaultLanguageUrlCode ||
 
@@ -343,7 +342,7 @@ class UrlLanguageManager extends \yii\web\UrlManager
                 //
                 if (str_contains($url, '://')) {
                     // Host URL ends at first '/' or '?' after the schema
-                    if (($pos = strpos($url, '/', 8))!==false || ($pos = strpos($url, '?', 8))!==false) {
+                    if (($pos = strpos($url, '/', 8)) !== false || ($pos = strpos($url, '?', 8)) !== false) {
                         $insertPos += $pos;
                     } else {
                         $insertPos += strlen($url);
@@ -420,7 +419,7 @@ class UrlLanguageManager extends \yii\web\UrlManager
                 // lowercase language, uppercase country
                 [$language, $country] = $this->matchCode($code);
 
-                if ($country!==null) {
+                if ($country !== null) {
                     if ($code === "$language-$country" && !$this->keepUppercaseLanguageCode) {
                         $this->redirectToLanguage(strtolower($code));   // Redirect ll-CC to ll-cc
                     } else {
@@ -539,12 +538,12 @@ class UrlLanguageManager extends \yii\web\UrlManager
 
         if ($this->languageSessionKey !== false) {
             $language = Yii::$app->session->get($this->languageSessionKey);
-            $language!==null && Yii::debug("Found persisted language '$language' in session.", __METHOD__);
+            $language !== null && Yii::debug("Found persisted language '$language' in session.", __METHOD__);
         }
 
         if ($language === null) {
             $language = $this->_request->getCookies()->getValue($this->languageCookieName);
-            $language!==null && Yii::debug("Found persisted language '$language' in cookie.", __METHOD__);
+            $language !== null && Yii::debug("Found persisted language '$language' in cookie.", __METHOD__);
         }
 
         return $language;
@@ -559,7 +558,7 @@ class UrlLanguageManager extends \yii\web\UrlManager
             foreach ($this->_request->getAcceptableLanguages() as $acceptable) {
                 [$language, $country] = $this->matchCode($acceptable);
 
-                if ($language!==null) {
+                if ($language !== null) {
                     $language = $country === null ? $language : "$language-$country";
                     Yii::debug("Detected browser language '$language'.", __METHOD__);
                     return $language;
