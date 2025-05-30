@@ -15,7 +15,7 @@ composer run check-dependencies
 The code is statically analyzed with [Phpstan](https://phpstan.org/). To run static analysis:
 
 ```shell
-composer run phpstan
+composer run static
 ```
 
 ## Unit tests

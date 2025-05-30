@@ -235,7 +235,7 @@ class UrlLanguageManager extends \yii\web\UrlManager
                 // Check if a normalizer wants to redirect
                 $normalized = false;
 
-                if (property_exists($this, 'normalizer') && $this->normalizer!==false) {
+                if ($this->normalizer!==false) {
                     try {
                         parent::parseRequest($request);
                     } catch (UrlNormalizerRedirectException $e) {

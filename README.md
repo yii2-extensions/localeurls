@@ -42,13 +42,31 @@ to the require-dev section of your `composer.json` file.
 ## Quality code
 
 [![static-analysis](https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml/badge.svg)](https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml)
-[![phpstan-level](https://img.shields.io/badge/PHPStan%20level-3-blue)](https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml)
+[![phpstan-level](https://img.shields.io/badge/PHPStan%20level-5-blue)](https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml)
 [![style-ci](https://github.styleci.io/repos/711867018/shield?branch=main)](https://github.styleci.io/repos/711867018?branch=main)
+
+# Configuration
+
+To use this extension, you need to configure the `localeUrls` component in your application configuration file. 
+
+```php
+'components' => [
+    'urlManager' => [
+        'class' => Yii2\Extensions\LocaleUrls\UrlLanguageManager::class,
+        'languages' => [
+            'en' => 'en-US',
+            'es' => 'es-ES',
+            'ru' => 'ru-RU',
+        ],
+        'enablePrettyUrl' => true,
+        'showScriptName' => false,
+    ],    
+],
+```
 
 ## Support versions Yii2
 
-[![Yii20](https://img.shields.io/badge/Yii2%20version-2.0-blue)](https://github.com/yiisoft/yii2/tree/2.0.49.3)
-[![Yii22](https://img.shields.io/badge/Yii2%20version-2.2-blue)](https://github.com/yiisoft/yii2/tree/2.2)
+[![Yii22](https://img.shields.io/badge/Yii2%20version-22-blue)](https://github.com/yiisoft/yii2/tree/22.0)
 
 ## Testing
 
