@@ -800,7 +800,7 @@ abstract class AbstractRedirect extends TestCase
                 $url += Yii::$app->request->getQueryParams();
             }
 
-            $this->assertEquals(
+            $this->assertSame(
                 $this->prepareUrl($to),
                 Url::to($url, $e->scheme),
                 "UrlNormalizerRedirectException redirect URL should match expected URL. Configuration: {$configMessage}",
@@ -812,7 +812,7 @@ abstract class AbstractRedirect extends TestCase
                 );
             }
 
-            $this->assertEquals(
+            $this->assertSame(
                 $this->prepareUrl($to),
                 $e->getMessage(),
                 "Exception redirect URL should match expected URL. Configuration: {$configMessage}",

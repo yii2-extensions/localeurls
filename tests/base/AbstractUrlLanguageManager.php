@@ -56,13 +56,31 @@ abstract class AbstractUrlLanguageManager extends TestCase
             ],
         );
         $this->mockRequest('/en-us/site/page');
-        $this->assertEquals('en-US', Yii::$app->language);
-        $this->assertEquals('en-US', Yii::$app->session->get('_language'));
-        $this->assertNull(Yii::$app->response->cookies->get('_language'));
+
+        $this->assertSame(
+            'en-US',
+            Yii::$app->language,
+            'Application language should be set to \'en-US\' when language is present in the URL and cookie is ' .
+            'disabled.',
+        );
+        $this->assertSame(
+            'en-US',
+            Yii::$app->session->get('_language'),
+            'Session \'_language\' should be set to \'en-US\' when language is present in the URL and cookie is ' .
+            'disabled.',
+        );
+        $this->assertNull(
+            Yii::$app->response->cookies->get('_language'),
+            'Language cookie should not be set when \'languageCookieDuration\' is false.',
+        );
 
         $request = Yii::$app->request;
 
-        $this->assertEquals('site/page', $request->pathInfo);
+        $this->assertSame(
+            'site/page',
+            $request->pathInfo,
+            'Request pathInfo should be \'site/page\' after language code is removed from the URL.',
+        );
     }
 
     /**
@@ -84,11 +102,21 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'acceptableLanguages' => ['de'],
             ],
         );
-        $this->assertEquals('en', Yii::$app->language);
+
+        $this->assertSame(
+            'en',
+            Yii::$app->language,
+            'Application language should default to \'en\' when language detection is disabled, regardless of ' .
+            'acceptable languages.',
+        );
 
         $request = Yii::$app->request;
 
-        $this->assertEquals('site/page', $request->pathInfo);
+        $this->assertSame(
+            'site/page',
+            $request->pathInfo,
+            'Request pathInfo should be \'site/page\' when no language code is present in the URL.',
+        );
     }
 
     /**
@@ -105,13 +133,28 @@ abstract class AbstractUrlLanguageManager extends TestCase
             ],
         );
         $this->mockRequest('/en-us/site/page');
-        $this->assertEquals('en-US', Yii::$app->language);
-        $this->assertNull(Yii::$app->session->get('_language'));
-        $this->assertNull(Yii::$app->response->cookies->get('_language'));
+
+        $this->assertSame(
+            'en-US',
+            Yii::$app->language,
+            'Application language should be set to \'en-US\' from the URL even when language persistence is disabled.',
+        );
+        $this->assertNull(
+            Yii::$app->session->get('_language'),
+            'Session \'_language\' should not be set when \'enableLanguagePersistence\' is false.',
+        );
+        $this->assertNull(
+            Yii::$app->response->cookies->get('_language'),
+            'Language cookie should not be set when \'enableLanguagePersistence\' is false.',
+        );
 
         $request = Yii::$app->request;
 
-        $this->assertEquals('site/page', $request->pathInfo);
+        $this->assertSame(
+            'site/page',
+            $request->pathInfo,
+            'Request pathInfo should be \'site/page\' after language code is removed from the URL.',
+        );
     }
 
     /**
@@ -128,13 +171,33 @@ abstract class AbstractUrlLanguageManager extends TestCase
             ],
         );
         $this->mockRequest('/en-us/site/page');
-        $this->assertEquals('en-US', Yii::$app->language);
-        $this->assertNull(Yii::$app->session->get('_language'));
-        $this->assertEquals('en-US', Yii::$app->response->cookies->get('_language'));
+
+        $this->assertSame(
+            'en-US',
+            Yii::$app->language,
+            'Application language should be set to \'en-US\' from the URL when session persistence is disabled.',
+        );
+
+        $cookie = Yii::$app->response->cookies->get('_language');
+
+        $this->assertNotNull(
+            $cookie,
+            "Language cookie should be set when 'languageSessionKey' is false and language is present in the URL.",
+        );
+        $this->assertSame(
+            'en-US',
+            $cookie->value,
+            'Language cookie value should be \'en-US\' when session persistence is disabled and language is present ' .
+            'in the URL.',
+        );
 
         $request = Yii::$app->request;
 
-        $this->assertEquals('site/page', $request->pathInfo);
+        $this->assertSame(
+            'site/page',
+            $request->pathInfo,
+            'Request pathInfo should be \'site/page\' after language code is removed from the URL.',
+        );
     }
 
     /**
@@ -150,17 +213,38 @@ abstract class AbstractUrlLanguageManager extends TestCase
             ],
         );
         $this->mockRequest('/deutsch/site/page');
-        $this->assertEquals('de', Yii::$app->language);
-        $this->assertEquals('de', Yii::$app->session->get('_language'));
+
+        $this->assertSame(
+            'de',
+            Yii::$app->language,
+            'Application language should be set to \'de\' when using a language alias in the URL.',
+        );
+        $this->assertSame(
+            'de',
+            Yii::$app->session->get('_language'),
+            'Session \'_language\' should be set to \'de\' when using a language alias in the URL.',
+        );
 
         $cookie = Yii::$app->response->cookies->get('_language');
 
-        $this->assertNotNull($cookie);
-        $this->assertEquals('de', $cookie->value);
+
+        $this->assertNotNull(
+            $cookie,
+            'Language cookie should be set when using a language alias in the URL.',
+        );
+        $this->assertSame(
+            'de',
+            $cookie->value,
+            'Language cookie value should be \'de\' when using a language alias in the URL.',
+        );
 
         $request = Yii::$app->request;
 
-        $this->assertEquals('site/page', $request->pathInfo);
+        $this->assertSame(
+            'site/page',
+            $request->pathInfo,
+            'Request pathInfo should be \'site/page\' after language alias is removed from the URL.',
+        );
     }
 
     /**
@@ -176,17 +260,37 @@ abstract class AbstractUrlLanguageManager extends TestCase
             ],
         );
         $this->mockRequest('/sr-latn/site/page');
-        $this->assertEquals('sr-Latn', Yii::$app->language);
-        $this->assertEquals('sr-Latn', Yii::$app->session->get('_language'));
+
+        $this->assertSame(
+            'sr-Latn',
+            Yii::$app->language,
+            'Application language should be set to \'sr-Latn\' when using a language with script code in the URL.',
+        );
+        $this->assertSame(
+            'sr-Latn',
+            Yii::$app->session->get('_language'),
+            'Session \'_language\' should be set to \'sr-Latn\' when using a language with script code in the URL.',
+        );
 
         $cookie = Yii::$app->response->cookies->get('_language');
 
-        $this->assertNotNull($cookie);
-        $this->assertEquals('sr-Latn', $cookie->value);
+        $this->assertNotNull(
+            $cookie,
+            'Language cookie should be set when using a language with script code in the URL.',
+        );
+        $this->assertSame(
+            'sr-Latn',
+            $cookie->value,
+            'Language cookie value should be \'sr-Latn\' when using a language with script code in the URL.',
+        );
 
         $request = Yii::$app->request;
 
-        $this->assertEquals('site/page', $request->pathInfo);
+        $this->assertSame(
+            'site/page',
+            $request->pathInfo,
+            'Request pathInfo should be \'site/page\' after language with script code is removed from the URL.',
+        );
     }
 
     /**
@@ -202,17 +306,37 @@ abstract class AbstractUrlLanguageManager extends TestCase
             ],
         );
         $this->mockRequest('/es-bo/site/page');
-        $this->assertEquals('es-BO', Yii::$app->language);
-        $this->assertEquals('es-BO', Yii::$app->session->get('_language'));
+
+        $this->assertSame(
+            'es-BO',
+            Yii::$app->language,
+            'Application language should be set to \'es-BO\' when using a wildcard country language in the URL.',
+        );
+        $this->assertSame(
+            'es-BO',
+            Yii::$app->session->get('_language'),
+            'Session \'_language\' should be set to \'es-BO\' when using a wildcard country language in the URL.',
+        );
 
         $cookie = Yii::$app->response->cookies->get('_language');
 
-        $this->assertNotNull($cookie);
-        $this->assertEquals('es-BO', $cookie->value);
+        $this->assertNotNull(
+            $cookie,
+            'Language cookie should be set when using a wildcard country language in the URL.',
+        );
+        $this->assertSame(
+            'es-BO',
+            $cookie->value,
+            'Language cookie value should be \'es-BO\' when using a wildcard country language in the URL.',
+        );
 
         $request = Yii::$app->request;
 
-        $this->assertEquals('site/page', $request->pathInfo);
+        $this->assertSame(
+            'site/page',
+            $request->pathInfo,
+            'Request pathInfo should be \'site/page\' after wildcard country language is removed from the URL.',
+        );
     }
 
     /**
@@ -229,7 +353,9 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'languages' => ['en-US', 'en', 'de'],
             ],
         );
+
         $this->expectNotToPerformAssertions();
+
         $this->mockRequest('/site/page');
     }
 
@@ -249,7 +375,9 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'languages' => ['en-US', 'en', 'de'],
             ],
         );
+
         $this->expectNotToPerformAssertions();
+
         $this->mockRequest('/site/page');
     }
 
@@ -275,18 +403,47 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'acceptableLanguages' => ['de'],
             ],
         );
-        $this->assertEquals('en', Yii::$app->language);
+
+        $this->assertSame(
+            'en',
+            Yii::$app->language,
+            'Application language should default to \'en\' when locale URLs are disabled, regardless of acceptable ' .
+            'languages.',
+        );
 
         $request = Yii::$app->request;
 
-        $this->assertEquals('site/page', $request->pathInfo);
+
+        $this->assertSame(
+            'site/page',
+            $request->pathInfo,
+            'Request pathInfo should be \'site/page\' when locale URLs are disabled and no language code is present ' .
+            'in the URL.',
+        );
 
         // If a URL rule is configured for the home URL, it will always have a trailing slash
-        $this->assertEquals($this->prepareUrl('/'), Url::to(['/site/index']));
-        $this->assertEquals($this->prepareUrl('/?x=y'), Url::to(['/site/index', 'x' => 'y']));
+        $this->assertSame(
+            $this->prepareUrl('/'),
+            Url::to(['/site/index']),
+            'Home URL should always have a trailing slash when a URL rule is configured for it.',
+        );
+        $this->assertSame(
+            $this->prepareUrl('/?x=y'),
+            Url::to(['/site/index', 'x' => 'y']),
+            'Home URL with query parameters should have a trailing slash when a URL rule is configured for it.',
+        );
+
         // Other URLs have no trailing slash
-        $this->assertEquals($this->prepareUrl('/site/test'), Url::to(['/site/test']));
-        $this->assertEquals($this->prepareUrl('/site/test?x=y'), Url::to(['/site/test', 'x' => 'y']));
+        $this->assertSame(
+            $this->prepareUrl('/site/test'),
+            Url::to(['/site/test']),
+            'Other URLs should not have a trailing slash when locale URLs are disabled.',
+        );
+        $this->assertSame(
+            $this->prepareUrl('/site/test?x=y'),
+            Url::to(['/site/test', 'x' => 'y']),
+            'Other URLs with query parameters should not have a trailing slash when locale URLs are disabled.',
+        );
     }
 
     /**
@@ -307,11 +464,24 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'acceptableLanguages' => ['de'],
             ],
         );
-        $this->assertEquals('en', Yii::$app->language);
+
+
+        $this->assertSame(
+            'en',
+            Yii::$app->language,
+            'Application language should default to \'en\' when no languages are configured, regardless of ' .
+            'acceptable languages.',
+        );
 
         $request = Yii::$app->request;
 
-        $this->assertEquals('site/page', $request->pathInfo);
+
+        $this->assertSame(
+            'site/page',
+            $request->pathInfo,
+            'Request pathInfo should be \'site/page\' when no languages are configured and no language code is ' .
+            'present in the URL.',
+        );
     }
 
     /**
@@ -335,11 +505,22 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'acceptableLanguages' => ['de'],
             ],
         );
-        $this->assertEquals('en', Yii::$app->language);
+
+        $this->assertSame(
+            'en',
+            Yii::$app->language,
+            'Application language should remain \'en\' when the URL matches an ignored pattern, regardless of ' .
+            'acceptable languages.',
+        );
 
         $request = Yii::$app->request;
 
-        $this->assertEquals('site/page', $request->pathInfo);
+        $this->assertSame(
+            'site/page',
+            $request->pathInfo,
+            'Request pathInfo should remain \'site/page\' when the URL matches an ignored pattern and no language ' .
+            'code is present.',
+        );
     }
 
     /**
@@ -355,11 +536,20 @@ abstract class AbstractUrlLanguageManager extends TestCase
             ],
         );
         $this->mockRequest('/');
-        $this->assertEquals('en', Yii::$app->language);
+
+        $this->assertSame(
+            'en',
+            Yii::$app->language,
+            'Application language should default to \'en\' when no language code is specified in the URL.',
+        );
 
         $request = Yii::$app->request;
 
-        $this->assertEquals('', $request->pathInfo);
+        $this->assertSame(
+            '',
+            $request->pathInfo,
+            'Request pathInfo should be empty when no language code is specified and the URL is root (\'/\').',
+        );
     }
 
     /**
@@ -375,17 +565,37 @@ abstract class AbstractUrlLanguageManager extends TestCase
             ],
         );
         $this->mockRequest('/en-us/site/page');
-        $this->assertEquals('en-US', Yii::$app->language);
-        $this->assertEquals('en-US', Yii::$app->session->get('_language'));
+
+        $this->assertSame(
+            'en-US',
+            Yii::$app->language,
+            'Application language should be set to \'en-US\' when the language code is present in the URL.',
+        );
+        $this->assertSame(
+            'en-US',
+            Yii::$app->session->get('_language'),
+            'Session \'_language\' should be set to \'en-US\' when the language code is present in the URL.',
+        );
 
         $cookie = Yii::$app->response->cookies->get('_language');
 
-        $this->assertNotNull($cookie);
-        $this->assertEquals('en-US', $cookie->value);
+        $this->assertNotNull(
+            $cookie,
+            'Language cookie should be set when the language code is present in the URL.',
+        );
+        $this->assertSame(
+            'en-US',
+            $cookie->value,
+            'Language cookie value should be \'en-US\' when the language code is present in the URL.',
+        );
 
         $request = Yii::$app->request;
 
-        $this->assertEquals('site/page', $request->pathInfo);
+        $this->assertSame(
+            'site/page',
+            $request->pathInfo,
+            'Request pathInfo should be \'site/page\' after the language code is removed from the URL.',
+        );
     }
 
     /**
@@ -401,17 +611,40 @@ abstract class AbstractUrlLanguageManager extends TestCase
             ],
         );
         $this->mockRequest('/de/site/page');
-        $this->assertEquals('de', Yii::$app->language);
-        $this->assertEquals('de', Yii::$app->session->get('_language'));
+
+        $this->assertSame(
+            'de',
+            Yii::$app->language,
+            'Application language should be set to \'de\' when the language code matches a wildcard in the ' .
+            'configuration.',
+        );
+        $this->assertSame(
+            'de',
+            Yii::$app->session->get('_language'),
+            'Session \'_language\' should be set to \'de\' when the language code matches a wildcard in the ' .
+            'configuration.',
+        );
 
         $cookie = Yii::$app->response->cookies->get('_language');
 
-        $this->assertNotNull($cookie);
-        $this->assertEquals('de', $cookie->value);
+        $this->assertNotNull(
+            $cookie,
+            'Language cookie should be set when the language code matches a wildcard in the configuration.',
+        );
+        $this->assertSame(
+            'de',
+            $cookie->value,
+            'Language cookie value should be \'de\' when the language code matches a wildcard in the configuration.',
+        );
 
         $request = Yii::$app->request;
 
-        $this->assertEquals('site/page', $request->pathInfo);
+        $this->assertSame(
+            'site/page',
+            $request->pathInfo,
+            'Request pathInfo should be \'site/page\' after the language code is removed from the URL when matching ' .
+            'a wildcard.',
+        );
     }
 
     /**
@@ -428,17 +661,41 @@ abstract class AbstractUrlLanguageManager extends TestCase
             ],
         );
         $this->mockRequest('/en-US/site/page');
-        $this->assertEquals('en-US', Yii::$app->language);
-        $this->assertEquals('en-US', Yii::$app->session->get('_language'));
+
+        $this->assertSame(
+            'en-US',
+            Yii::$app->language,
+            'Application language should be set to \'en-US\' when the language code is present in the URL and ' .
+            'uppercase is enabled.',
+        );
+        $this->assertSame(
+            'en-US',
+            Yii::$app->session->get('_language'),
+            'Session \'_language\' should be set to \'en-US\' when the language code is present in the URL and ' .
+            'uppercase is enabled.',
+        );
 
         $cookie = Yii::$app->response->cookies->get('_language');
 
-        $this->assertNotNull($cookie);
-        $this->assertEquals('en-US', $cookie->value);
+        $this->assertNotNull(
+            $cookie,
+            'Language cookie should be set when the language code is present in the URL and uppercase is enabled.',
+        );
+        $this->assertSame(
+            'en-US',
+            $cookie->value,
+            'Language cookie value should be \'en-US\' when the language code is present in the URL and uppercase is ' .
+            'enabled.',
+        );
 
         $request = Yii::$app->request;
 
-        $this->assertEquals('site/page', $request->pathInfo);
+        $this->assertSame(
+            'site/page',
+            $request->pathInfo,
+            'Request pathInfo should be \'site/page\' after the language code is removed from the URL and uppercase ' .
+            'is enabled.',
+        );
     }
 
     /**
@@ -454,16 +711,41 @@ abstract class AbstractUrlLanguageManager extends TestCase
             ],
         );
         $this->mockRequest('/en-us/site/page');
-        $this->assertEquals('en-US', Yii::$app->language);
-        $this->assertEquals('en-US', Yii::$app->session->get('_language'));
+
+        $this->assertSame(
+            'en-US',
+            Yii::$app->language,
+            'Application language should be set to \'en-US\' when the language code is present in the URL and ' .
+            'matches the order in the configuration.',
+        );
+        $this->assertSame(
+            'en-US',
+            Yii::$app->session->get('_language'),
+            'Session \'_language\' should be set to \'en-US\' when the language code is present in the URL and ' .
+            'matches the order in the configuration.',
+        );
 
         $cookie = Yii::$app->response->cookies->get('_language');
 
-        $this->assertNotNull($cookie);
-        $this->assertEquals('en-US', $cookie->value);
+        $this->assertNotNull(
+            $cookie,
+            'Language cookie should be set when the language code is present in the URL and matches the order in the ' .
+            'configuration.',
+        );
+        $this->assertSame(
+            'en-US',
+            $cookie->value,
+            'Language cookie value should be \'en-US\' when the language code is present in the URL and matches the ' .
+            'order in the configuration.',
+        );
 
         $request = Yii::$app->request;
 
-        $this->assertEquals('site/page', $request->pathInfo);
+        $this->assertSame(
+            'site/page',
+            $request->pathInfo,
+            'Request pathInfo should be \'site/page\' after the language code is removed from the URL and matches ' .
+            'the order in the configuration.',
+        );
     }
 }

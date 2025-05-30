@@ -569,14 +569,14 @@ abstract class AbstractUrlCreation extends TestCase
 
                 if ($route[0] === false) {
                     array_shift($route);
-                    $this->assertEquals(
+                    $this->assertSame(
                         $schema . '://' . $host . $this->prepareUrl($relativeUrl),
                         Url::to($route),
                         'Absolute URL should be generated correctly as relative URL when forced with \'false\' ' .
                         'parameter  for route: ' . json_encode($route, JSON_THROW_ON_ERROR),
                     );
                 } else {
-                    $this->assertEquals(
+                    $this->assertSame(
                         $schema . '://' . $host . $this->prepareUrl($relativeUrl),
                         Url::to($route, $schema),
                         "Absolute URL should be generated correctly with schema '{$schema}' for route: " .
@@ -584,11 +584,11 @@ abstract class AbstractUrlCreation extends TestCase
                     );
                 }
             } else {
-                $this->assertEquals(
+                $this->assertSame(
                     $this->prepareUrl($url),
                     Url::to($route),
                     'Relative URL should be generated correctly for route: ' .
-                        json_encode($route, JSON_THROW_ON_ERROR) . " with expected URL: '{$url}'",
+                    json_encode($route, JSON_THROW_ON_ERROR) . " with expected URL: '{$url}'",
                 );
             }
         }
