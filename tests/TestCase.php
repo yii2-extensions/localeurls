@@ -2,46 +2,46 @@
 
 declare(strict_types=1);
 
-namespace Yii2\Extensions\LocaleUrls\Test;
+namespace yii2\extensions\localeurls\tests;
 
-use Yii2\Extensions\LocaleUrls\UrlLanguageManager;
+use yii2\extensions\localeurls\UrlLanguageManager;
 use Yii;
 use yii\base\Exception;
+use yii\base\InvalidConfigException;
 use yii\di\Container;
 use yii\helpers\ArrayHelper;
 use yii\web\Application;
+use yii\web\NotFoundHttpException;
 
 abstract class TestCase extends \PHPUnit\Framework\TestCase
 {
     /**
-     * @var array UrlManager component configuration for each test method
+     * @var mixed Variable is used to keep the initial `$_SERVER` content to restore it after each test in `tearDown()`.
+     */
+    protected mixed $_server = null;
+
+    /**
+     * @var string Base URL prefix for test scenarios.
+     */
+    protected string $baseUrl = '';
+
+    /**
+     * @var array UrlManager component configuration for test scenarios.
      */
     protected array $urlManager = [];
 
     /**
-     * @var bool show script name configuration for each test method
+     * @var bool Whether to show the script name in generated URLs.
      */
     protected bool $showScriptName = false;
-
-    /**
-     * @var string the base URL to use
-     */
-    protected string $baseUrl = '';
-
-    protected mixed $_server = null;
 
     protected function setUp(): void
     {
         if ($this->_server === null) {
-            // Keep initial $_SERVER content to restore after each
-            // test in tearDown()
             $this->_server = $_SERVER;
         }
     }
 
-    /**
-     * Destroy Yii app singleton, DI container, session and cookies
-     */
     protected function tearDown(): void
     {
         $_COOKIE = [];
@@ -59,26 +59,59 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Mock a HTTP request
+     * Sets up an expectation for a redirect exception with URL validation.
      *
-     * This will set all required variables in the PHP environment to mock a HTTP
-     * request with the given URL. It will then initialize a Yii web app and let
-     * it resolve the request.
+     * Configures PHPUnit to expect a specific exception that indicates a redirect operation, validating that the
+     * redirect URL matches the expected pattern after URL preprocessing.
      *
-     * @param string $url the relative request URL
-     * @param array $config optional configuration for the `request` application component
+     * This method is essential for testing redirect scenarios in URL routing and language switching, ensuring that
+     * redirects are triggered correctly and point to the expected destinations.
+     *
+     * @param string $url Expected redirect URL to validate against.
      */
-    protected function mockRequest($url, $config = [])
+    protected function expectRedirect(string $url): void
     {
         $url = $this->prepareUrl($url);
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessageMatches("#^{$url}$#");
+    }
+
+    /**
+     * Mocks an HTTP request with URL preparation and web application initialization.
+     *
+     * Configures the PHP environment to simulate an HTTP request by setting required `$_SERVER` variables and
+     * initializing a Yii web application instance for request processing.
+     *
+     * This method handles URL preprocessing, query string parsing, and request resolution, making it suitable for
+     * testing URL routing, language detection, and request handling scenarios.
+     *
+     * The request simulation includes proper setup of script names, document root, and query parameters to ensure
+     * realistic testing conditions that match production environments.
+     *
+     * @param string $url Relative request URL to simulate.
+     * @param array $config Optional configuration for the request application component.
+     *
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the application configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
+     *
+     * @phpstan-param array<string, mixed> $config
+     */
+    protected function mockRequest(string $url, array $config = []): void
+    {
+        $url = $this->prepareUrl($url);
+
         $_SERVER['REQUEST_URI'] = $url;
         $_SERVER['SCRIPT_NAME'] = $this->baseUrl . '/index.php';
         $_SERVER['SCRIPT_FILENAME'] = __DIR__ . $this->baseUrl . '/index.php';
         $_SERVER['DOCUMENT_ROOT'] = __DIR__;
+
         $parts = explode('?', $url);
 
         if (isset($parts[1])) {
             $_SERVER['QUERY_STRING'] = $parts[1];
+
             parse_str($parts[1], $_GET);
         } else {
             $_GET = [];
@@ -97,56 +130,42 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         Yii::$app->request->resolve();
     }
 
+
     /**
-     * Mock a web application with given config for urlManager component and let it resolve the request
+     * Configures the URL language manager component for testing scenarios.
      *
-     * @param array $config for urlManager component
+     * Sets up the configuration for the {@see UrlLanguageManager} component that will be used during test execution.
+     *
+     * This method prepares the language-aware URL management configuration without initializing the actual web
+     * application, allowing tests to define specific language settings before making mock requests.
+     *
+     * @param array $config Configuration array for the UrlLanguageManager component.
+     *
+     * @phpstan-param array<string, mixed> $config
      */
-    public function mockUrlLanguageManager($config = []): void
+    protected function mockUrlLanguageManager(array $config = []): void
     {
         $this->urlManager = $config;
     }
 
     /**
-     * Expect a redirect exception
+     * Creates a mock Yii web application instance with pre-configured test settings.
      *
-     * @param string $url the redirect URL
+     * Initializes a complete Yii web application for testing purposes configured with essential parts and default
+     * settings suitable for unit and integration testing scenarios.
+     *
+     * The application is configured with a locale-aware URL manager using the {@see UrlLanguageManager} class, which
+     * enables testing of internationalized routing and URL generation features.
+     *
+     * @param array $config Optional application configuration that overrides default settings.
+     *
+     * @throws InvalidConfigException if the application configuration is invalid or incomplete.
+     *
+     * @phpstan-param array<string, mixed> $config
      */
-    protected function expectRedirect($url)
+    protected function mockWebApplication(array $config = []): void
     {
-        $url = $this->prepareUrl($url);
-
-        $this->expectException(Exception::class);
-        $this->expectExceptionMessageMatches('#^' . $url . '$#');
-    }
-
-    /**
-     * @param string $url
-     *
-     * @return string the URL with scriptName and baseUrl applied if enabled
-     */
-    protected function prepareUrl($url)
-    {
-        if ($this->showScriptName) {
-            $url = '/index.php' . $url;
-        }
-
-        return $this->baseUrl . $url;
-    }
-
-    /**
-     * Mock a Yii web application
-     *
-     * This will create a new Yii application object and configure it with some default options.
-     * For the `urlManager` component it will use the options that where set with `mockUrlLanguageManager()`.
-     * Extra configuration passed via `$config` will override any of the above options.
-     *
-     * @param array $config application configuration
-     * @param string $appClass default is `\yii\web\Application`
-     */
-    protected function mockWebApplication($config = [], $appClass = Application::class)
-    {
-        new $appClass(
+        new Application(
             ArrayHelper::merge(
                 [
                     'id' => 'testapp',
@@ -159,14 +178,36 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
                             'isConsoleRequest' => false,
                             'hostInfo' => 'http://localhost',
                         ],
-                        'urlManager' => ArrayHelper::merge([
-                            'class' => UrlLanguageManager::class,
-                            'showScriptName' => $this->showScriptName,
-                        ], $this->urlManager),
+                        'urlManager' => ArrayHelper::merge(
+                            [
+                                'class' => UrlLanguageManager::class,
+                                'showScriptName' => $this->showScriptName,
+                            ],
+                            $this->urlManager
+                        ),
                     ],
                 ],
                 $config,
             ),
         );
+    }
+
+    /**
+     * Prepares a URL by applying script name and base URL configuration for testing scenarios.
+     *
+     * Transforms relative URLs into complete test URLs by conditionally prepending the script name and base URL based
+     * on the current test configuration settings.
+     *
+     * @param string $url Relative URL to transform into a complete test URL.
+     *
+     * @return string Complete URL with script name and base URL applied according to test configuration.
+     */
+    protected function prepareUrl(string $url): string
+    {
+        if ($this->showScriptName) {
+            $url = '/index.php' . $url;
+        }
+
+        return $this->baseUrl . $url;
     }
 }

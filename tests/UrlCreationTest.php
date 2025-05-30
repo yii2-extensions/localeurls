@@ -2,11 +2,44 @@
 
 declare(strict_types=1);
 
-namespace Yii2\Extensions\LocaleUrls\Test;
+namespace yii2\extensions\localeurls\tests;
 
+
+use JsonException;
 use PHPUnit\Framework\Attributes\Group;
+use yii2\extensions\localeurls\tests\stub\UrlRule;
+use yii\base\Exception;
+use yii\base\InvalidConfigException;
 use yii\helpers\Url;
+use yii\web\NotFoundHttpException;
 
+/**
+ * Test suite for URL creation and route parsing with language-aware URLs in the LocaleUrls extension.
+ *
+ * Verifies that the URL manager correctly generates and parses URLs with language codes, supporting multiple language
+ * configurations, aliases, custom rules, and parameter extraction for both relative and absolute URLs.
+ *
+ * These tests ensure that the URL creation logic handles language code normalization, alias resolution, suffix
+ * management, and query string preservation, as well as correct mapping of custom and slug-based routes.
+ *
+ * This test class focuses on scenarios where URLs are generated or parsed with or without language codes, validating
+ * the correct extraction of route and parameters, and ensuring that language-specific and aliased routes are handled
+ * consistently across different URL patterns and configurations.
+ *
+ * Test coverage.
+ * - Aliased language code handling and mapping to canonical language codes.
+ * - Consistent behavior for both HTTP and HTTPS, and for host-based rules.
+ * - Custom URL rule processing and mapping.
+ * - Ignore pattern matching for URLs excluded from language processing.
+ * - Language code detection and normalization in URLs (including aliases and case handling).
+ * - Query string and parameter preservation during URL creation and parsing.
+ * - Route and parameter extraction for both relative and absolute URLs.
+ * - Slug-based route parsing and parameter extraction.
+ * - Suffix management for routes with and without trailing slashes.
+ *
+ * @copyright Copyright (C) 2023 Terabytesoftw.
+ * @license https://opensource.org/license/bsd-3-clause BSD 3-Clause License.
+ */
 #[Group('locale-urls')]
 class UrlCreationTest extends TestCase
 {
@@ -23,7 +56,7 @@ class UrlCreationTest extends TestCase
                     '/custom/<term:.+>/bar' => 'demo/custom',
                     'http://www.example.com/foo/<term:.+>/bar' => 'demo/absolute-slug',
                     [
-                        'class' => TestUrlRule::class,
+                        'class' => UrlRule::class,
                     ],
                     [
                         'pattern' => '/slash',
@@ -506,10 +539,11 @@ class UrlCreationTest extends TestCase
         ],
     ];
 
-    public function testUrlCreation(): void
+    public function testGenerateUrlsWithMultipleLanguageConfigurations(): void
     {
         foreach ($this->testConfigs as $config) {
             $urlManager = $config['urlManager'] ?? [];
+
             foreach ($config['urls'] as $requestUrl => $routes) {
                 $this->performUrlCreationTest($requestUrl, $urlManager, $routes);
             }
@@ -517,13 +551,12 @@ class UrlCreationTest extends TestCase
     }
 
     /**
-     * Tests URL creation during a specific request
-     *
-     * @param string $requestUrl the requested URL
-     * @param array $urlManager the urlManager configuration
-     * @param array $routes to create URL for indexed by the expected URL
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws JsonException if there is an error encoding or decodes JSON data.
+     * @throws NotFoundHttpException if the requested resource can't be found.
      */
-    public function performUrlCreationTest(string $requestUrl, array $urlManager, array $routes): void
+    private function performUrlCreationTest(string $requestUrl, array $urlManager, array $routes): void
     {
         $this->tearDown();
         $this->mockUrlLanguageManager($urlManager);
@@ -540,15 +573,24 @@ class UrlCreationTest extends TestCase
                     $this->assertEquals(
                         $schema . '://' . $host . $this->prepareUrl($relativeUrl),
                         Url::to($route),
+                        'Absolute URL should be generated correctly as relative URL when forced with \'false\' ' .
+                        "parameter  for route: " . json_encode($route, JSON_THROW_ON_ERROR),
                     );
                 } else {
                     $this->assertEquals(
                         $schema . '://' . $host . $this->prepareUrl($relativeUrl),
                         Url::to($route, $schema),
+                        "Absolute URL should be generated correctly with schema '{$schema}' for route: " .
+                        json_encode($route, JSON_THROW_ON_ERROR),
                     );
                 }
             } else {
-                $this->assertEquals($this->prepareUrl($url), Url::to($route));
+                $this->assertEquals(
+                    $this->prepareUrl($url),
+                    Url::to($route),
+                    'Relative URL should be generated correctly for route: ' .
+                        json_encode($route, JSON_THROW_ON_ERROR) . " with expected URL: '{$url}'",
+                );
             }
         }
     }

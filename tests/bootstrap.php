@@ -11,5 +11,3 @@ define('YII_ENV', 'test');
 // require composer autoloader if available
 require(__DIR__ . '/../vendor/autoload.php');
 require(__DIR__ . '/../vendor/yiisoft/yii2/Yii.php');
-require(__DIR__ . '/TestCase.php');
-require(__DIR__ . '/TestUrlRule.php');

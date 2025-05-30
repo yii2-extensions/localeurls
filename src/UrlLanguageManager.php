@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Yii2\Extensions\LocaleUrls;
+namespace yii2\extensions\localeurls;
 
 use Yii;
 use yii\base\Exception;
@@ -322,7 +322,7 @@ class UrlLanguageManager extends UrlManager
                 }
             }
 
-            if ($process && !$this->_processed) {
+            if ($process && $this->_processed === false) {
                 // Check if a normalizer wants to redirect
                 $normalized = false;
 
@@ -377,7 +377,7 @@ class UrlLanguageManager extends UrlManager
                 // Only add language if it is not empty and ...
                 $language !== '' && (
                     // ... it is not the default language or default language uses URL code ...
-                    !$isDefaultLanguage || $this->enableDefaultLanguageUrlCode ||
+                    $isDefaultLanguage === false || $this->enableDefaultLanguageUrlCode ||
 
                     /**
                      * ... or if a language is explicitly given, but only if either persistence or detection is enabled.
@@ -513,7 +513,7 @@ class UrlLanguageManager extends UrlManager
                 [$language, $country] = $this->matchCode($code);
 
                 if ($country !== null) {
-                    if ($code === "$language-$country" && !$this->keepUppercaseLanguageCode) {
+                    if ($code === "$language-$country" && $this->keepUppercaseLanguageCode === false) {
                         $this->redirectToLanguage(strtolower($code));   // Redirect ll-CC to ll-cc
                     } else {
                         $language = "$language-$country";
@@ -536,7 +536,7 @@ class UrlLanguageManager extends UrlManager
              * "Reset" case: We called for example, /fr/demo/page so the persisted language was set back to "fr".
              * Now we can redirect to the URL without language prefix, if default prefixes are disabled.
              */
-            $reset = !$this->enableDefaultLanguageUrlCode && $language === $this->_defaultLanguage;
+            $reset = $this->enableDefaultLanguageUrlCode === false && $language === $this->_defaultLanguage;
 
             if ($reset || $normalized) {
                 $this->redirectToLanguage('');
@@ -553,7 +553,7 @@ class UrlLanguageManager extends UrlManager
             }
 
             if ($language === null || $language === $this->_defaultLanguage) {
-                if (!$this->enableDefaultLanguageUrlCode) {
+                if ($this->enableDefaultLanguageUrlCode === false) {
                     return;
                 }
 
@@ -571,7 +571,7 @@ class UrlLanguageManager extends UrlManager
                 $language = $key;
             }
 
-            if (!$this->keepUppercaseLanguageCode) {
+            if ($this->keepUppercaseLanguageCode === false) {
                 $language = strtolower($language);
             }
 

@@ -21,20 +21,14 @@
         "phpunit/phpunit": "^10.5",
         "rector/rector": "^2.0"
     },
-    "repositories": [
-        {
-            "type": "composer",
-            "url": "https://asset-packagist.org"
-        }
-    ],
     "autoload": {
         "psr-4": {
-            "Yii2\\Extensions\\LocaleUrls\\": "src"
+            "yii2\\extensions\\localeurls\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Yii2\\Extensions\\LocaleUrls\\Tests\\": "tests"
+            "yii2\\extensions\\localeurls\\tests\\": "tests"
         }
     },
     "config": {
