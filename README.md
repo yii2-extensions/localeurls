@@ -10,14 +10,23 @@
     <a href="https://www.php.net/releases/8.1/en.php" target="_blank">
         <img src="https://img.shields.io/badge/PHP-%3E%3D8.1-787CB5" alt="php-version">
     </a>
+    <a href="https://github.com/yiisoft/yii2/tree/22.0" target="_blank">
+        <img src="https://img.shields.io/badge/Yii2%20-22-blue" alt="Yii2 version">
+    </a>
     <a href="https://github.com/yii2-extensions/localeurls/actions/workflows/build.yml" target="_blank">
         <img src="https://github.com/yii2-extensions/localeurls/actions/workflows/build.yml/badge.svg" alt="PHPUnit">
     </a>
-    <a href="https://github.com/yii2-extensions/localeurls/actions/workflows/compatibility.yml" target="_blank">
-        <img src="https://github.com/yii2-extensions/localeurls/actions/workflows/compatibility.yml/badge.svg" alt="PHPUnit">
+    <a href="https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml" target="_blank">        
+        <img src="https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml/badge.svg" alt="Static Analysis">
+    </a>
+    <a href="https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml" target="_blank">
+        <img src="https://img.shields.io/badge/PHPStan%20level-5-blue" alt="PHPStan Level">
     </a>    
     <a href="https://codecov.io/gh/yii2-extensions/localeurls" target="_blank">
         <img src="https://codecov.io/gh/yii2-extensions/localeurls/graph/badge.svg?token=hLDHtLBgqV" alt="Codecov">
+    </a>
+    <a href="https://github.styleci.io/repos/711867018?branch=main" target="_blank">
+        <img src="https://github.styleci.io/repos/711867018/shield?branch=main" alt="StyleCI">
     </a>      
 </p>
 
@@ -39,16 +48,24 @@ or add
 
 to the require-dev section of your `composer.json` file.  
 
-## Quality code
+## Configuration
 
-[![static-analysis](https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml/badge.svg)](https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml)
-[![phpstan-level](https://img.shields.io/badge/PHPStan%20level-3-blue)](https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml)
-[![style-ci](https://github.styleci.io/repos/711867018/shield?branch=main)](https://github.styleci.io/repos/711867018?branch=main)
+To use this extension, you need to configure the `localeUrls` component in your application configuration file. 
 
-## Support versions Yii2
-
-[![Yii20](https://img.shields.io/badge/Yii2%20version-2.0-blue)](https://github.com/yiisoft/yii2/tree/2.0.49.3)
-[![Yii22](https://img.shields.io/badge/Yii2%20version-2.2-blue)](https://github.com/yiisoft/yii2/tree/2.2)
+```php
+'components' => [
+    'urlManager' => [
+        'class' => Yii2\Extensions\LocaleUrls\UrlLanguageManager::class,
+        'languages' => [
+            'en' => 'en-US',
+            'es' => 'es-ES',
+            'ru' => 'ru-RU',
+        ],
+        'enablePrettyUrl' => true,
+        'showScriptName' => false,
+    ],    
+],
+```
 
 ## Testing
 

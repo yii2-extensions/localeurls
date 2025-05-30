@@ -13,12 +13,12 @@
     "require": {
         "php": ">=8.1",
         "ext-mbstring": "*",
-        "yiisoft/yii2": "*"
+        "yiisoft/yii2": "22.0.x-dev"
     },
     "require-dev": {
         "maglnet/composer-require-checker": "^4.6",
-        "phpunit/phpunit": "^10.4",
-        "yii2-extensions/phpstan": "dev-main"
+        "phpstan/phpstan": "^2.1",
+        "phpunit/phpunit": "^10.5"
     },
     "repositories": [
         {
@@ -36,22 +36,15 @@
             "Yii2\\Extensions\\LocaleUrls\\Tests\\": "tests"
         }
     },
-    "extra": {
-        "branch-alias": {
-            "dev-main": "1.0.x-dev"
-        },
-        "config-plugin-options": {
-            "source-directory": "config"
-        },
-        "config-plugin": {
-            "params-web": "params-web.php",
-            "yii2-localeurls": "extension.php"
-        }
-    },
     "config": {
         "sort-packages": true,
         "allow-plugins": {
             "yiisoft/yii2-composer": true
         }
+    },
+    "scripts": {
+        "check-dependencies": "./vendor/bin/composer-require-checker check",
+        "static": "./vendor/bin/phpstan analyse src --memory-limit=512M",
+        "tests": "./vendor/bin/phpunit"
     }
 }

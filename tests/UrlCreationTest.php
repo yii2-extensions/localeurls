@@ -550,7 +550,7 @@ class UrlCreationTest extends TestCase
                 $schema = $matches[1];
                 $host = $matches[2];
                 $relativeUrl = $matches[3];
-                if ($route[0]===false) {
+                if ($route[0] === false) {
                     array_shift($route);
                     $this->assertEquals($schema . '://' . $host . $this->prepareUrl($relativeUrl), Url::to($route));
                 } else {

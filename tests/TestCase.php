@@ -84,7 +84,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
             $_GET = [];
         }
 
-        if ($config!==[]) {
+        if ($config !== []) {
             $config = [
                 'components' => [
                     'request' => $config,

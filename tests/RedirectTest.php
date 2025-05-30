@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Yii2\Extensions\LocaleUrls\Test;
 
 use Yii;
+use yii\base\Exception;
 use yii\helpers\Url;
+use yii\web\UrlNormalizerRedirectException;
 
 class RedirectTest extends TestCase
 {
@@ -779,7 +781,7 @@ class RedirectTest extends TestCase
             if ($to) {
                 $this->fail("No redirect:\n$configMessage");
             }
-        } catch (\yii\web\UrlNormalizerRedirectException $e) {
+        } catch (UrlNormalizerRedirectException $e) {
             $url = $e->url;
             if (is_array($url)) {
                 if (isset($url[0])) {
@@ -790,7 +792,7 @@ class RedirectTest extends TestCase
             }
             $message = "UrlNormalizerRedirectException:\n$configMessage";
             $this->assertEquals($this->prepareUrl($to), Url::to($url, $e->scheme), $message);
-        } catch (\yii\base\Exception $e) {
+        } catch (Exception $e) {
             $message = "Redirection:\n$configMessage";
             $this->assertEquals($this->prepareUrl($to), $e->getMessage(), $message);
         }
