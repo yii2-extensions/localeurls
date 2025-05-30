@@ -7,7 +7,7 @@ return static function (Rector\Config\RectorConfig $rectorConfig): void {
 
     $rectorConfig->importNames();
 
-    $rectorConfig->phpVersion(Rector\ValueObject\PhpVersion::PHP_82);
+    $rectorConfig->phpVersion(Rector\ValueObject\PhpVersion::PHP_81);
 
     $rectorConfig->paths(
         [
@@ -18,8 +18,8 @@ return static function (Rector\Config\RectorConfig $rectorConfig): void {
 
     $rectorConfig->sets(
         [
-            Rector\Set\ValueObject\SetList::PHP_84,
-            Rector\Set\ValueObject\LevelSetList::UP_TO_PHP_84,
+            Rector\Set\ValueObject\SetList::PHP_82,
+            Rector\Set\ValueObject\LevelSetList::UP_TO_PHP_82,
             Rector\Set\ValueObject\SetList::TYPE_DECLARATION,
         ],
     );
