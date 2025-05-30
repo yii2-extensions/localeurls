@@ -172,8 +172,8 @@ class UrlLanguageManager extends UrlManager
     /**
      * @var array Configuration options for the language cookie.
      *
-     * {@see LocaleUrls::languageCookieName} will override.
-     * {@see LocaleUrls::languageCookeDuration} will override
+     * @see LocaleUrls::languageCookieName will override.
+     * @see LocaleUrls::languageCookieDuration will override
      */
     public array $languageCookieOptions = [];
 

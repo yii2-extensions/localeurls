@@ -13,7 +13,7 @@ class UrlCreationTest extends TestCase
     /**
      * @var array Set of test configurations to test.
      */
-    public $testConfigs = [
+    public array $testConfigs = [
         [
             'urlManager' => [
                 'languages' => ['en-US', 'en', 'french' => 'fr', 'de'],
