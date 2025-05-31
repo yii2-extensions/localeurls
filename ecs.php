@@ -20,7 +20,8 @@ return ECSConfig::configure()
         ],
     )
     ->withConfiguredRule(
-        OrderedImportsFixer::class, [
+        OrderedImportsFixer::class,
+        [
             'imports_order' => ['class', 'function', 'const'],
             'sort_algorithm' => 'alpha',
         ],
