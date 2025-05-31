@@ -199,9 +199,6 @@ class UrlLanguageManager extends UrlManager
      */
     public array $ignoreLanguageUrlPatterns = [];
 
-    /**
-     * @inheritdoc
-     */
     public $enablePrettyUrl = true;
 
     /**
@@ -217,7 +214,7 @@ class UrlLanguageManager extends UrlManager
     public string $languageParam = 'language';
 
     /**
-     * @var string Key in $_SERVER that contains the detected GeoIP country.
+     * @var string Key in that contains the detected GeoIP country.
      *
      * Default is 'HTTP_X_GEO_COUNTRY' as used by mod_geoip in apache.
      */
@@ -260,8 +257,6 @@ class UrlLanguageManager extends UrlManager
     protected bool $_processed = false;
 
     /**
-     * @inheritdoc
-     *
      * @throws InvalidConfigException if the configuration is invalid or incomplete.
      */
     public function init(): void
@@ -295,8 +290,6 @@ class UrlLanguageManager extends UrlManager
     }
 
     /**
-     * {@inheritdoc}
-     *
      * @throws Exception if an unexpected error occurs during execution.
      * @throws ExitException if execution should be halted without exiting the process.
      * @throws InvalidConfigException if the configuration is invalid or incomplete.
@@ -344,8 +337,6 @@ class UrlLanguageManager extends UrlManager
     }
 
     /**
-     * {@inheritdoc}
-     *
      * @throws InvalidConfigException if the configuration is invalid or incomplete.
      */
     public function createUrl($params): array|string
@@ -625,7 +616,7 @@ class UrlLanguageManager extends UrlManager
                         'value' => $language,
                         'expire' => time() + $this->languageCookieDuration,
                     ],
-                )
+                ),
             );
 
             Yii::$app->getResponse()->getCookies()->add($cookie);

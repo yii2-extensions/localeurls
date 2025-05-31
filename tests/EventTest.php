@@ -65,14 +65,14 @@ final class EventTest extends TestCase
 
         $this->assertFalse(
             $this->eventFired,
-            'Language changed event should not be fired before making the request when no language is persisted.'
+            'Language changed event should not be fired before making the request when no language is persisted.',
         );
 
         $this->mockRequest('/fr/site/page');
 
         $this->assertTrue(
             $this->eventFired,
-            'Language changed event should be fired when no language is persisted and a language is detected from URL.'
+            'Language changed event should be fired when no language is persisted and a language is detected from URL.',
         );
     }
 

@@ -312,7 +312,7 @@ abstract class AbstractUrlCreation extends TestCase
                     // Other language
                     '/en-us/' => ['/site/index', 'language' => 'en-US'],
                     '/en-us/?x=y' => ['/site/index', 'language' => 'en-US', 'x' => 'y'],
-                    '/en-us/demo/action/' => ['/demo/action' , 'language' => 'en-US'],
+                    '/en-us/demo/action/' => ['/demo/action', 'language' => 'en-US'],
                     '/en-us/demo/action/?x=y' => ['/demo/action', 'language' => 'en-US', 'x' => 'y'],
                     '/en-us/foo/baz/bar/' => ['/demo/slug', 'language' => 'en-US', 'term' => 'baz'],
                     '/en-us/foo/baz/bar/?x=y' => ['/demo/slug', 'language' => 'en-US', 'term' => 'baz', 'x' => 'y'],
@@ -339,7 +339,7 @@ abstract class AbstractUrlCreation extends TestCase
                     // Aliased language
                     '/french/' => ['/site/index', 'language' => 'fr'],
                     '/french/?x=y' => ['/site/index', 'language' => 'fr', 'x' => 'y'],
-                    '/french/demo/action/' => ['/demo/action' , 'language' => 'fr'],
+                    '/french/demo/action/' => ['/demo/action', 'language' => 'fr'],
                     '/french/demo/action/?x=y' => ['/demo/action', 'language' => 'fr', 'x' => 'y'],
                     '/french/foo/baz/bar/' => ['/demo/slug', 'language' => 'fr', 'term' => 'baz'],
                     '/french/foo/baz/bar/?x=y' => ['/demo/slug', 'language' => 'fr', 'term' => 'baz', 'x' => 'y'],
@@ -377,7 +377,7 @@ abstract class AbstractUrlCreation extends TestCase
                     // No language
                     '/' => ['/site/index', 'language' => ''],
                     '/?x=y' => ['/site/index', 'language' => '', 'x' => 'y'],
-                    '/demo/action/' => ['/demo/action' , 'language' => ''],
+                    '/demo/action/' => ['/demo/action', 'language' => ''],
                     '/demo/action/?x=y' => ['/demo/action', 'language' => '', 'x' => 'y'],
                     '/foo/baz/bar/' => ['/demo/slug', 'language' => '', 'term' => 'baz'],
                     '/foo/baz/bar/?x=y' => ['/demo/slug', 'language' => '', 'term' => 'baz', 'x' => 'y'],

@@ -808,7 +808,7 @@ abstract class AbstractRedirect extends TestCase
         } catch (Exception $e) {
             if ($to === false || $to === null) {
                 $this->fail(
-                    "Expected redirect from '$from' to '$to' but no redirect occurred. Configuration: $configMessage"
+                    "Expected redirect from '$from' to '$to' but no redirect occurred. Configuration: $configMessage",
                 );
             }
 
