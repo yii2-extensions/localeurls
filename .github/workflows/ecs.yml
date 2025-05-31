@@ -6,22 +6,28 @@ on:
       - 'CHANGELOG.md'
       - '.gitignore'
       - '.gitattributes'
+      - 'infection.json.dist'
+      - 'phpunit.xml.dist'
 
   push:
+    branches: ['main']
     paths-ignore:
       - 'docs/**'
       - 'README.md'
       - 'CHANGELOG.md'
       - '.gitignore'
       - '.gitattributes'
+      - 'infection.json.dist'
+      - 'phpunit.xml.dist'
 
-name: static analysis
+name: ecs
 
 jobs:
-  phpstan:
-    uses: php-forge/actions/.github/workflows/phpstan.yml@main
+  easy-coding-standard:
+    uses: php-forge/actions/.github/workflows/ecs.yml@main
     with:
+      extensions: mbstring
       os: >-
         ['ubuntu-latest']
       php: >-
-        ['8.2', '8.3', '8.4']
+        ['8.2']

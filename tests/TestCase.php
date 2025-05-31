@@ -6,8 +6,8 @@ namespace yii2\extensions\localeurls\tests;
 
 use Yii;
 use yii\base\Exception;
+use yii\base\ExitException;
 use yii\base\InvalidConfigException;
-use yii\di\Container;
 use yii\helpers\ArrayHelper;
 use yii\web\Application;
 use yii\web\NotFoundHttpException;
@@ -158,7 +158,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         new Application(
             ArrayHelper::merge(
                 [
-                    'id' => 'testapp',
+                    'id' => 'app',
                     'language' => 'en',
                     'basePath' => __DIR__,
                     'vendorPath' => __DIR__ . '/../vendor/',
@@ -173,7 +173,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
                                 'class' => UrlLanguageManager::class,
                                 'showScriptName' => $this->showScriptName,
                             ],
-                            $this->urlManager
+                            $this->urlManager,
                         ),
                     ],
                 ],
@@ -212,13 +212,13 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         $_COOKIE = [];
         $_SESSION = [];
         $_SERVER = $this->_server;
-
-        if (isset(Yii::$app)) {
-            Yii::$app->session->destroy();
-            Yii::$app = null;
-            Yii::$container = new Container();
-        }
-
         $this->urlManager = [];
+
+        Yii::$app->session->destroy();
+
+        try {
+            Yii::$app->end();
+        } catch (ExitException) {
+        }
     }
 }
