@@ -43,11 +43,6 @@ use function array_column;
  */
 abstract class AbstractSlugRedirect extends TestCase
 {
-    /**
-     * @throws Exception if an unexpected error occurs during execution.
-     * @throws InvalidConfigException if the configuration is invalid or incomplete.
-     * @throws NotFoundHttpException if the requested resource can't be found.
-     */
     public function testLogBrowserLanguageDetectionAndRedirectionMessages(): void
     {
         Yii::getLogger()->flush(true);
@@ -133,11 +128,6 @@ abstract class AbstractSlugRedirect extends TestCase
         }
     }
 
-    /**
-     * @throws Exception if an unexpected error occurs during execution.
-     * @throws InvalidConfigException if the configuration is invalid or incomplete.
-     * @throws NotFoundHttpException if the requested resource can't be found.
-     */
     public function testLogGeoIpLanguageDetectionWhenGeoIpCountryPresent(): void
     {
         Yii::getLogger()->flush(true);
@@ -690,6 +680,11 @@ abstract class AbstractSlugRedirect extends TestCase
         $this->mockRequest('/');
     }
 
+    /**
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
+     */
     public function testRedirectsToLowerCaseFromUpperCaseCookie(): void
     {
         $this->expectRedirect('/de-at/foo/baz/bar');
@@ -706,6 +701,11 @@ abstract class AbstractSlugRedirect extends TestCase
         $this->mockRequest('/foo/baz/bar');
     }
 
+    /**
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
+     */
     public function testRedirectsToLowerCaseFromAcceptLanguageHeader(): void
     {
         $this->expectRedirect('/de-at/foo/baz/bar');
@@ -725,6 +725,11 @@ abstract class AbstractSlugRedirect extends TestCase
         );
     }
 
+    /**
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
+     */
     public function testRedirectsToLowerCaseFromUpperCaseSession(): void
     {
         $this->expectRedirect('/de-at/foo/baz/bar');

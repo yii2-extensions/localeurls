@@ -488,7 +488,7 @@ class UrlLanguageManager extends UrlManager
         }
 
         // order by length to make longer patterns match before short patterns, for example, put "en-GB" before "en"
-        usort($parts, fn($a, $b): int => mb_strlen((string) $b) <=> mb_strlen((string) $a));
+        usort($parts, static fn($a, $b): int => mb_strlen((string) $b) <=> mb_strlen((string) $a));
 
         $pattern = implode('|', $parts);
 

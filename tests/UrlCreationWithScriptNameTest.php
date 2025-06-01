@@ -10,7 +10,7 @@ use yii2\extensions\localeurls\tests\base\AbstractUrlCreation;
 /**
  * Test suite for URL creation functionality with script name configuration.
  *
- * Extends the base URL creation test suite, to verify URL generation behavior when the script name is visible in the
+ * Extends the base URL creation test suite to verify URL generation behavior when the script name is visible in the
  * URL manager configuration.
  *
  * This covers scenarios where applications are deployed with visible entry scripts (for example, `index.php`), ensuring

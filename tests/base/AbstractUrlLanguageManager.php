@@ -542,11 +542,6 @@ abstract class AbstractUrlLanguageManager extends TestCase
         );
     }
 
-    /**
-     * @throws Exception if an unexpected error occurs during execution.
-     * @throws InvalidConfigException if the configuration is invalid or incomplete.
-     * @throws NotFoundHttpException if the requested resource can't be found.
-     */
     public function testHandlesLanguageCodesWithMultipleDashes(): void
     {
         $this->mockUrlLanguageManager(

@@ -10,7 +10,7 @@ use yii2\extensions\localeurls\tests\base\AbstractSlugRedirect;
 /**
  * Test suite for slug-based URL redirection functionality with script name visibility configuration.
  *
- * Extends the slug redirect test suite, to verify redirection behavior when script name visibility is enabled in the
+ * Extends the slug redirect test suite to verify redirection behavior when script name visibility is enabled in the
  * URL manager, testing scenarios where applications with slug-based routing show the script name (for example,
  * `index.php`) in generated URLs.
  *
