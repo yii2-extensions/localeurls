@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace yii2\extensions\localeurls\tests\base;
 
-use PHPUnit\Framework\Attributes\Group;
 use Yii;
 use yii\base\Exception;
 use yii\base\InvalidConfigException;
 use yii\helpers\Url;
 use yii\web\NotFoundHttpException;
 use yii2\extensions\localeurls\tests\TestCase;
+use yii2\extensions\localeurls\UrlLanguageManager;
+
+use function array_column;
 
 /**
  * Base class for language-aware URL manager and language detection tests in the Yii2 LocaleUrls extension.
@@ -39,7 +41,6 @@ use yii2\extensions\localeurls\tests\TestCase;
  * @copyright Copyright (C) 2023 Terabytesoftw.
  * @license https://opensource.org/license/bsd-3-clause BSD 3-Clause License.
  */
-#[Group('locale-urls')]
 abstract class AbstractUrlLanguageManager extends TestCase
 {
     /**
@@ -55,6 +56,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'languageCookieDuration' => false,
             ],
         );
+
         $this->mockRequest('/en-us/site/page');
 
         $this->assertSame(
@@ -96,6 +98,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'enableLanguageDetection' => false,
             ],
         );
+
         $this->mockRequest(
             '/site/page',
             [
@@ -132,6 +135,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'enableLanguagePersistence' => false,
             ],
         );
+
         $this->mockRequest('/en-us/site/page');
 
         $this->assertSame(
@@ -170,6 +174,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'languageSessionKey' => false,
             ],
         );
+
         $this->mockRequest('/en-us/site/page');
 
         $this->assertSame(
@@ -212,6 +217,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'languages' => ['en-US', 'en', 'deutsch' => 'de'],
             ],
         );
+
         $this->mockRequest('/deutsch/site/page');
 
         $this->assertSame(
@@ -259,6 +265,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'languages' => ['en-US', 'deutsch' => 'de', 'sr-Latn'],
             ],
         );
+
         $this->mockRequest('/sr-latn/site/page');
 
         $this->assertSame(
@@ -305,6 +312,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'languages' => ['en-US', 'deutsch' => 'de', 'es-*'],
             ],
         );
+
         $this->mockRequest('/es-bo/site/page');
 
         $this->assertSame(
@@ -397,6 +405,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 ],
             ],
         );
+
         $this->mockRequest(
             '/site/page',
             [
@@ -412,7 +421,6 @@ abstract class AbstractUrlLanguageManager extends TestCase
         );
 
         $request = Yii::$app->request;
-
 
         $this->assertSame(
             'site/page',
@@ -458,13 +466,13 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'languages' => [],
             ],
         );
+
         $this->mockRequest(
             '/site/page',
             [
                 'acceptableLanguages' => ['de'],
             ],
         );
-
 
         $this->assertSame(
             'en',
@@ -474,7 +482,6 @@ abstract class AbstractUrlLanguageManager extends TestCase
         );
 
         $request = Yii::$app->request;
-
 
         $this->assertSame(
             'site/page',
@@ -491,6 +498,8 @@ abstract class AbstractUrlLanguageManager extends TestCase
      */
     public function testDoesNothingIfUrlMatchesIgnoresUrls(): void
     {
+        Yii::getLogger()->flush(true);
+
         $this->mockUrlLanguageManager(
             [
                 'languages' => ['en-US', 'en', 'de'],
@@ -499,6 +508,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 ],
             ],
         );
+
         $this->mockRequest(
             '/site/page',
             [
@@ -521,6 +531,67 @@ abstract class AbstractUrlLanguageManager extends TestCase
             'Request pathInfo should remain \'site/page\' when the URL matches an ignored pattern and no language ' .
             'code is present.',
         );
+
+        $loggerMessages = Yii::getLogger()->messages;
+        $expectedMessages = array_column($loggerMessages, 0);
+
+        $this->assertContains(
+            'Ignore pattern \'#^site/page#\' matches \'site/page.\' Skipping language processing.',
+            $expectedMessages,
+            'First log message should indicate that the URL is ignored due to matching an ignored pattern.',
+        );
+    }
+
+    /**
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
+     */
+    public function testHandlesLanguageCodesWithMultipleDashes(): void
+    {
+        $this->mockUrlLanguageManager(
+            [
+                'languages' => ['en-*', 'es', 'de'],
+                'enableLanguageDetection' => true,
+                'keepUppercaseLanguageCode' => false,
+            ],
+        );
+
+        $_SERVER['HTTP_ACCEPT_LANGUAGE'] = 'en-US-variant;q=0.9,en;q=0.8,es;q=0.7';
+
+        try {
+            $this->mockRequest('/site/page');
+
+            $this->fail('Expected redirection exception was not thrown.');
+        } catch (Exception $e) {
+            $this->assertStringContainsString(
+                '/en-us-variant/site/page',
+                $e->getMessage(),
+                'Redirect URL should preserve all parts after first dash when explode limit is \'2\'.',
+            );
+        }
+
+        $this->mockUrlLanguageManager(
+            [
+                'languages' => ['es-*', 'en', 'de'],
+                'enableLanguageDetection' => true,
+                'keepUppercaseLanguageCode' => false,
+            ],
+        );
+
+        $_SERVER['HTTP_ACCEPT_LANGUAGE'] = 'es-MX-variant-extended;q=0.9,es;q=0.8,en;q=0.7';
+
+        try {
+            $this->mockRequest('/site/page');
+
+            $this->fail('Expected redirection exception was not thrown for second test case.');
+        } catch (Exception $e) {
+            $this->assertStringContainsString(
+                '/es-mx-variant-extended/site/page',
+                $e->getMessage(),
+                'Redirect URL should handle multiple dashes correctly with explode limit of \'2\'.',
+            );
+        }
     }
 
     /**
@@ -535,6 +606,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'languages' => ['en-US', 'en', 'de'],
             ],
         );
+
         $this->mockRequest('/');
 
         $this->assertSame(
@@ -564,6 +636,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'languages' => ['en-US', 'en', 'de'],
             ],
         );
+
         $this->mockRequest('/en-us/site/page');
 
         $this->assertSame(
@@ -610,6 +683,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'languages' => ['en-US', 'de-*'],
             ],
         );
+
         $this->mockRequest('/de/site/page');
 
         $this->assertSame(
@@ -660,6 +734,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'keepUppercaseLanguageCode' => true,
             ],
         );
+
         $this->mockRequest('/en-US/site/page');
 
         $this->assertSame(
@@ -710,6 +785,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'languages' => ['en', 'en-US', 'de'],
             ],
         );
+
         $this->mockRequest('/en-us/site/page');
 
         $this->assertSame(
@@ -747,5 +823,44 @@ abstract class AbstractUrlLanguageManager extends TestCase
             'Request pathInfo should be \'site/page\' after the language code is removed from the URL and matches ' .
             'the order in the configuration.',
         );
+    }
+
+    public function testThrowInvalidConfigExceptionWhenEnablePrettyUrlIsFalse(): void
+    {
+        $this->mockWebApplication();
+
+        $this->expectException(InvalidConfigException::class);
+        $this->expectExceptionMessage('Locale URL support requires enablePrettyUrl to be set to true.');
+
+        new UrlLanguageManager(
+            [
+                'languages' => ['en'],
+                'enablePrettyUrl' => false,
+            ]
+        );
+    }
+
+    public function testThrowNotFoundHttpExceptionWhenUrlIsInvalid(): void
+    {
+        $this->mockUrlLanguageManager(
+            [
+                'languages' => ['en-US', 'en', 'de'],
+                'enablePrettyUrl' => true,
+                'enableStrictParsing' => true,
+            ],
+        );
+
+        $this->mockWebApplication();
+
+        $_COOKIE['_language'] = 'de';
+
+        $urlManager = Yii::$app->urlManager;
+        $request = Yii::$app->request;
+        $request->setUrl('/de/invalid-url');
+
+        $this->expectException(NotFoundHttpException::class);
+        $this->expectExceptionMessage('Page not found.');
+
+        $urlManager->parseRequest($request);
     }
 }

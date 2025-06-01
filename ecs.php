@@ -49,7 +49,6 @@ return ECSConfig::configure()
     )
     ->withRules(
         [
-            LineEndingFixer::class,
             NoUnusedImportsFixer::class,
             OrderedClassElementsFixer::class,
             OrderedTraitsFixer::class,
