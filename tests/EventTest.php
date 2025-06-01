@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace yii2\extensions\localeurls\tests;
 
 use PHPUnit\Framework\Attributes\Group;
+use Yii;
 use yii2\extensions\localeurls\LanguageChangedEvent;
+
+use function array_column;
 
 /**
  * Test suite for {@see LanguageChangedEvent} event functionality and behavior.
@@ -54,6 +57,8 @@ final class EventTest extends TestCase
 
     public function testFiresIfNoLanguagePersisted(): void
     {
+        Yii::getLogger()->flush(true);
+
         $this->mockUrlLanguageManager(
             [
                 'languages' => ['fr', 'en', 'de'],
@@ -73,6 +78,25 @@ final class EventTest extends TestCase
         $this->assertTrue(
             $this->eventFired,
             'Language changed event should be fired when no language is persisted and a language is detected from URL.',
+        );
+
+        $loggerMessages = Yii::getLogger()->messages;
+        $expectedMessages = array_column($loggerMessages, 0);
+
+        $this->assertContains(
+            'Triggering languageChanged event:  -> fr',
+            $expectedMessages,
+            'Language changed event should be logged with the new language.',
+        );
+        $this->assertContains(
+            'Persisting language \'fr\' in session.',
+            $expectedMessages,
+            'Persisting language in session should be logged.',
+        );
+        $this->assertContains(
+            'Persisting language \'fr\' in cookie.',
+            $expectedMessages,
+            'Persisting language in cookie should be logged.',
         );
     }
 

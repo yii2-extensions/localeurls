@@ -9,6 +9,7 @@ use yii\base\Exception;
 use yii\base\ExitException;
 use yii\base\InvalidConfigException;
 use yii\helpers\ArrayHelper;
+use yii\log\FileTarget;
 use yii\web\Application;
 use yii\web\NotFoundHttpException;
 use yii2\extensions\localeurls\UrlLanguageManager;
@@ -159,10 +160,20 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
             ArrayHelper::merge(
                 [
                     'id' => 'app',
-                    'language' => 'en',
                     'basePath' => __DIR__,
+                    'bootstrap' => ['log'],
+                    'language' => 'en',
                     'vendorPath' => __DIR__ . '/../vendor/',
                     'components' => [
+                        'log' => [
+                            'traceLevel' => 0,
+                            'targets' => [
+                                [
+                                    'class' => FileTarget::class,
+                                    'levels' => ['trace'],
+                                ],
+                            ],
+                        ],
                         'request' => [
                             'enableCookieValidation' => false,
                             'isConsoleRequest' => false,

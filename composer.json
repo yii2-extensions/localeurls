@@ -16,6 +16,7 @@
         "yiisoft/yii2": "22.0.x-dev"
     },
     "require-dev": {
+        "infection/infection": "^0.29",
         "maglnet/composer-require-checker": "^4.6",
         "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^10.5",
@@ -35,13 +36,16 @@
     "config": {
         "sort-packages": true,
         "allow-plugins": {
+            "infection/extension-installer": true,
             "yiisoft/yii2-composer": true
         }
     },
     "scripts": {
         "check-dependencies": "./vendor/bin/composer-require-checker check",
-        "static": "./vendor/bin/phpstan analyse src --memory-limit=512M",
+        "ecs": "./vendor/bin/ecs --fix",
+        "mutation": "./vendor/bin/infection --threads=4 --ignore-msi-with-no-mutations --only-covered --min-msi=100 --min-covered-msi=100",
         "rector": "./vendor/bin/rector process src",
+        "static": "./vendor/bin/phpstan analyse src --memory-limit=512M",
         "tests": "./vendor/bin/phpunit"
     }
 }

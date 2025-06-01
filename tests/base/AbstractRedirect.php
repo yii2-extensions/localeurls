@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace yii2\extensions\localeurls\tests\base;
 
-use PHPUnit\Framework\Attributes\Group;
 use Yii;
 use yii\base\Exception;
 use yii\helpers\Url;
@@ -42,7 +41,6 @@ use yii2\extensions\localeurls\tests\TestCase;
  * @copyright Copyright (C) 2023 Terabytesoftw.
  * @license https://opensource.org/license/bsd-3-clause BSD 3-Clause License.
  */
-#[Group('locale-urls')]
 abstract class AbstractRedirect extends TestCase
 {
     /**

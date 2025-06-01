@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace yii2\extensions\localeurls\tests\base;
 
-use PHPUnit\Framework\Attributes\Group;
+use Yii;
 use yii\base\Exception;
 use yii\base\InvalidConfigException;
 use yii\web\NotFoundHttpException;
 use yii2\extensions\localeurls\tests\TestCase;
+
+use function array_column;
 
 /**
  * Base class for slug redirect tests in the Yii2 LocaleUrls extension.
@@ -39,13 +41,138 @@ use yii2\extensions\localeurls\tests\TestCase;
  * @copyright Copyright (C) 2023 Terabytesoftw.
  * @license https://opensource.org/license/bsd-3-clause BSD 3-Clause License.
  */
-#[Group('locale-urls')]
 abstract class AbstractSlugRedirect extends TestCase
 {
     /**
-     * @throws Exception
-     * @throws InvalidConfigException
-     * @throws NotFoundHttpException
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
+     */
+    public function testLogBrowserLanguageDetectionAndRedirectionMessages(): void
+    {
+        Yii::getLogger()->flush(true);
+
+        $this->mockUrlLanguageManager(
+            [
+                'languages' => ['de', 'at' => 'de-AT'],
+            ],
+        );
+
+        try {
+            $this->mockRequest(
+                '/foo/baz/bar',
+                [
+                    'acceptableLanguages' => ['en-US', 'en', 'de'],
+                ],
+            );
+        } catch (Exception) {
+        }
+
+        $loggerMessages = Yii::getLogger()->messages;
+        $expectedMessages = array_column($loggerMessages, 0);
+
+        $this->assertContains(
+            'Detected browser language \'de\'.',
+            $expectedMessages,
+            'Logger should record browser language detection message \'Detected browser language \'de\'.\' at index ' .
+            '\'3\'.',
+        );
+
+        if ($this->baseUrl === '/base' && $this->showScriptName) {
+            $this->assertSame(
+                'http://localhost/base/index.php/de/foo/baz/bar',
+                Yii::$app->response->getHeaders()->get('Location'),
+                'Response should redirect to \'http://localhost/base/index.php/de/foo/baz/bar\'.',
+            );
+            $this->assertContains(
+                'Redirecting to /base/index.php/de/foo/baz/bar.',
+                $expectedMessages,
+                'Logger should record redirection message \'Redirecting to /base/index.php/de/foo/baz/bar.\' at ' .
+                'index \'6\'.',
+            );
+        }
+
+        if ($this->baseUrl === '/base' && $this->showScriptName === false) {
+            $this->assertSame(
+                'http://localhost/base/de/foo/baz/bar',
+                Yii::$app->response->getHeaders()->get('Location'),
+                'Response should redirect to \'http://localhost/base/de/foo/baz/bar\'.',
+            );
+            $this->assertContains(
+                'Redirecting to /base/de/foo/baz/bar.',
+                $expectedMessages,
+                'Logger should record redirection message \'Redirecting to /base/de/foo/baz/bar.\' at index \'6\'.',
+            );
+        }
+
+        if ($this->baseUrl === '' && $this->showScriptName) {
+            $this->assertSame(
+                'http://localhost/index.php/de/foo/baz/bar',
+                Yii::$app->response->getHeaders()->get('Location'),
+                'Response should redirect to \'http://localhost/index.php/de/foo/baz/bar\'.',
+            );
+            $this->assertContains(
+                'Redirecting to /index.php/de/foo/baz/bar.',
+                $expectedMessages,
+                'Logger should record redirection message \'Redirecting to /index.php/de/foo/baz/bar.\' at index ' .
+                '\'6\'.',
+            );
+        }
+
+        if ($this->baseUrl === '' && $this->showScriptName === false) {
+            $this->assertSame(
+                'http://localhost/de/foo/baz/bar',
+                Yii::$app->response->getHeaders()->get('Location'),
+                'Response should redirect to \'http://localhost/de/foo/baz/bar\'.',
+            );
+            $this->assertContains(
+                'Redirecting to /de/foo/baz/bar.',
+                $expectedMessages,
+                'Logger should record redirection message \'Redirecting to /de/foo/baz/bar.\' at index \'6\'.',
+            );
+        }
+    }
+
+    /**
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
+     */
+    public function testLogGeoIpLanguageDetectionWhenGeoIpCountryPresent(): void
+    {
+        Yii::getLogger()->flush(true);
+
+        $_SERVER['HTTP_X_GEO_COUNTRY'] = 'DEU';
+
+        $this->mockUrlLanguageManager(
+            [
+                'languages' => ['en-US', 'en', 'de'],
+                'geoIpLanguageCountries' => [
+                    'de' => ['DEU'],
+                    'en-US' => ['USA'],
+                ],
+            ],
+        );
+
+        try {
+            $this->mockRequest('/foo/baz/bar');
+        } catch (Exception) {
+        }
+
+        $loggerMessages = Yii::getLogger()->messages;
+        $expectedMessages = array_column($loggerMessages, 0);
+
+        $this->assertContains(
+            'Detected GeoIp language \'de\'.',
+            $expectedMessages,
+            'Logger should record GeoIP language detection message \'Detected GeoIp language \'de\'.\' at index \'3\'.',
+        );
+    }
+
+    /**
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
      */
     public function testRedirectsIfDefaultLanguageInUrlAndDefaultLanguageUsesNoSuffix(): void
     {
@@ -61,9 +188,9 @@ abstract class AbstractSlugRedirect extends TestCase
     }
 
     /**
-     * @throws Exception
-     * @throws InvalidConfigException
-     * @throws NotFoundHttpException
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
      */
     public function testRedirectsIfDefaultLanguageInUrlAndDefaultLanguageUsesNoSuffixAndTrailingSlashEnabled(): void
     {
@@ -80,9 +207,9 @@ abstract class AbstractSlugRedirect extends TestCase
     }
 
     /**
-     * @throws Exception
-     * @throws NotFoundHttpException
-     * @throws InvalidConfigException
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
      */
     public function testRedirectsIfLanguageWithUpperCaseCountryInUrl(): void
     {
@@ -98,9 +225,9 @@ abstract class AbstractSlugRedirect extends TestCase
     }
 
     /**
-     * @throws Exception
-     * @throws InvalidConfigException
-     * @throws NotFoundHttpException
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
      */
     public function testRedirectsIfLanguageWithUpperCaseWildcardCountryInUrl(): void
     {
@@ -139,9 +266,9 @@ abstract class AbstractSlugRedirect extends TestCase
     }
 
     /**
-     * @throws Exception
-     * @throws NotFoundHttpException
-     * @throws InvalidConfigException
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
      */
     public function testRedirectsIfNoLanguageInUrlAndAcceptedLanguageMatchesLanguageAndCountryAlias(): void
     {
@@ -162,9 +289,9 @@ abstract class AbstractSlugRedirect extends TestCase
     }
 
     /**
-     * @throws Exception
-     * @throws InvalidConfigException
-     * @throws NotFoundHttpException
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
      */
     public function testRedirectsIfNoLanguageInUrlAndAcceptedLanguageMatchesWildcard(): void
     {
@@ -185,9 +312,9 @@ abstract class AbstractSlugRedirect extends TestCase
     }
 
     /**
-     * @throws Exception
-     * @throws NotFoundHttpException
-     * @throws InvalidConfigException
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
      */
     public function testRedirectsIfNoLanguageInUrlAndAcceptedLanguageWithCountryMatches(): void
     {
@@ -208,9 +335,9 @@ abstract class AbstractSlugRedirect extends TestCase
     }
 
     /**
-     * @throws Exception
-     * @throws InvalidConfigException
-     * @throws NotFoundHttpException
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
      */
     public function testRedirectsIfNoLanguageInUrlAndAcceptedLanguageWithCountryMatchesCountryAlias(): void
     {
@@ -231,9 +358,9 @@ abstract class AbstractSlugRedirect extends TestCase
     }
 
     /**
-     * @throws Exception
-     * @throws NotFoundHttpException
-     * @throws InvalidConfigException
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
      */
     public function testRedirectsIfNoLanguageInUrlAndAcceptedLanguageWithCountryMatchesLanguage(): void
     {
@@ -254,9 +381,9 @@ abstract class AbstractSlugRedirect extends TestCase
     }
 
     /**
-     * @throws Exception
-     * @throws InvalidConfigException
-     * @throws NotFoundHttpException
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
      */
     public function testRedirectsIfNoLanguageInUrlAndAcceptedLanguageWithCountryMatchesWildcard(): void
     {
@@ -277,9 +404,9 @@ abstract class AbstractSlugRedirect extends TestCase
     }
 
     /**
-     * @throws Exception
-     * @throws NotFoundHttpException
-     * @throws InvalidConfigException
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
      */
     public function testRedirectsIfNoLanguageInUrlAndAcceptedLanguageWithLowercaseCountryMatches(): void
     {
@@ -300,9 +427,9 @@ abstract class AbstractSlugRedirect extends TestCase
     }
 
     /**
-     * @throws Exception
-     * @throws InvalidConfigException
-     * @throws NotFoundHttpException
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
      */
     public function testRedirectsIfNoLanguageInUrlAndDefaultLanguageUsesSuffix(): void
     {
@@ -319,9 +446,9 @@ abstract class AbstractSlugRedirect extends TestCase
     }
 
     /**
-     * @throws Exception
-     * @throws NotFoundHttpException
-     * @throws InvalidConfigException
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
      */
     public function testRedirectsIfNoLanguageInUrlAndGeoIpMatches(): void
     {
@@ -343,9 +470,9 @@ abstract class AbstractSlugRedirect extends TestCase
     }
 
     /**
-     * @throws Exception
-     * @throws InvalidConfigException
-     * @throws NotFoundHttpException
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
      */
     public function testRedirectsIfNoLanguageInUrlAndGeoIpMatchesWildcard(): void
     {
@@ -367,9 +494,9 @@ abstract class AbstractSlugRedirect extends TestCase
     }
 
     /**
-     * @throws Exception
-     * @throws NotFoundHttpException
-     * @throws InvalidConfigException
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
      */
     public function testRedirectsIfNoLanguageInUrlAndGeoIpWithCountryMatches(): void
     {
@@ -391,9 +518,9 @@ abstract class AbstractSlugRedirect extends TestCase
     }
 
     /**
-     * @throws Exception
-     * @throws NotFoundHttpException
-     * @throws InvalidConfigException
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
      */
     public function testRedirectsIfNoLanguageInUrlAndGeoIpWithCountryMatchesCountryAlias(): void
     {
@@ -415,9 +542,9 @@ abstract class AbstractSlugRedirect extends TestCase
     }
 
     /**
-     * @throws Exception
-     * @throws NotFoundHttpException
-     * @throws InvalidConfigException
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
      */
     public function testRedirectsIfNoLanguageInUrlAndGeoIpWithCountryMatchesWildcard(): void
     {
@@ -439,9 +566,9 @@ abstract class AbstractSlugRedirect extends TestCase
     }
 
     /**
-     * @throws Exception
-     * @throws InvalidConfigException
-     * @throws NotFoundHttpException
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
      */
     public function testRedirectsIfNoLanguageInUrlAndLanguageInCookie(): void
     {
@@ -459,9 +586,9 @@ abstract class AbstractSlugRedirect extends TestCase
     }
 
     /**
-     * @throws Exception
-     * @throws InvalidConfigException
-     * @throws NotFoundHttpException
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
      */
     public function testRedirectsIfNoLanguageInUrlAndLanguageInCookieMatchesWildcard(): void
     {
@@ -479,9 +606,9 @@ abstract class AbstractSlugRedirect extends TestCase
     }
 
     /**
-     * @throws Exception
-     * @throws InvalidConfigException
-     * @throws NotFoundHttpException
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
      */
     public function testRedirectsIfNoLanguageInUrlAndLanguageInSession(): void
     {
@@ -501,9 +628,9 @@ abstract class AbstractSlugRedirect extends TestCase
     }
 
     /**
-     * @throws Exception
-     * @throws NotFoundHttpException
-     * @throws InvalidConfigException
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
      */
     public function testRedirectsIfNoLanguageInUrlAndLanguageInSessionMatchesWildcard(): void
     {
@@ -523,9 +650,9 @@ abstract class AbstractSlugRedirect extends TestCase
     }
 
     /**
-     * @throws Exception
-     * @throws NotFoundHttpException
-     * @throws InvalidConfigException
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
      */
     public function testRedirectsIfUrlDoesNotMatchIgnoresUrls(): void
     {
@@ -544,9 +671,9 @@ abstract class AbstractSlugRedirect extends TestCase
     }
 
     /**
-     * @throws Exception
-     * @throws InvalidConfigException
-     * @throws NotFoundHttpException
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
      */
     public function testRedirectsRootToDefaultLanguageIfDefaultLanguageUsesSuffixAndTrailingSlashEnabled(): void
     {
@@ -563,10 +690,63 @@ abstract class AbstractSlugRedirect extends TestCase
         $this->mockRequest('/');
     }
 
+    public function testRedirectsToLowerCaseFromUpperCaseCookie(): void
+    {
+        $this->expectRedirect('/de-at/foo/baz/bar');
+
+        $_COOKIE['_language'] = 'DE-AT';
+
+        $this->mockUrlLanguageManager(
+            [
+                'languages' => ['de-AT'],
+                'keepUppercaseLanguageCode' => false,
+            ],
+        );
+
+        $this->mockRequest('/foo/baz/bar');
+    }
+
+    public function testRedirectsToLowerCaseFromAcceptLanguageHeader(): void
+    {
+        $this->expectRedirect('/de-at/foo/baz/bar');
+
+        $this->mockUrlLanguageManager(
+            [
+                'languages' => ['de-AT'],
+                'keepUppercaseLanguageCode' => false,
+            ],
+        );
+
+        $this->mockRequest(
+            '/foo/baz/bar',
+            [
+                'acceptableLanguages' => ['DE-AT'],
+            ],
+        );
+    }
+
+    public function testRedirectsToLowerCaseFromUpperCaseSession(): void
+    {
+        $this->expectRedirect('/de-at/foo/baz/bar');
+
+        @session_start();
+
+        $_SESSION['_language'] = 'DE-AT';
+
+        $this->mockUrlLanguageManager(
+            [
+                'languages' => ['de-AT'],
+                'keepUppercaseLanguageCode' => false,
+            ],
+        );
+
+        $this->mockRequest('/foo/baz/bar');
+    }
+
     /**
-     * @throws Exception
-     * @throws InvalidConfigException
-     * @throws NotFoundHttpException
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
      */
     public function testRedirectsToRootIfOnlyDefaultLanguageInUrlAndDefaultLanguageUsesNoSuffixAndTrailingSlashEnabled(): void
     {

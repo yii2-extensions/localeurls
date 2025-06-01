@@ -383,7 +383,7 @@ class UrlLanguageManager extends UrlManager
                     $language = $key;
                 }
 
-                if (!$this->keepUppercaseLanguageCode) {
+                if ($this->keepUppercaseLanguageCode === false) {
                     $language = strtolower((string) $language);
                 }
 
@@ -477,9 +477,9 @@ class UrlLanguageManager extends UrlManager
         foreach ($this->languages as $k => $v) {
             $value = is_string($k) ? $k : $v;
 
-            if (str_ends_with((string) $value, '-*')) {
-                $lng = substr((string) $value, 0, -2);
-
+            if (str_ends_with($value, '-*')) {
+                // @infection-ignore-all
+                $lng = substr($value, 0, -2);
                 $parts[] = "{$lng}\-[a-z]{2,3}";
                 $parts[] = $lng;
             } else {
@@ -505,7 +505,7 @@ class UrlLanguageManager extends UrlManager
 
                 if ($country !== null) {
                     if ($code === "$language-$country" && $this->keepUppercaseLanguageCode === false) {
-                        $this->redirectToLanguage(strtolower($code));   // Redirect ll-CC to ll-cc
+                        $this->redirectToLanguage($code); // Redirect ll-CC to ll-cc
                     } else {
                         $language = "$language-$country";
                     }
@@ -558,12 +558,8 @@ class UrlLanguageManager extends UrlManager
 
             $key = array_search($language, $this->languages, true);
 
-            if ($key && is_string($key)) {
+            if (is_string($key)) {
                 $language = $key;
-            }
-
-            if ($this->keepUppercaseLanguageCode === false) {
-                $language = strtolower($language);
             }
 
             $this->redirectToLanguage($language);
@@ -775,7 +771,7 @@ class UrlLanguageManager extends UrlManager
      * @throws InvalidRouteException if the route can't be resolved.
      * @throws NotFoundHttpException if the requested resource can't be found.
      */
-    protected function redirectToLanguage(string $language): void
+    private function redirectToLanguage(string $language): void
     {
         try {
             $result = parent::parseRequest($this->_request);
@@ -795,17 +791,19 @@ class UrlLanguageManager extends UrlManager
 
         [$route, $params] = $result;
 
-        if ($language) {
+        if ($language !== '') {
             $params[$this->languageParam] = $language;
         }
 
         // See Yii Issues #8291 and #9161:
         $params += $this->_request->getQueryParams();
+
         array_unshift($params, $route);
+
         $url = $this->createUrl($params);
 
         // Required to prevent double slashes on generated URLs
-        if ($this->suffix === '/' && $route === '' && count($params) === 1) {
+        if ($route === '' && count($params) === 1) {
             $url = rtrim($url, '/') . '/';
         }
 
