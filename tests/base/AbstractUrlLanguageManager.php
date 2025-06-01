@@ -836,7 +836,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
             [
                 'languages' => ['en'],
                 'enablePrettyUrl' => false,
-            ]
+            ],
         );
     }
 
