@@ -9,7 +9,6 @@ use PhpCsFixer\Fixer\ClassNotation\VisibilityRequiredFixer;
 use PhpCsFixer\Fixer\Import\NoUnusedImportsFixer;
 use PhpCsFixer\Fixer\Import\OrderedImportsFixer;
 use PhpCsFixer\Fixer\StringNotation\SingleQuoteFixer;
-use PhpCsFixer\Fixer\Whitespace\LineEndingFixer;
 use Symplify\EasyCodingStandard\Config\ECSConfig;
 
 return ECSConfig::configure()
