@@ -5,16 +5,9 @@ declare(strict_types=1);
 namespace yii2\extensions\localeurls;
 
 use Yii;
-use yii\base\Exception;
-use yii\base\ExitException;
-use yii\base\InvalidConfigException;
-use yii\base\InvalidRouteException;
+use yii\base\{Exception, ExitException, InvalidConfigException, InvalidRouteException};
 use yii\helpers\Url;
-use yii\web\Cookie;
-use yii\web\NotFoundHttpException;
-use yii\web\Request;
-use yii\web\UrlManager;
-use yii\web\UrlNormalizerRedirectException;
+use yii\web\{Cookie, NotFoundHttpException, Request, UrlManager, UrlNormalizerRedirectException};
 
 use function array_map;
 use function array_search;

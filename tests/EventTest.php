@@ -6,8 +6,7 @@ namespace yii2\extensions\localeurls\tests;
 
 use PHPUnit\Framework\Attributes\Group;
 use Yii;
-use yii\base\Exception;
-use yii\base\InvalidConfigException;
+use yii\base\{Exception, InvalidConfigException};
 use yii\web\NotFoundHttpException;
 use yii2\extensions\localeurls\LanguageChangedEvent;
 

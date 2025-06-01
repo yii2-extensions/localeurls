@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace yii2\extensions\localeurls\tests\base;
 
 use Yii;
-use yii\base\Exception;
-use yii\base\InvalidConfigException;
+use yii\base\{Exception, InvalidConfigException};
 use yii\helpers\Url;
 use yii\web\NotFoundHttpException;
 use yii2\extensions\localeurls\tests\TestCase;
