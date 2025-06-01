@@ -7,8 +7,7 @@ namespace yii2\extensions\localeurls\tests\base;
 use Yii;
 use yii\base\Exception;
 use yii\helpers\Url;
-use yii\web\UrlNormalizer;
-use yii\web\UrlNormalizerRedirectException;
+use yii\web\{UrlNormalizer, UrlNormalizerRedirectException};
 use yii2\extensions\localeurls\tests\stub\UrlRule;
 use yii2\extensions\localeurls\tests\TestCase;
 
