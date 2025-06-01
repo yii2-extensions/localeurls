@@ -16,6 +16,9 @@
     <a href="https://github.com/yii2-extensions/localeurls/actions/workflows/build.yml" target="_blank">
         <img src="https://github.com/yii2-extensions/localeurls/actions/workflows/build.yml/badge.svg" alt="PHPUnit">
     </a>
+    <a href="https://dashboard.stryker-mutator.io/reports/github.com/yii2-extensions/localeurls/main" target="_blank">
+        <img src="https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fyii2-extensions%2Flocaleurls%2Fmain" alt="Mutation testing">
+    </a>    
     <a href="https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml" target="_blank">        
         <img src="https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml/badge.svg" alt="Static Analysis">
     </a>
