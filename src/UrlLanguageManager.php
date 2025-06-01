@@ -505,7 +505,7 @@ class UrlLanguageManager extends UrlManager
 
                 if ($country !== null) {
                     if ($code === "$language-$country" && $this->keepUppercaseLanguageCode === false) {
-                        $this->redirectToLanguage($code); // Redirect ll-CC to ll-cc
+                        $this->redirectToLanguage($code);
                     } else {
                         $language = "$language-$country";
                     }
