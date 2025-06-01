@@ -5,7 +5,13 @@ declare(strict_types=1);
 namespace yii2\extensions\localeurls\tests;
 
 use PHPUnit\Framework\Attributes\Group;
+use Yii;
+use yii\base\Exception;
+use yii\base\InvalidConfigException;
+use yii\web\NotFoundHttpException;
 use yii2\extensions\localeurls\LanguageChangedEvent;
+
+use function array_column;
 
 /**
  * Test suite for {@see LanguageChangedEvent} event functionality and behavior.
@@ -52,8 +58,15 @@ final class EventTest extends TestCase
         $this->expectedOldLanguage = null;
     }
 
+    /**
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
+     */
     public function testFiresIfNoLanguagePersisted(): void
     {
+        Yii::getLogger()->flush(true);
+
         $this->mockUrlLanguageManager(
             [
                 'languages' => ['fr', 'en', 'de'],
@@ -74,8 +87,32 @@ final class EventTest extends TestCase
             $this->eventFired,
             'Language changed event should be fired when no language is persisted and a language is detected from URL.',
         );
+
+        $loggerMessages = Yii::getLogger()->messages;
+        $expectedMessages = array_column($loggerMessages, 0);
+
+        $this->assertContains(
+            'Triggering languageChanged event:  -> fr',
+            $expectedMessages,
+            'Language changed event should be logged with the new language.',
+        );
+        $this->assertContains(
+            'Persisting language \'fr\' in session.',
+            $expectedMessages,
+            'Persisting language in session should be logged.',
+        );
+        $this->assertContains(
+            'Persisting language \'fr\' in cookie.',
+            $expectedMessages,
+            'Persisting language in cookie should be logged.',
+        );
     }
 
+    /**
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
+     */
     public function testFiresNotIfNoCookieLanguageChange(): void
     {
         $_COOKIE['_language'] = 'fr';
@@ -101,6 +138,11 @@ final class EventTest extends TestCase
         );
     }
 
+    /**
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
+     */
     public function testFiresNotIfNoSessionLanguageChange(): void
     {
         @session_start();
@@ -127,6 +169,11 @@ final class EventTest extends TestCase
         );
     }
 
+    /**
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
+     */
     public function testFiresNotIfPersistenceDisabled(): void
     {
         $this->mockUrlLanguageManager(
@@ -152,6 +199,11 @@ final class EventTest extends TestCase
         );
     }
 
+    /**
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
+     */
     public function testFiresOnCookieLanguageChange(): void
     {
         $_COOKIE['_language'] = 'de';
@@ -179,6 +231,11 @@ final class EventTest extends TestCase
         );
     }
 
+    /**
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
+     */
     public function testFiresOnSessionLanguageChange(): void
     {
         @session_start();
