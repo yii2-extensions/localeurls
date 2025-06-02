@@ -13,7 +13,7 @@
     "require": {
         "php": ">=8.2",
         "ext-mbstring": "*",
-        "yiisoft/yii2": "22.0.x-dev"
+        "yiisoft/yii2": "^2.0.52 || ^22"
     },
     "require-dev": {
         "infection/infection": "^0.29",

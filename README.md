@@ -8,19 +8,22 @@
 
 <p align="center">
     <a href="https://www.php.net/releases/8.2/en.php" target="_blank">
-        <img src="https://img.shields.io/badge/PHP-%3E%3D8.2-787CB5" alt="php-version">
+        <img src="https://img.shields.io/badge/PHP-%3E%3D8.2-787CB5" alt="PHP-Version">
+    </a>
+    <a href="https://github.com/yiisoft/yii2/tree/2.0.52" target="_blank">
+        <img src="https://img.shields.io/badge/Yii2%20-2.0.52-blue" alt="Yii-22.0.52">
     </a>
     <a href="https://github.com/yiisoft/yii2/tree/22.0" target="_blank">
-        <img src="https://img.shields.io/badge/Yii2%20-22-blue" alt="Yii2 version">
+        <img src="https://img.shields.io/badge/Yii2%20-22-blue" alt="Yii2-22">
     </a>
     <a href="https://github.com/yii2-extensions/localeurls/actions/workflows/build.yml" target="_blank">
         <img src="https://github.com/yii2-extensions/localeurls/actions/workflows/build.yml/badge.svg" alt="PHPUnit">
     </a>
     <a href="https://dashboard.stryker-mutator.io/reports/github.com/yii2-extensions/localeurls/main" target="_blank">
-        <img src="https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fyii2-extensions%2Flocaleurls%2Fmain" alt="Mutation testing">
+        <img src="https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fyii2-extensions%2Flocaleurls%2Fmain" alt="Mutation-Testing">
     </a>    
     <a href="https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml" target="_blank">        
-        <img src="https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml/badge.svg" alt="Static Analysis">
+        <img src="https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml/badge.svg" alt="Static-Analysis">
     </a>
     <a href="https://codecov.io/gh/yii2-extensions/localeurls" target="_blank">
         <img src="https://codecov.io/gh/yii2-extensions/localeurls/graph/badge.svg?token=hLDHtLBgqV" alt="Codecov">
