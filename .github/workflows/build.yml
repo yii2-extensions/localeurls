@@ -21,6 +21,18 @@ jobs:
   phpunit:
     uses: php-forge/actions/.github/workflows/phpunit.yml@main
     with:
+      composer-command: |
+        composer require yiisoft/yii2:22.0.x-dev --prefer-dist --no-progress --no-interaction --no-scripts --ansi
+      concurrency-group: phpunit-${{ github.workflow }}-${{ github.ref }}
+      extensions: mbstring, intl
+      os: >-
+        ['ubuntu-latest', 'windows-latest']
+      php: >-
+        ['8.2', '8.3', '8.4']
+  phpunit-compatibility:
+    uses: php-forge/actions/.github/workflows/phpunit.yml@main
+    with:
+      concurrency-group: compatibility-${{ github.workflow }}-${{ github.ref }}
       extensions: mbstring, intl
       os: >-
         ['ubuntu-latest', 'windows-latest']
