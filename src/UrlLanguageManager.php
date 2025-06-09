@@ -339,7 +339,9 @@ class UrlLanguageManager extends UrlManager
         }
 
         /** @phpstan-var array<string>|bool $result */
-        return parent::parseRequest($request);
+        $result = parent::parseRequest($request);
+
+        return $result;
     }
 
     /**
