@@ -405,7 +405,6 @@ abstract class AbstractUrlLanguageManager extends TestCase
             'Logger should record a message when an invalid language \'fr\' is found in the session and not in the ' .
             'configured languages list.',
         );
-
     }
 
     /**
