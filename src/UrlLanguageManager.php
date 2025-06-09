@@ -763,7 +763,7 @@ class UrlLanguageManager extends UrlManager
             }
 
             if (in_array($language . '-*', $this->languages, true)) {
-                if ($hasDash && $country  !== null) {
+                if ($hasDash && $country !== null) {
                     return [$language, strtoupper($country)];
                 }
 
