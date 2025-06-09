@@ -339,9 +339,7 @@ class UrlLanguageManager extends UrlManager
         }
 
         /** @phpstan-var array<string>|bool $result */
-        $result = parent::parseRequest($request);
-
-        return $result;
+        return parent::parseRequest($request);
     }
 
     /**
@@ -352,6 +350,7 @@ class UrlLanguageManager extends UrlManager
      * @return string the created URL with appropriate language handling applied.
      *
      * @phpstan-param array<string,string>|string $params
+     *
      * @phpstan-ignore method.childParameterType
      */
     public function createUrl($params): string
