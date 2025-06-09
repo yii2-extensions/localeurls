@@ -7,8 +7,8 @@
 </p>
 
 <p align="center">
-    <a href="https://www.php.net/releases/8.2/en.php" target="_blank">
-        <img src="https://img.shields.io/badge/PHP-%3E%3D8.2-787CB5" alt="PHP-Version">
+    <a href="https://www.php.net/releases/8.1/en.php" target="_blank">
+        <img src="https://img.shields.io/badge/PHP-%3E%3D8.1-787CB5" alt="PHP-Version">
     </a>
     <a href="https://github.com/yiisoft/yii2/tree/2.0.52" target="_blank">
         <img src="https://img.shields.io/badge/Yii2%20-2.0.52-blue" alt="Yii-22.0.52">
@@ -69,7 +69,7 @@ To use this extension, you need to configure the `urlManager` component in your 
 
 ## Quality code
 
-[![phpstan-level](https://img.shields.io/badge/PHPStan%20level-5-blue)](https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml)
+[![phpstan-level](https://img.shields.io/badge/PHPStan%20level-max-blue)](https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml)
 [![StyleCI](https://github.styleci.io/repos/711867018/shield?branch=main)](https://github.styleci.io/repos/711867018?branch=main)
 
 ## Testing
