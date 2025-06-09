@@ -82,7 +82,7 @@ To use this extension, you need to configure the `urlManager` component in your 
 
 ## License
 
-The MIT License. Please see [License File](LICENSE.md) for more information.
+BSD-3-Clause license. Please see [License File](LICENSE.md) for more information.
 
 ## Fork 
 
