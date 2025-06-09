@@ -11,17 +11,20 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": ">=8.2",
+        "php": ">=8.1",
         "ext-mbstring": "*",
         "yiisoft/yii2": "^2.0.52 || ^22"
     },
     "require-dev": {
-        "infection/infection": "^0.29",
-        "maglnet/composer-require-checker": "^4.6",
-        "phpstan/phpstan": "^2.1",
+        "infection/infection": "^0.27|^0.29",
+        "maglnet/composer-require-checker": "^4.1",
+        "nikic/php-parser": "^4.1|^5.4.0",
+        "phpstan/extension-installer": "^1.4",
+        "phpstan/phpstan-strict-rules": "^2.0.3",
         "phpunit/phpunit": "^10.5",
         "rector/rector": "^2.0",
-        "symplify/easy-coding-standard": "^12.3"
+        "symplify/easy-coding-standard": "^12.3",
+        "yii2-extensions/phpstan": "^0.2.3"
     },
     "autoload": {
         "psr-4": {
@@ -37,6 +40,7 @@
         "sort-packages": true,
         "allow-plugins": {
             "infection/extension-installer": true,
+            "phpstan/extension-installer": true,
             "yiisoft/yii2-composer": true
         }
     },
@@ -47,5 +51,11 @@
         "rector": "./vendor/bin/rector process src",
         "static": "./vendor/bin/phpstan analyse src --memory-limit=512M",
         "tests": "./vendor/bin/phpunit"
-    }
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        }
+    ]
 }

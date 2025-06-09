@@ -232,7 +232,6 @@ abstract class AbstractUrlLanguageManager extends TestCase
 
         $cookie = Yii::$app->response->cookies->get('_language');
 
-
         $this->assertNotNull(
             $cookie,
             'Language cookie should be set when using a language alias in the URL.',
@@ -353,6 +352,8 @@ abstract class AbstractUrlLanguageManager extends TestCase
      */
     public function testDoesNothingIfInvalidLanguageInCookie(): void
     {
+        Yii::getLogger()->flush(true);
+
         $_COOKIE['_language'] = 'fr';
 
         $this->mockUrlLanguageManager(
@@ -361,9 +362,17 @@ abstract class AbstractUrlLanguageManager extends TestCase
             ],
         );
 
-        $this->expectNotToPerformAssertions();
-
         $this->mockRequest('/site/page');
+
+        $loggerMessages = Yii::getLogger()->messages;
+        $expectedMessages = array_column($loggerMessages, 0);
+
+        $this->assertContains(
+            'Found persisted language \'fr\' in cookie.',
+            $expectedMessages,
+            'Logger should record a message when an invalid language \'fr\' is found in the cookie and not in the ' .
+            'configured languages list.',
+        );
     }
 
     /**
@@ -373,6 +382,8 @@ abstract class AbstractUrlLanguageManager extends TestCase
      */
     public function testDoesNothingIfInvalidLanguageInSession(): void
     {
+        Yii::getLogger()->flush(true);
+
         @session_start();
 
         $_SESSION['_language'] = 'fr';
@@ -383,9 +394,17 @@ abstract class AbstractUrlLanguageManager extends TestCase
             ],
         );
 
-        $this->expectNotToPerformAssertions();
-
         $this->mockRequest('/site/page');
+
+        $loggerMessages = Yii::getLogger()->messages;
+        $expectedMessages = array_column($loggerMessages, 0);
+
+        $this->assertContains(
+            'Found persisted language \'fr\' in session.',
+            $expectedMessages,
+            'Logger should record a message when an invalid language \'fr\' is found in the session and not in the ' .
+            'configured languages list.',
+        );
     }
 
     /**

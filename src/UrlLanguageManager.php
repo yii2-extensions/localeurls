@@ -87,6 +87,8 @@ class UrlLanguageManager extends UrlManager
      * before `en`.
      *
      * This can also contain mapping of `<url_value> => <language>`, (for example, `'english' => 'en'`).
+     *
+     * @phpstan-var array<array-key,string>
      */
     public array $languages = [];
 
@@ -167,6 +169,8 @@ class UrlLanguageManager extends UrlManager
      *
      * @see LocaleUrls::languageCookieName will override.
      * @see LocaleUrls::languageCookieDuration will override
+     *
+     * @phpstan-var array<string,bool|int|string>
      */
     public array $languageCookieOptions = [];
 
@@ -189,6 +193,8 @@ class UrlLanguageManager extends UrlManager
      *     '#^api/#' => '#^api/#',
      * ]
      * ```
+     *
+     * @phpstan-var array<string,string>
      */
     public array $ignoreLanguageUrlPatterns = [];
 
@@ -226,6 +232,8 @@ class UrlLanguageManager extends UrlManager
      *     'ru' => ['RUS','AZE','ARM','BLR','KAZ','KGZ','MDA','TJK','TKM','UZB','UKR']
      * ]
      * ```
+     *
+     * @phpstan-var array<string,array<int, string>>
      */
     public array $geoIpLanguageCountries = [];
 
@@ -237,7 +245,7 @@ class UrlLanguageManager extends UrlManager
     /**
      * @var string Language that was initially set in the application configuration.
      */
-    protected string $_defaultLanguage;
+    protected string $_defaultLanguage = '';
 
     /**
      * @var Request|null Request object that is currently being processed.
@@ -254,7 +262,7 @@ class UrlLanguageManager extends UrlManager
      */
     public function init(): void
     {
-        if ($this->enableLocaleUrls && empty($this->languages) === false && $this->enablePrettyUrl === false) {
+        if ($this->enableLocaleUrls && $this->languages !== [] && $this->enablePrettyUrl === false) {
             throw new InvalidConfigException('Locale URL support requires enablePrettyUrl to be set to true.');
         }
 
@@ -287,18 +295,21 @@ class UrlLanguageManager extends UrlManager
      * @throws ExitException if execution should be halted without exiting the process.
      * @throws InvalidConfigException if the configuration is invalid or incomplete.
      * @throws NotFoundHttpException if the requested resource can't be found.
+     *
+     * @return array|bool Parsed request parameters or `false` if parsing failed.
+     *
+     * @phpstan-return array<string>|bool
      */
-    public function parseRequest($request): bool|array
+    public function parseRequest($request): array|bool
     {
-        if ($this->enableLocaleUrls && $this->languages) {
-            $this->_request = $request;
+        if ($this->enableLocaleUrls && $this->languages !== []) {
             $process = true;
 
-            if ($this->ignoreLanguageUrlPatterns) {
+            if ($this->ignoreLanguageUrlPatterns !== []) {
                 $pathInfo = $request->getPathInfo();
 
-                foreach ($this->ignoreLanguageUrlPatterns as $k => $pattern) {
-                    if (preg_match($pattern, $pathInfo)) {
+                foreach ($this->ignoreLanguageUrlPatterns as $_k => $pattern) {
+                    if (preg_match($pattern, $pathInfo) !== 0) {
                         $message = "Ignore pattern '{$pattern}' matches '{$pathInfo}.' Skipping language processing.";
 
                         Yii::debug($message, __METHOD__);
@@ -326,29 +337,45 @@ class UrlLanguageManager extends UrlManager
             }
         }
 
-        return parent::parseRequest($request);
+        /** @phpstan-var array<string>|bool $result */
+        $result = parent::parseRequest($request);
+
+        return $result;
     }
 
     /**
+     * @param array|string $params Parameters to be used for URL creation.
+     *
      * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     *
+     * @return string the created URL with the appropriate language handling applied.
+     *
+     * @phpstan-param array<string,string>|string $params
+     *
+     * @phpstan-ignore method.childParameterType
      */
-    public function createUrl($params): array|string
+    public function createUrl($params): string
     {
-        if ($this->ignoreLanguageUrlPatterns) {
-            $params = (array) $params;
-            $route = trim((string) $params[0], '/');
+        if ($this->ignoreLanguageUrlPatterns !== []) {
+            $params = is_string($params) ? [$params] : $params;
+
+            if (isset($params[0]) === false) {
+                return parent::createUrl($params);
+            }
+
+            $route = trim($params[0], '/');
 
             foreach ($this->ignoreLanguageUrlPatterns as $pattern => $v) {
-                if (preg_match($pattern, $route)) {
+                if (preg_match($pattern, $route) !== 0) {
                     return parent::createUrl($params);
                 }
             }
         }
 
-        if ($this->enableLocaleUrls && $this->languages) {
-            $params = (array) $params;
+        if ($this->enableLocaleUrls && $this->languages !== []) {
+            $params = is_string($params) ? [$params] : $params;
             $isLanguageGiven = isset($params[$this->languageParam]);
-            $language = $isLanguageGiven ? $params[$this->languageParam] : Yii::$app->language;
+            $language = $params[$this->languageParam] ?? Yii::$app->language;
             $isDefaultLanguage = $language === $this->getDefaultLanguage();
 
             if ($isLanguageGiven) {
@@ -377,7 +404,7 @@ class UrlLanguageManager extends UrlManager
                 }
 
                 if ($this->keepUppercaseLanguageCode === false) {
-                    $language = strtolower((string) $language);
+                    $language = strtolower($language);
                 }
 
                 /**
@@ -464,7 +491,7 @@ class UrlLanguageManager extends UrlManager
      */
     protected function processLocaleUrl(bool $normalized): void
     {
-        $pathInfo = $this->_request->getPathInfo();
+        $pathInfo = $this->ensureRequest()->getPathInfo();
         $parts = [];
 
         foreach ($this->languages as $k => $v) {
@@ -481,13 +508,13 @@ class UrlLanguageManager extends UrlManager
         }
 
         // order by length to make longer patterns match before short patterns, for example, put "en-GB" before "en"
-        usort($parts, static fn($a, $b): int => mb_strlen((string) $b) <=> mb_strlen((string) $a));
+        usort($parts, static fn($a, $b): int => mb_strlen($b) <=> mb_strlen($a));
 
         $pattern = implode('|', $parts);
 
-        if (preg_match("#^($pattern)\b(/?)#i", $pathInfo, $m)) {
-            $this->_request->setPathInfo(mb_substr($pathInfo, mb_strlen($m[1] . $m[2])));
-            $code = $m[1];
+        if (preg_match("#^($pattern)\b(/?)#i", $pathInfo, $m) !== 0) {
+            $this->ensureRequest()->setPathInfo(mb_substr($pathInfo, mb_strlen(($m[1] ?? '') . ($m[2] ?? ''))));
+            $code = $m[1] ?? '';
 
             if (isset($this->languages[$code])) {
                 // Replace alias with language code
@@ -590,12 +617,12 @@ class UrlLanguageManager extends UrlManager
             }
         }
 
-        if ($this->languageSessionKey !== false) {
-            Yii::$app->getSession()->set($this->languageSessionKey, $language);
+        if (is_string($this->languageSessionKey)) {
+            Yii::$app->session->set($this->languageSessionKey, $language);
             Yii::debug("Persisting language '$language' in session.", __METHOD__);
         }
 
-        if ($this->languageCookieDuration) {
+        if ($this->languageCookieDuration > 0) {
             $cookie = new Cookie(
                 array_merge(
                     ['httpOnly' => true],
@@ -608,7 +635,7 @@ class UrlLanguageManager extends UrlManager
                 ),
             );
 
-            Yii::$app->getResponse()->getCookies()->add($cookie);
+            Yii::$app->getResponse()->cookies->add($cookie);
             Yii::debug("Persisting language '{$language}' in cookie.", __METHOD__);
         }
     }
@@ -626,19 +653,25 @@ class UrlLanguageManager extends UrlManager
      */
     protected function loadPersistedLanguage(): string|null
     {
-        $language = null;
-
-        if ($this->languageSessionKey !== false) {
+        if (is_string($this->languageSessionKey)) {
             $language = Yii::$app->session->get($this->languageSessionKey);
-            $language !== null && Yii::debug("Found persisted language '$language' in session.", __METHOD__);
+
+            if (is_string($language)) {
+                Yii::debug("Found persisted language '$language' in session.", __METHOD__);
+
+                return $language;
+            }
         }
 
-        if ($language === null) {
-            $language = $this->_request->getCookies()->getValue($this->languageCookieName);
-            $language !== null && Yii::debug("Found persisted language '$language' in cookie.", __METHOD__);
+        $language = $this->ensureRequest()->getCookies()->getValue($this->languageCookieName);
+
+        if (is_string($language)) {
+            Yii::debug("Found persisted language '$language' in cookie.", __METHOD__);
+
+            return $language;
         }
 
-        return $language;
+        return null;
     }
 
     /**
@@ -656,7 +689,10 @@ class UrlLanguageManager extends UrlManager
     protected function detectLanguage(): string|null
     {
         if ($this->enableLanguageDetection) {
-            foreach ($this->_request->getAcceptableLanguages() as $acceptable) {
+            /** @phpstan-var list<string> $acceptableLanguages */
+            $acceptableLanguages = $this->ensureRequest()->getAcceptableLanguages();
+
+            foreach ($acceptableLanguages as $acceptable) {
                 [$language, $country] = $this->matchCode($acceptable);
 
                 if ($language !== null) {
@@ -707,7 +743,7 @@ class UrlLanguageManager extends UrlManager
      *
      * @return array An array with the matched language and country, or `null` values if not matched.
      *
-     * @phpstan-return array{0: string|null, 1: string|null}
+     * @phpstan-return array{string|null, string|null}
      */
     protected function matchCode(string $code): array
     {
@@ -717,14 +753,16 @@ class UrlLanguageManager extends UrlManager
 
         if (($key = array_search($lcCode, $lcLanguages, true)) === false) {
             if ($hasDash) {
-                [$language, $country] = explode('-', $code, 2);
+                $parts = explode('-', $code, 2);
+                $language = $parts[0];
+                $country = $parts[1] ?? '';
             } else {
                 $language = $code;
-                $country = null;
+                $country = '';
             }
 
             if (in_array($language . '-*', $this->languages, true)) {
-                if ($hasDash) {
+                if ($hasDash === true) {
                     return [$language, strtoupper($country)];
                 }
 
@@ -738,9 +776,14 @@ class UrlLanguageManager extends UrlManager
             return [null, null];
         }
 
-        $result = $this->languages[$key];
+        $result = $this->languages[$key] ?? $lcCode;
 
-        return $hasDash ? explode('-', (string) $result, 2) : [$result, null];
+        if ($hasDash) {
+            $parts = explode('-', $result, 2);
+            return [$parts[0], $parts[1] ?? null];
+        }
+
+        return [$result, null];
     }
 
     /**
@@ -767,7 +810,8 @@ class UrlLanguageManager extends UrlManager
     private function redirectToLanguage(string $language): void
     {
         try {
-            $result = parent::parseRequest($this->_request);
+            /** @phpstan-var array{0: string, 1: array<string, string>}|false $result */
+            $result = parent::parseRequest($this->ensureRequest());
         } catch (UrlNormalizerRedirectException $e) {
             if (is_array($e->url)) {
                 $params = $e->url;
@@ -789,10 +833,11 @@ class UrlLanguageManager extends UrlManager
         }
 
         // See Yii Issues #8291 and #9161:
-        $params += $this->_request->getQueryParams();
+        $params += $this->ensureRequest()->getQueryParams();
 
         array_unshift($params, $route);
 
+        /** @phpstan-var non-empty-array<string,string> $params */
         $url = $this->createUrl($params);
 
         // Required to prevent double slashes on generated URLs
@@ -803,12 +848,12 @@ class UrlLanguageManager extends UrlManager
         /**
          * Prevent redirects to the same URL which could happen in certain UrlNormalizer / custom rule combinations
          */
-        if ($url === $this->_request->url) {
+        if ($url === $this->ensureRequest()->url) {
             return;
         }
 
         Yii::debug("Redirecting to {$url}.", __METHOD__);
-        Yii::$app->getResponse()->redirect($url, $this->languageRedirectCode);
+        Yii::$app->response->redirect($url, $this->languageRedirectCode);
 
         if (YII_ENV === 'test') {
             /**
@@ -819,5 +864,24 @@ class UrlLanguageManager extends UrlManager
         }
 
         Yii::$app->end();
+    }
+
+    /**
+     * Ensures a request instance is available for language processing operations.
+     *
+     * This method provides lazy initialization of the request object, retrieving it from the Yii application instance
+     * only when needed and caching it for later calls.
+     *
+     * The method uses the null coalescing assignment operator to efficiently handle the initialization, avoiding
+     * multiple calls to `Yii::$app->request` during the same request lifecycle.
+     *
+     * This approach improves performance by preventing repeated access to the application's request component while
+     * ensuring the request object is always available for URL parsing, language detection, and redirect operations.
+     *
+     * @return Request The current HTTP request instance from the Yii application.
+     */
+    private function ensureRequest(): Request
+    {
+        return $this->_request ??= Yii::$app->request;
     }
 }
