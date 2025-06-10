@@ -8,7 +8,6 @@
         "locale"
     ],
     "license": "BSD-3-Clause",
-    "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
         "php": ">=8.1",
@@ -24,7 +23,7 @@
         "phpunit/phpunit": "^10.5",
         "rector/rector": "^2.0",
         "symplify/easy-coding-standard": "^12.3",
-        "yii2-extensions/phpstan": "^0.2.3"
+        "yii2-extensions/phpstan": "^0.2"
     },
     "autoload": {
         "psr-4": {
@@ -34,6 +33,11 @@
     "autoload-dev": {
         "psr-4": {
             "yii2\\extensions\\localeurls\\tests\\": "tests"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "0.1.x-dev"
         }
     },
     "config": {
