@@ -20,8 +20,3 @@ name: Composer require checker
 jobs:
   composer-require-checker:
     uses: php-forge/actions/.github/workflows/composer-require-checker.yml@main
-    with:
-      os: >-
-        ['ubuntu-latest']
-      php: >-
-        ['8.4']
