@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://github.com/yii2-extensions/localeurls" target="_blank">
-        <img src="https://www.yiiframework.com/image/yii_logo_light.svg" height="100px;">
+        <img src="https://www.yiiframework.com/image/yii_logo_light.svg" height="100px;" alt="Yii Framework">
     </a>
     <h1 align="center">Locale URLs</h1>
     <br>
@@ -30,51 +30,106 @@
     </a>   
 </p>
 
-## Installation
+A powerful URL manager extension that provides transparent language detection, persistence, and locale-aware URL
+generation for Yii2 applications.
 
-The preferred way to install this extension is through [composer](https://getcomposer.org/download/).
+Create SEO-friendly multilingual URLs with automatic language switching, GeoIP detection, and comprehensive fallback 
+mechanisms.
 
-Either run
+## Features
 
+- ✅ **Automatic Language Detection** - From URL, browser headers, session, or GeoIP.
+- ✅ **Language Persistence** - Remembers user's language choice.
+- ✅ **SEO-Friendly URLs** - Clean URLs like `/en/about` or `/es/acerca`.
+- ✅ **Flexible Configuration** - Supports language aliases, wildcards, and custom mappings.
+
+### Installation
+
+```bash
+composer require yii2-extensions/localeurls
 ```
-composer require --dev --prefer-dist yii2-extensions/localeurls
-```
 
-or add
+## Quick Start
 
-```
-"yii2-extensions/localeurls": "dev-main"
-```
+## How It Works
 
-to the require-dev section of your `composer.json` file.  
+The extension automatically:
 
-## Configuration
+1. **Detects language** from URL path (`/es/about` → Spanish).
+2. **Falls back** to browser headers, session, or GeoIP.
+3. **Adds language prefix** to all generated URLs.
+4. **Remembers choice** in session and cookie.
 
-To use this extension, you need to configure the `urlManager` component in your application configuration file. 
+### Basic Configuration
+
+Replace your `urlManager` component in `config/web.php`:
 
 ```php
 'components' => [
     'urlManager' => [
         'class' => yii2\extensions\localeurls\UrlLanguageManager::class,
-        'languages' => [
-            'en' => 'en-US',
-            'es' => 'es-ES',
-            'ru' => 'ru-RU',
-        ],
+        'languages' => ['en', 'es', 'fr', 'de'],
         'enablePrettyUrl' => true,
         'showScriptName' => false,
-    ],    
+        'rules' => [
+            '' => 'site/index',
+            '<controller:\w+>/<action:\w+>' => '<controller>/<action>',
+        ],
+    ],
 ],
 ```
+
+## Basic Usage
+
+### Automatic url generation
+
+```php
+use yii\helpers\Url;
+
+// URLs are automatically localized based on current language
+Url::to(['site/index']); // /en/ (if current language is 'en')
+Url::to(['site/about']); // /es/site/about (if current language is 'es')
+
+// Force specific language
+Url::to(['site/contact', 'language' => 'fr']); // /fr/site/contact
+```
+
+### Language switching
+
+```php
+// Create language switcher links
+foreach (Yii::$app->urlManager->languages as $code => $language) {
+    $languageCode = is_string($code) ? $code : $language;
+    echo Html::a(
+        strtoupper($languageCode), 
+        Url::current(['language' => $language])
+    );
+}
+```
+
+### Current Language Access
+
+```php
+// Get current language
+$currentLang = Yii::$app->language;
+
+// Get default language
+$defaultLang = Yii::$app->urlManager->getDefaultLanguage();
+```
+
+## Documentation
+
+For detailed configuration options and advanced usage patterns:
+
+- 📚 [Installation Guide](docs/installation.md)
+- ⚙️ [Configuration Reference](docs/configuration.md) 
+- 💡 [Usage Examples](docs/examples.md)
+- 🧪 [Testing Guide](docs/testing.md)
 
 ## Quality code
 
 [![phpstan-level](https://img.shields.io/badge/PHPStan%20level-max-blue)](https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml)
 [![StyleCI](https://github.styleci.io/repos/711867018/shield?branch=main)](https://github.styleci.io/repos/711867018?branch=main)
-
-## Testing
-
-[Check the documentation testing](/docs/testing.md) to learn about testing.
 
 ## Our social networks
 
