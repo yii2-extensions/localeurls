@@ -3,7 +3,6 @@
 ## System requirements
 
 - [`PHP`](https://www.php.net/downloads) 8.1 or higher.
-- [`PHPStan`](https://github.com/phpstan/phpstan) 2.1 or higher.
 - [`Yii2`](https://github.com/yiisoft/yii2) 2.0.52+ or 22.x.
 
 ## Installation
