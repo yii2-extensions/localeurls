@@ -51,7 +51,7 @@ composer require yii2-extensions/localeurls
 
 ## Quick Start
 
-## How It Works
+### How It Works
 
 The extension automatically:
 
@@ -79,9 +79,9 @@ Replace your `urlManager` component in `config/web.php`:
 ],
 ```
 
-## Basic Usage
+### Basic Usage
 
-### Automatic url generation
+#### Automatic url generation
 
 ```php
 use yii\helpers\Url;
@@ -94,7 +94,7 @@ Url::to(['site/about']); // /es/site/about (if current language is 'es')
 Url::to(['site/contact', 'language' => 'fr']); // /fr/site/contact
 ```
 
-### Language switching
+#### Language switching
 
 ```php
 // Create language switcher links
@@ -107,7 +107,7 @@ foreach (Yii::$app->urlManager->languages as $code => $language) {
 }
 ```
 
-### Current Language Access
+#### Current Language Access
 
 ```php
 // Get current language
