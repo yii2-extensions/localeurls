@@ -22,5 +22,3 @@ jobs:
     uses: php-forge/actions/.github/workflows/infection.yml@main
     secrets:
       STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
-    with:
-      command: phpstan-mutant-killer-infection-runner
