@@ -43,13 +43,13 @@ mechanisms.
 - ✅ **Language Persistence** - Remembers user's language choice.
 - ✅ **SEO-Friendly URLs** - Clean URLs like `/en/about` or `/es/acerca`.
 
+## Quick start
+
 ### Installation
 
 ```bash
 composer require yii2-extensions/localeurls
 ```
-
-## Quick Start
 
 ### How it works
 
