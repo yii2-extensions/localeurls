@@ -39,9 +39,9 @@ mechanisms.
 ## Features
 
 - ✅ **Automatic Language Detection** - From URL, browser headers, session, or GeoIP.
+- ✅ **Flexible Configuration** - Supports language aliases, wildcards, and custom mappings.
 - ✅ **Language Persistence** - Remembers user's language choice.
 - ✅ **SEO-Friendly URLs** - Clean URLs like `/en/about` or `/es/acerca`.
-- ✅ **Flexible Configuration** - Supports language aliases, wildcards, and custom mappings.
 
 ### Installation
 
@@ -127,6 +127,8 @@ foreach (Yii::$app->urlManager->languages as $code => $language) {
 
 ```php
 <?php
+
+declare(strict_types=1);
 
 // Get current language
 $currentLang = Yii::$app->language;
