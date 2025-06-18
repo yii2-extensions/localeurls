@@ -31,7 +31,7 @@
 </p>
 
 A powerful URL manager extension that provides transparent language detection, persistence, and locale-aware URL
-generation for Yii2 applications.
+generation for Yii applications.
 
 Create SEO-friendly multilingual URLs with automatic language switching, GeoIP detection, and comprehensive fallback 
 mechanisms.
@@ -53,7 +53,7 @@ composer require yii2-extensions/localeurls
 
 ### How it works
 
-The extension automatically:
+The extension automatically.
 
 1. **Detects language** from URL path (`/es/about` → Spanish).
 2. **Falls back** to browser headers, session, or GeoIP.
@@ -62,7 +62,7 @@ The extension automatically:
 
 ### Basic Configuration
 
-Replace your `urlManager` component in `config/web.php`:
+Replace your `urlManager` component in `config/web.php`.
 
 ```php
 <?php
@@ -87,7 +87,7 @@ return [
 
 ### Basic Usage
 
-#### Automatic url generation
+#### Automatic URL generation
 
 ```php
 <?php
@@ -139,7 +139,7 @@ $defaultLang = Yii::$app->urlManager->getDefaultLanguage();
 
 ## Documentation
 
-For detailed configuration options and advanced usage patterns:
+For detailed configuration options and advanced usage patterns.
 
 - 📚 [Installation Guide](docs/installation.md)
 - ⚙️ [Configuration Reference](docs/configuration.md) 
