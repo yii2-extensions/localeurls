@@ -51,14 +51,14 @@ composer require yii2-extensions/localeurls
 
 ## Quick Start
 
-### How It Works
+### How it works
 
 The extension automatically:
 
 1. **Detects language** from URL path (`/es/about` → Spanish).
 2. **Falls back** to browser headers, session, or GeoIP.
 3. **Adds language prefix** to all generated URLs.
-4. **Remembers choice** in session and cookie.
+4. **Remember choice** in session and cookie.
 
 ### Basic Configuration
 
@@ -84,9 +84,11 @@ Replace your `urlManager` component in `config/web.php`:
 #### Automatic url generation
 
 ```php
+<?php
+
 use yii\helpers\Url;
 
-// URLs are automatically localized based on current language
+// URLs are automatically localized based on the current language
 Url::to(['site/index']); // /en/ (if current language is 'en')
 Url::to(['site/about']); // /es/site/about (if current language is 'es')
 
@@ -97,6 +99,10 @@ Url::to(['site/contact', 'language' => 'fr']); // /fr/site/contact
 #### Language switching
 
 ```php
+<?php
+
+use yii\helpers\Html;
+
 // Create language switcher links
 foreach (Yii::$app->urlManager->languages as $code => $language) {
     $languageCode = is_string($code) ? $code : $language;
@@ -107,9 +113,11 @@ foreach (Yii::$app->urlManager->languages as $code => $language) {
 }
 ```
 
-#### Current Language Access
+#### Current language access
 
 ```php
+<?php
+
 // Get current language
 $currentLang = Yii::$app->language;
 
