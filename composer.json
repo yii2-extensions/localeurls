@@ -19,7 +19,6 @@
         "maglnet/composer-require-checker": "^4.1",
         "nikic/php-parser": "^4.1|^5.4.0",
         "phpstan/extension-installer": "^1.4",
-        "phpstan/mutant-killer-infection-runner": "1.0.x-dev",
         "phpstan/phpstan-strict-rules": "^2.0.3",
         "phpunit/phpunit": "^10.5",
         "rector/rector": "^2.0",
