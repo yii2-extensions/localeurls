@@ -53,6 +53,12 @@
         "check-dependencies": "./vendor/bin/composer-require-checker check",
         "ecs": "./vendor/bin/ecs --fix",
         "mutation": "./vendor/bin/phpstan-mutant-killer-infection-runner --threads=4 --ignore-msi-with-no-mutations --only-covered --min-msi=100 --min-covered-msi=100",
+        "post-install-cmd": [
+            "@php tests/install-mutant-killer.php"
+        ],
+        "post-update-cmd": [
+            "@php tests/install-mutant-killer.php"
+        ],
         "rector": "./vendor/bin/rector process src",
         "static": "./vendor/bin/phpstan analyse src --memory-limit=512M",
         "tests": "./vendor/bin/phpunit"
