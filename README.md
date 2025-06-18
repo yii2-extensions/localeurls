@@ -67,6 +67,8 @@ Replace your `urlManager` component in `config/web.php`:
 ```php
 <?php
 
+declare(strict_types=1);
+
 return [
     'components' => [
         'urlManager' => [
@@ -90,6 +92,8 @@ return [
 ```php
 <?php
 
+declare(strict_types=1);
+
 use yii\helpers\Url;
 
 // URLs are automatically localized based on the current language
@@ -104,6 +108,8 @@ Url::to(['site/contact', 'language' => 'fr']); // /fr/site/contact
 
 ```php
 <?php
+
+declare(strict_types=1);
 
 use yii\helpers\Html;
 
