@@ -65,18 +65,22 @@ The extension automatically:
 Replace your `urlManager` component in `config/web.php`:
 
 ```php
-'components' => [
-    'urlManager' => [
-        'class' => yii2\extensions\localeurls\UrlLanguageManager::class,
-        'languages' => ['en', 'es', 'fr', 'de'],
-        'enablePrettyUrl' => true,
-        'showScriptName' => false,
-        'rules' => [
-            '' => 'site/index',
-            '<controller:\w+>/<action:\w+>' => '<controller>/<action>',
+<?php
+
+return [
+    'components' => [
+        'urlManager' => [
+            'class' => yii2\extensions\localeurls\UrlLanguageManager::class,
+            'languages' => ['en', 'es', 'fr', 'de'],
+            'enablePrettyUrl' => true,
+            'showScriptName' => false,
+            'rules' => [
+                '' => 'site/index',
+                '<controller:\w+>/<action:\w+>' => '<controller>/<action>',
+            ],
         ],
     ],
-],
+];
 ```
 
 ### Basic Usage
