@@ -10,10 +10,10 @@ parameters:
     paths:
         - src
 
+    tmpDir: %currentWorkingDirectory%/tests/runtime
+
     yii2:
-        # Path to your `Yii2` configuration file (optional)
-        # If not provided or empty, will work without explicit configuration
-        config_path: %currentWorkingDirectory%/tests/config/test.php
+        config_path: %currentWorkingDirectory%/tests/phpstan-config.php
 
     # Enable strict advanced checks
     checkImplicitMixed: true
