@@ -98,8 +98,7 @@ declare(strict_types=1);
 
 use yii\helpers\Url;
 
-// URLs are automatically localized based on the current language
-
+// URL are automatically localized based on the current language
 // /en/ (if current language is 'en')
 Url::to(['site/index']);
 // /es/site/about (if current language is 'es')
@@ -116,6 +115,7 @@ Url::to(['site/contact', 'language' => 'fr']); // /fr/site/contact
 declare(strict_types=1);
 
 use yii\helpers\Html;
+use yii\helpers\Url;
 
 // Create language switcher links
 foreach (Yii::$app->urlManager->languages as $language) {
@@ -135,7 +135,6 @@ declare(strict_types=1);
 
 // Get current language
 $currentLang = Yii::$app->language;
-
 // Get default language
 $defaultLang = Yii::$app->urlManager->getDefaultLanguage();
 ```

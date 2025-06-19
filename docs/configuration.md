@@ -62,10 +62,14 @@ Define available languages for your application.
 
 ```php
 'languages' => [
-    'en-US', // Specific locale
-    'en',    // Language only
-    'de',    // German
-    'pt',    // Portuguese
+    // Specific locale
+    'en-US',
+    // Language only
+    'en',
+    // German
+    'de',
+    // Portuguese
+    'pt',
 ],
 ```
 
@@ -77,9 +81,12 @@ Map custom URL segments to language codes.
 'languages' => [
     'en-US',
     'en', 
-    'deutsch' => 'de', // /deutsch/page → German (de)
-    'french' => 'fr',  // /french/page → French (fr)
-    'at' => 'de-AT',   // /at/page → Austrian German (de-AT)
+    // /deutsch/page → German (de)
+    'deutsch' => 'de',
+    // /french/page → French (fr)
+    'french' => 'fr',
+    // /at/page → Austrian German (de-AT)
+    'at' => 'de-AT',
 ],
 ```
 
@@ -91,9 +98,12 @@ Support language variants with wildcards.
 'languages' => [
     'en-US',
     'en',
-    'de-*', // Matches: de-AT, de-CH, de-DE, etc.
-    'es-*', // Matches: es-MX, es-AR, es-ES, etc.
-    'wc-*', // Custom wildcard pattern
+    // Matches: de-AT, de-CH, de-DE, etc.
+    'de-*',
+    // Matches: es-MX, es-AR, es-ES, etc.
+    'es-*',
+    // Custom wildcard pattern
+    'wc-*',
 ],
 ```
 
@@ -106,7 +116,6 @@ Control whether the default language appears in the URL.
 ```php
 // Default behavior: omit default code
 'enableDefaultLanguageUrlCode' => false,
-
 // Alternative: include default code
 'enableDefaultLanguageUrlCode' => true,
 ```
@@ -118,7 +127,6 @@ Control case handling for language codes in URL.
 ```php
 // Default: convert to lowercase (recommended)
 'keepUppercaseLanguageCode' => false,  // /de-at/page
-
 // Alternative: preserve an original case
 'keepUppercaseLanguageCode' => true,   // /de-AT/page
 ```
@@ -130,8 +138,10 @@ Control case handling for language codes in URL.
 Enable/disable automatic language detection.
 
 ```php
-'enableLanguageDetection' => true,  // Default: detect from headers/GeoIP
-'enableLanguageDetection' => false, // Disable automatic detection
+// Default: detect from headers/GeoIP
+'enableLanguageDetection' => true,
+// Disable automatic detection
+'enableLanguageDetection' => false,
 ```
 
 Detection priority order.
@@ -147,8 +157,10 @@ Detection priority order.
 Control language persistence in session and cookies.
 
 ```php
-'enableLanguagePersistence' => true,  // Default: persist language choice
-'enableLanguagePersistence' => false, // Disable persistence
+// Default: persist language choice
+'enableLanguagePersistence' => true,
+// Disable persistence
+'enableLanguagePersistence' => false,
 ```
 
 ### Session configuration
@@ -156,9 +168,12 @@ Control language persistence in session and cookies.
 Configure session-based language persistence.
 
 ```php
-'languageSessionKey' => '_language', // Default session key
-'languageSessionKey' => 'user_lang', // Custom session key
-'languageSessionKey' => false,       // Disable session persistence
+// Default session key
+'languageSessionKey' => '_language',
+// Custom session key
+'languageSessionKey' => 'user_lang',
+// Disable session persistence
+'languageSessionKey' => false,
 ```
 
 ### Cookie configuration
@@ -166,9 +181,12 @@ Configure session-based language persistence.
 Configure cookie-based language persistence.
 
 ```php
-'languageCookieName' => '_language', // Default cookie name
-'languageCookieDuration' => 2592000, // 30 days (default)
-'languageCookieOptions' => [         // Additional cookie options
+// Default cookie name
+'languageCookieName' => '_language',
+// 30 days (default)
+'languageCookieDuration' => 2592000,
+// Additional cookie options
+'languageCookieOptions' => [
     'httpOnly' => true,
     'secure' => true,
     'sameSite' => 'Lax',
@@ -179,7 +197,8 @@ Configure cookie-based language persistence.
 To disable cookie persistence.
 
 ```php
-'languageCookieDuration' => false, // Disable cookie persistence
+// Disable cookie persistence
+'languageCookieDuration' => false,
 ```
 
 ## GeoIP detection
@@ -189,12 +208,17 @@ To disable cookie persistence.
 Configure automatic language detection based on visitor's country.
 
 ```php
-'geoIpServerVar' => 'HTTP_X_GEO_COUNTRY', // Default header name
+// Default header name
+'geoIpServerVar' => 'HTTP_X_GEO_COUNTRY',
 'geoIpLanguageCountries' => [
-    'de' => ['DEU', 'AUT'],               // German for Germany, Austria
-    'fr' => ['FRA'],                      // French for France
-    'en' => ['USA', 'GBR'],               // English for US, UK
-    'es' => ['ESP', 'MEX', 'ARG'],        // Spanish for multiple countries
+    // German for Germany, Austria
+    'de' => ['DEU', 'AUT'],
+    // French for France
+    'fr' => ['FRA'],
+    // English for US, UK
+    'en' => ['USA', 'GBR'],
+    // Spanish for multiple countries
+    'es' => ['ESP', 'MEX', 'ARG'],
 ],
 ```
 
@@ -203,8 +227,10 @@ Configure automatic language detection based on visitor's country.
 If using a different GeoIP service.
 
 ```php
-'geoIpServerVar' => 'HTTP_CF_IPCOUNTRY',   // CloudFlare
-'geoIpServerVar' => 'HTTP_X_COUNTRY_CODE', // Custom header
+// CloudFlare
+'geoIpServerVar' => 'HTTP_CF_IPCOUNTRY',
+// Custom header
+'geoIpServerVar' => 'HTTP_X_COUNTRY_CODE',
 ```
 
 ## URL patterns and rules
@@ -215,9 +241,12 @@ Exclude specific URLs from language processing.
 
 ```php
 'ignoreLanguageUrlPatterns' => [
-    '#^api/#' => '#^api/#',                              // Skip API routes
-    '#^admin/#' => '#^admin/#',                          // Skip admin routes  
-    '#^site/(login|register)#' => '#^(login|register)#', // Skip auth pages
+    // Skip API routes
+    '#^api/#' => '#^api/#',
+    // Skip admin routes
+    '#^admin/#' => '#^admin/#',
+    // Skip auth pages
+    '#^site/(login|register)#' => '#^(login|register)#',
 ],
 ```
 
@@ -249,8 +278,10 @@ Combine with standard Yii URL rules.
 Configure URL suffixes for all routes.
 
 ```php
-'suffix' => '/', // Add trailing slash to all URL
-'suffix' => '',  // No suffix (default)
+// Add trailing slash to all URL
+'suffix' => '/',
+// No suffix (default)
+'suffix' => '', 
 ```
 
 Individual rules can override the global suffix.
@@ -259,8 +290,9 @@ Individual rules can override the global suffix.
 'rules' => [
     [
         'pattern' => '/noslash',
-        'route' => 'test/noslash', 
-        'suffix' => '', // Override global suffix
+        'route' => 'test/noslash',
+        // Override global suffix
+        'suffix' => '',
     ],
 ],
 ```
@@ -272,15 +304,19 @@ Individual rules can override the global suffix.
 Customize the language parameter name used in URL generation.
 
 ```php
-'languageParam' => 'language', // Default parameter name
-'languageParam' => 'lang',     // Custom parameter name
+// Default parameter name
+'languageParam' => 'language',
+// Custom parameter name
+'languageParam' => 'lang',
 ```
 
 Usage.
 
 ```php
-Url::to(['site/index', 'language' => 'de']); // Default
-Url::to(['site/index', 'lang' => 'de']);     // Custom
+// Default
+Url::to(['site/index', 'language' => 'de']);
+// Custom
+Url::to(['site/index', 'lang' => 'de']);
 ```
 
 ### Redirect status code
@@ -288,8 +324,10 @@ Url::to(['site/index', 'lang' => 'de']);     // Custom
 Configure the HTTP status code for language redirects.
 
 ```php
-'languageRedirectCode' => 302, // Default: temporary redirect
-'languageRedirectCode' => 301, // Permanent redirect
+// Default: temporary redirect
+'languageRedirectCode' => 302,
+// Permanent redirect
+'languageRedirectCode' => 301,
 ```
 
 ### URL normalizer integration
@@ -377,7 +415,8 @@ return [
             'class' => UrlLanguageManager::class,
             'languages' => ['en', 'de'],
             'ignoreLanguageUrlPatterns' => [
-                '#^api/#' => '#^api/#', // Skip all API routes
+                // Skip all API routes
+                '#^api/#' => '#^api/#',
             ],
         ],
     ],
@@ -400,7 +439,8 @@ return [
         'urlManager' => [
             'class' => UrlLanguageManager::class,
             'languages' => ['en', 'de'],
-            'baseUrl' => '/myapp', // Application subdirectory
+            // Application subdirectory
+            'baseUrl' => '/myapp',
         ],
     ],
 ];
@@ -422,7 +462,8 @@ return [
         'urlManager' => [
             'class' => UrlLanguageManager::class,
             'languages' => ['en', 'de'],
-            'showScriptName' => true, // Show `index.php` in URL
+            // Show `index.php` in URL
+            'showScriptName' => true,
         ],
     ],
 ];
