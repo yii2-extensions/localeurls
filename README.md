@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://github.com/yii2-extensions/localeurls" target="_blank">
-        <img src="https://www.yiiframework.com/image/yii_logo_light.svg" height="100px;">
+        <img src="https://www.yiiframework.com/image/yii_logo_light.svg" height="100px;" alt="Yii Framework">
     </a>
     <h1 align="center">Locale URLs</h1>
     <br>
@@ -30,51 +30,126 @@
     </a>   
 </p>
 
-## Installation
+A powerful URL manager extension that provides transparent language detection, persistence, and locale-aware URL
+generation for Yii applications.
 
-The preferred way to install this extension is through [composer](https://getcomposer.org/download/).
+Create SEO-friendly multilingual URLs with automatic language switching, GeoIP detection, and comprehensive fallback 
+mechanisms.
 
-Either run
+## Features
 
+- ✅ **Automatic Language Detection** - From URL, browser headers, session, or GeoIP.
+- ✅ **Flexible Configuration** - Supports language aliases, wildcards, and custom mappings.
+- ✅ **Language Persistence** - Remembers user's language choice.
+- ✅ **SEO-Friendly URLs** - Clean URLs like `/en/about` or `/es/acerca`.
+
+## Quick start
+
+### Installation
+
+```bash
+composer require yii2-extensions/localeurls
 ```
-composer require --dev --prefer-dist yii2-extensions/localeurls
-```
 
-or add
+### How it works
 
-```
-"yii2-extensions/localeurls": "dev-main"
-```
+1. **Detects language** from URL path (`/es/about` → Spanish).
+2. **Falls back** to browser headers, session, or GeoIP.
+3. **Adds language prefix** to all generated URLs.
+4. **Remember choice** in session and cookie.
 
-to the require-dev section of your `composer.json` file.  
+### Basic Configuration
 
-## Configuration
-
-To use this extension, you need to configure the `urlManager` component in your application configuration file. 
+Replace your `urlManager` component in `config/web.php`.
 
 ```php
-'components' => [
-    'urlManager' => [
-        'class' => yii2\extensions\localeurls\UrlLanguageManager::class,
-        'languages' => [
-            'en' => 'en-US',
-            'es' => 'es-ES',
-            'ru' => 'ru-RU',
+<?php
+
+declare(strict_types=1);
+
+use yii2\extensions\localeurls\UrlLanguageManager;
+
+return [
+    'components' => [
+        'urlManager' => [
+            'class' => UrlLanguageManager::class,
+            'languages' => ['en', 'es', 'fr', 'de'],
+            'enablePrettyUrl' => true,
+            'showScriptName' => false,
+            'rules' => [
+                '' => 'site/index',
+                '<controller:\w+>/<action:\w+>' => '<controller>/<action>',
+            ],
         ],
-        'enablePrettyUrl' => true,
-        'showScriptName' => false,
-    ],    
-],
+    ],
+];
 ```
+
+### Basic Usage
+
+#### Automatic URL generation
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use yii\helpers\Url;
+
+// URL are automatically localized based on the current language
+// /en/ (if current language is 'en')
+Url::to(['site/index']);
+// /es/site/about (if current language is 'es')
+Url::to(['site/about']);
+// Force specific language
+Url::to(['site/contact', 'language' => 'fr']); // /fr/site/contact
+```
+
+#### Language switching
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use yii\helpers\Html;
+use yii\helpers\Url;
+
+// Create language switcher links
+foreach (Yii::$app->urlManager->languages as $language) {
+    echo Html::a(
+        strtoupper($language),
+        Url::current(['language' => $language]),
+    );
+}
+```
+
+#### Current language access
+
+```php
+<?php
+
+declare(strict_types=1);
+
+// Get current language
+$currentLang = Yii::$app->language;
+// Get default language
+$defaultLang = Yii::$app->urlManager->getDefaultLanguage();
+```
+
+## Documentation
+
+For detailed configuration options and advanced usage patterns.
+
+- 📚 [Installation Guide](docs/installation.md)
+- ⚙️ [Configuration Reference](docs/configuration.md) 
+- 💡 [Usage Examples](docs/examples.md)
+- 🧪 [Testing Guide](docs/testing.md)
 
 ## Quality code
 
 [![phpstan-level](https://img.shields.io/badge/PHPStan%20level-max-blue)](https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml)
 [![StyleCI](https://github.styleci.io/repos/711867018/shield?branch=main)](https://github.styleci.io/repos/711867018?branch=main)
-
-## Testing
-
-[Check the documentation testing](/docs/testing.md) to learn about testing.
 
 ## Our social networks
 
