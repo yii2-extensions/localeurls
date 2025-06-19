@@ -114,11 +114,10 @@ declare(strict_types=1);
 use yii\helpers\Html;
 
 // Create language switcher links
-foreach (Yii::$app->urlManager->languages as $code => $language) {
-    $languageCode = is_string($code) ? $code : $language;
+foreach (Yii::$app->urlManager->languages as $language) {
     echo Html::a(
-        strtoupper($languageCode), 
-        Url::current(['language' => $language])
+        strtoupper($language),
+        Url::current(['language' => $language]),
     );
 }
 ```

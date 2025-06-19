@@ -104,10 +104,10 @@ Support language variants with wildcards.
 Control whether the default language appears in the URL.
 
 ```php
-// Default behavior: /page (default), /de/page (German)
+// Default behavior: omit default code
 'enableDefaultLanguageUrlCode' => false,
 
-// Alternative: /en/page (default), /de/page (German)  
+// Alternative: include default code
 'enableDefaultLanguageUrlCode' => true,
 ```
 
