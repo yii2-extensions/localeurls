@@ -69,10 +69,12 @@ Replace your `urlManager` component in `config/web.php`.
 
 declare(strict_types=1);
 
+use yii2\extensions\localeurls\UrlLanguageManager;
+
 return [
     'components' => [
         'urlManager' => [
-            'class' => yii2\extensions\localeurls\UrlLanguageManager::class,
+            'class' => UrlLanguageManager::class,
             'languages' => ['en', 'es', 'fr', 'de'],
             'enablePrettyUrl' => true,
             'showScriptName' => false,
