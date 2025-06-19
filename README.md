@@ -99,9 +99,11 @@ declare(strict_types=1);
 use yii\helpers\Url;
 
 // URLs are automatically localized based on the current language
-Url::to(['site/index']); // /en/ (if current language is 'en')
-Url::to(['site/about']); // /es/site/about (if current language is 'es')
 
+// /en/ (if current language is 'en')
+Url::to(['site/index']);
+// /es/site/about (if current language is 'es')
+Url::to(['site/about']);
 // Force specific language
 Url::to(['site/contact', 'language' => 'fr']); // /fr/site/contact
 ```
