@@ -53,8 +53,6 @@ composer require yii2-extensions/localeurls
 
 ### How it works
 
-The extension automatically.
-
 1. **Detects language** from URL path (`/es/about` → Spanish).
 2. **Falls back** to browser headers, session, or GeoIP.
 3. **Adds language prefix** to all generated URLs.
