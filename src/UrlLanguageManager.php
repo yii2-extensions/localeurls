@@ -35,14 +35,14 @@ use function usort;
 /**
  * URL manager with transparent language detection, persistence, and locale-aware URL generation.
  *
- * Extends Yii's {@see UrlManager} to provide automatic language detection from the URL, browser settings, session,
- * or GeoIP, and ensures the language is consistently reflected in all generated URLs.
+ * Extends Yii {@see UrlManager} to provide automatic language detection from the URL, browser settings, session, or
+ * GeoIP, and ensures the language is consistently reflected in all generated URLs.
  *
  * This enables seamless multilingual support for web applications, allowing users to interact in their preferred
  * language while maintaining clean and predictable URLs.
  *
- * The manager can persist the detected language in the user session and/or a cookie, and supports redirecting users
- * to the correct language-prefixed URL as needed.
+ * The manager can persist the detected language in the user session and/or a cookie, and supports redirecting users to
+ * the correct language-prefixed URL as needed.
  *
  * It also provides flexible configuration for language code formats, default language handling, and exclusion patterns
  * for routes or URLs that shouldn't be processed for localization.
@@ -52,7 +52,7 @@ use function usort;
  * - Configurable language code handling (case, default language prefix, aliases, wildcards).
  * - Event support for language change notifications.
  * - Exclusion patterns for routes/URLs to skip language processing.
- * - Integration with Yii's pretty URLs and URL normalization.
+ * - Integration with Yii pretty URLs and URL normalization.
  * - Locale-aware URL creation with language parameter injection.
  * - Redirects to canonical URLs based on language and configuration.
  * - Transparent persistence of language selection in session and cookie.
@@ -152,9 +152,6 @@ class UrlLanguageManager extends UrlManager
     /**
      * @var array Configuration options for the language cookie.
      *
-     * @see LocaleUrls::languageCookieName will override.
-     * @see LocaleUrls::languageCookieDuration will override
-     *
      * @phpstan-var array<string,bool|int|string>
      */
     public array $languageCookieOptions = [];
@@ -223,7 +220,7 @@ class UrlLanguageManager extends UrlManager
     public array $geoIpLanguageCountries = [];
 
     /**
-     * @var int HTTP status code. Default is 302.
+     * @var int HTTP status code. Default is `302`.
      */
     public int $languageRedirectCode = 302;
 
@@ -458,7 +455,7 @@ class UrlLanguageManager extends UrlManager
      * Processes the current request to extract and apply a language or locale code from the URL, session, cookie, or
      * browser settings.
      *
-     * This method checks the incoming URL of a language or locale prefix and updates the application's language
+     * This method checks the incoming URL of a language or locale prefix and updates the application language
      * accordingly.
      * - If no language is found in the URL, it attempts to load a persisted language from session or cookie, or detect
      *   it from browser headers or GeoIP.
@@ -529,7 +526,7 @@ class UrlLanguageManager extends UrlManager
             }
 
             /**
-             * "Reset" case: We called for example, /fr/demo/page so the persisted language was set back to "fr".
+             * "Reset" case: We called, for example, /fr/demo/page, so the persisted language was set back to "fr".
              * Now we can redirect to the URL without language prefix, if default prefixes are disabled.
              */
             $reset = $this->enableDefaultLanguageUrlCode === false && $language === $this->_defaultLanguage;
