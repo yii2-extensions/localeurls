@@ -75,7 +75,7 @@ use function usort;
  * @see LanguageChangedEvent for event details when language changes.
  * @see UrlManager for base URL management and routing.
  *
- * @copyright Copyright (C) 2015-2025 Carsten Brandt, contributors.
+ * @copyright Copyright (C) 2023 Terabytesoftw.
  * @license https://opensource.org/license/bsd-3-clause BSD 3-Clause License.
  */
 class UrlLanguageManager extends UrlManager
