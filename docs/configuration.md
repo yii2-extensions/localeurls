@@ -362,8 +362,7 @@ React to language changes with event handlers.
 
 declare(strict_types=1);
 
-use yii2\extensions\localeurls\LanguageChangedEvent;
-use yii2\extensions\localeurls\UrlLanguageManager;
+use yii2\extensions\localeurls\{LanguageChangedEvent, UrlLanguageManager};
 
 return [
     'components' => [

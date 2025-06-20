@@ -67,7 +67,6 @@ final class SiteController extends Controller
 declare(strict_types=1);
 
 use yii\helpers\Url;
-
 use yii\web\Controller;
 
 class BlogController extends Controller
