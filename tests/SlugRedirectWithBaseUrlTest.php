@@ -31,7 +31,7 @@ use yii2\extensions\localeurls\tests\base\AbstractSlugRedirect;
 final class SlugRedirectWithBaseUrlTest extends AbstractSlugRedirect
 {
     /**
-     * @var string Base URL prefix for test scenarios.
+     * Base URL prefix for test scenarios.
      */
     protected string $baseUrl = '/base';
 }

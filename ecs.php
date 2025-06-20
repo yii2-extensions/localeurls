@@ -31,7 +31,11 @@ return ECSConfig::configure()
             'elements' => [],
         ],
     )
-    ->withFileExtensions(['php'])
+    ->withFileExtensions(
+        [
+            'php',
+        ],
+    )
     ->withPaths(
         [
             __DIR__ . '/src',
@@ -53,4 +57,9 @@ return ECSConfig::configure()
             OrderedTraitsFixer::class,
             SingleQuoteFixer::class,
         ]
+    )
+    ->withSkip(
+        [
+            __DIR__ . '/tests/runtime',
+        ],
     );

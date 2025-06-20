@@ -29,7 +29,7 @@ use yii2\extensions\localeurls\tests\base\AbstractUrlCreation;
 final class UrlCreationWithBaseUrlTest extends AbstractUrlCreation
 {
     /**
-     * @var string Base URL prefix for test scenarios.
+     * Base URL prefix for test scenarios.
      */
     protected string $baseUrl = '/base';
 }

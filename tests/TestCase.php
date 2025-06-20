@@ -5,31 +5,34 @@ declare(strict_types=1);
 namespace yii2\extensions\localeurls\tests;
 
 use Yii;
-use yii\base\Exception;
-use yii\base\ExitException;
-use yii\base\InvalidConfigException;
+use yii\base\{Exception, ExitException, InvalidConfigException};
 use yii\helpers\ArrayHelper;
 use yii\log\FileTarget;
-use yii\web\Application;
-use yii\web\NotFoundHttpException;
+use yii\web\{Application, NotFoundHttpException};
 use yii2\extensions\localeurls\UrlLanguageManager;
+
+use function explode;
+use function is_array;
+use function parse_str;
 
 abstract class TestCase extends \PHPUnit\Framework\TestCase
 {
     /**
-     * @var mixed Variable is used to keep the initial `$_SERVER` content to restore it after each test in `tearDown()`.
+     * Variable is used to keep the initial `$_SERVER` content to restore it after each test in `tearDown()`.
      */
     protected mixed $_server = null;
 
     /**
-     * @var string Base URL prefix for test scenarios.
+     * Base URL prefix for test scenarios.
      */
     protected string $baseUrl = '';
 
     /**
-     * @var array UrlManager component configuration for test scenarios.
+     * UrlManager component configuration for test scenarios.
+     *
+     * @phpstan-var array<string, mixed>|false|string
      */
-    protected array $urlManager = [];
+    protected array|false|string $urlManager = [];
 
     /**
      * @var bool Whether to show the script name in generated URLs.
@@ -82,15 +85,15 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
      * realistic testing conditions that match production environments.
      *
      * @param string $url Relative request URL to simulate.
-     * @param array $config Optional configuration for the request application component.
+     * @param array|false|string $config Optional configuration for the request application component.
      *
      * @throws Exception if an unexpected error occurs during execution.
      * @throws InvalidConfigException if the application configuration is invalid or incomplete.
      * @throws NotFoundHttpException if the requested resource can't be found.
      *
-     * @phpstan-param array<string, mixed> $config
+     * @phpstan-param array<string, mixed>|false|string $config
      */
-    protected function mockRequest(string $url, array $config = []): void
+    protected function mockRequest(string $url, array|false|string $config = []): void
     {
         $url = $this->prepareUrl($url);
 
@@ -130,11 +133,11 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
      * This method prepares the language-aware URL management configuration without initializing the actual web
      * application, allowing tests to define specific language settings before making mock requests.
      *
-     * @param array $config Configuration array for the UrlLanguageManager component.
+     * @param array|false|string $config Configuration array for the UrlLanguageManager component.
      *
-     * @phpstan-param array<string, mixed> $config
+     * @phpstan-param array<string, mixed>|false|string $config
      */
-    protected function mockUrlLanguageManager(array $config = []): void
+    protected function mockUrlLanguageManager(array|false|string $config = []): void
     {
         $this->urlManager = $config;
     }
@@ -156,6 +159,18 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
      */
     protected function mockWebApplication(array $config = []): void
     {
+        $urlManager = [];
+
+        if (is_array($this->urlManager)) {
+            $urlManager = ArrayHelper::merge(
+                [
+                    'class' => UrlLanguageManager::class,
+                    'showScriptName' => $this->showScriptName,
+                ],
+                $this->urlManager,
+            );
+        }
+
         new Application(
             ArrayHelper::merge(
                 [
@@ -179,13 +194,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
                             'isConsoleRequest' => false,
                             'hostInfo' => 'http://localhost',
                         ],
-                        'urlManager' => ArrayHelper::merge(
-                            [
-                                'class' => UrlLanguageManager::class,
-                                'showScriptName' => $this->showScriptName,
-                            ],
-                            $this->urlManager,
-                        ),
+                        'urlManager' => $urlManager,
                     ],
                 ],
                 $config,

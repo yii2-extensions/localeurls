@@ -10,9 +10,11 @@ use yii\web\NotFoundHttpException;
 use yii2\extensions\localeurls\tests\TestCase;
 
 use function array_column;
+use function is_array;
+use function session_start;
 
 /**
- * Base class for slug redirect tests in the Yii2 LocaleUrls extension.
+ * Base class for slug redirect tests in the Yii LocaleUrls extension.
  *
  * Provides comprehensive tests for URL redirection involving slug-based routes, ensuring correct language detection,
  * normalization, and redirect behavior across multiple sources and configuration scenarios.
@@ -65,7 +67,7 @@ abstract class AbstractSlugRedirect extends TestCase
         $loggerMessages = Yii::getLogger()->messages;
         $expectedMessages = array_column($loggerMessages, 0);
 
-        $this->assertContains(
+        self::assertContains(
             'Detected browser language \'de\'.',
             $expectedMessages,
             'Logger should record browser language detection message \'Detected browser language \'de\'.\' at index ' .
@@ -73,12 +75,12 @@ abstract class AbstractSlugRedirect extends TestCase
         );
 
         if ($this->baseUrl === '/base' && $this->showScriptName) {
-            $this->assertSame(
+            self::assertSame(
                 'http://localhost/base/index.php/de/foo/baz/bar',
                 Yii::$app->response->getHeaders()->get('Location'),
                 'Response should redirect to \'http://localhost/base/index.php/de/foo/baz/bar\'.',
             );
-            $this->assertContains(
+            self::assertContains(
                 'Redirecting to /base/index.php/de/foo/baz/bar.',
                 $expectedMessages,
                 'Logger should record redirection message \'Redirecting to /base/index.php/de/foo/baz/bar.\' at ' .
@@ -87,12 +89,12 @@ abstract class AbstractSlugRedirect extends TestCase
         }
 
         if ($this->baseUrl === '/base' && $this->showScriptName === false) {
-            $this->assertSame(
+            self::assertSame(
                 'http://localhost/base/de/foo/baz/bar',
                 Yii::$app->response->getHeaders()->get('Location'),
                 'Response should redirect to \'http://localhost/base/de/foo/baz/bar\'.',
             );
-            $this->assertContains(
+            self::assertContains(
                 'Redirecting to /base/de/foo/baz/bar.',
                 $expectedMessages,
                 'Logger should record redirection message \'Redirecting to /base/de/foo/baz/bar.\' at index \'6\'.',
@@ -100,12 +102,12 @@ abstract class AbstractSlugRedirect extends TestCase
         }
 
         if ($this->baseUrl === '' && $this->showScriptName) {
-            $this->assertSame(
+            self::assertSame(
                 'http://localhost/index.php/de/foo/baz/bar',
                 Yii::$app->response->getHeaders()->get('Location'),
                 'Response should redirect to \'http://localhost/index.php/de/foo/baz/bar\'.',
             );
-            $this->assertContains(
+            self::assertContains(
                 'Redirecting to /index.php/de/foo/baz/bar.',
                 $expectedMessages,
                 'Logger should record redirection message \'Redirecting to /index.php/de/foo/baz/bar.\' at index ' .
@@ -114,12 +116,12 @@ abstract class AbstractSlugRedirect extends TestCase
         }
 
         if ($this->baseUrl === '' && $this->showScriptName === false) {
-            $this->assertSame(
+            self::assertSame(
                 'http://localhost/de/foo/baz/bar',
                 Yii::$app->response->getHeaders()->get('Location'),
                 'Response should redirect to \'http://localhost/de/foo/baz/bar\'.',
             );
-            $this->assertContains(
+            self::assertContains(
                 'Redirecting to /de/foo/baz/bar.',
                 $expectedMessages,
                 'Logger should record redirection message \'Redirecting to /de/foo/baz/bar.\' at index \'6\'.',
@@ -151,7 +153,7 @@ abstract class AbstractSlugRedirect extends TestCase
         $loggerMessages = Yii::getLogger()->messages;
         $expectedMessages = array_column($loggerMessages, 0);
 
-        $this->assertContains(
+        self::assertContains(
             'Detected GeoIp language \'de\'.',
             $expectedMessages,
             'Logger should record GeoIP language detection message \'Detected GeoIp language \'de\'.\' at index \'3\'.',
@@ -166,13 +168,11 @@ abstract class AbstractSlugRedirect extends TestCase
     public function testRedirectsIfDefaultLanguageInUrlAndDefaultLanguageUsesNoSuffix(): void
     {
         $this->expectRedirect('/foo/baz/bar');
-
         $this->mockUrlLanguageManager(
             [
                 'languages' => ['en-US', 'en', 'de'],
             ],
         );
-
         $this->mockRequest('/en/foo/baz/bar');
     }
 
@@ -184,14 +184,12 @@ abstract class AbstractSlugRedirect extends TestCase
     public function testRedirectsIfDefaultLanguageInUrlAndDefaultLanguageUsesNoSuffixAndTrailingSlashEnabled(): void
     {
         $this->expectRedirect('/foo/baz/bar/');
-
         $this->mockUrlLanguageManager(
             [
                 'languages' => ['en-US', 'en', 'de'],
                 'suffix' => '/',
             ],
         );
-
         $this->mockRequest('/en/foo/baz/bar/');
     }
 
@@ -203,13 +201,11 @@ abstract class AbstractSlugRedirect extends TestCase
     public function testRedirectsIfLanguageWithUpperCaseCountryInUrl(): void
     {
         $this->expectRedirect('/es-bo/foo/baz/bar');
-
         $this->mockUrlLanguageManager(
             [
                 'languages' => ['en-US', 'deutsch' => 'de', 'es-BO'],
             ],
         );
-
         $this->mockRequest('/es-BO/foo/baz/bar');
     }
 
@@ -221,31 +217,27 @@ abstract class AbstractSlugRedirect extends TestCase
     public function testRedirectsIfLanguageWithUpperCaseWildcardCountryInUrl(): void
     {
         $this->expectRedirect('/es-bo/foo/baz/bar');
-
         $this->mockUrlLanguageManager(
             [
                 'languages' => ['en-US', 'deutsch' => 'de', 'es-*'],
             ],
         );
-
         $this->mockRequest('/es-BO/foo/baz/bar');
     }
 
     /**
-     * @throws Exception
-     * @throws InvalidConfigException
-     * @throws NotFoundHttpException
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
      */
     public function testRedirectsIfNoLanguageInUrlAndAcceptedLanguageMatches(): void
     {
         $this->expectRedirect('/de/foo/baz/bar');
-
         $this->mockUrlLanguageManager(
             [
                 'languages' => ['en-US', 'en', 'de'],
             ],
         );
-
         $this->mockRequest(
             '/foo/baz/bar',
             [
@@ -262,13 +254,11 @@ abstract class AbstractSlugRedirect extends TestCase
     public function testRedirectsIfNoLanguageInUrlAndAcceptedLanguageMatchesLanguageAndCountryAlias(): void
     {
         $this->expectRedirect('/de/foo/baz/bar');
-
         $this->mockUrlLanguageManager(
             [
                 'languages' => ['de', 'at' => 'de-AT'],
             ],
         );
-
         $this->mockRequest(
             '/foo/baz/bar',
             [
@@ -285,13 +275,11 @@ abstract class AbstractSlugRedirect extends TestCase
     public function testRedirectsIfNoLanguageInUrlAndAcceptedLanguageMatchesWildcard(): void
     {
         $this->expectRedirect('/de/foo/baz/bar');
-
         $this->mockUrlLanguageManager(
             [
                 'languages' => ['en-US', 'en', 'de-*'],
             ],
         );
-
         $this->mockRequest(
             '/foo/baz/bar',
             [
@@ -308,13 +296,11 @@ abstract class AbstractSlugRedirect extends TestCase
     public function testRedirectsIfNoLanguageInUrlAndAcceptedLanguageWithCountryMatches(): void
     {
         $this->expectRedirect('/de-at/foo/baz/bar');
-
         $this->mockUrlLanguageManager(
             [
                 'languages' => ['en-US', 'en', 'de', 'de-AT'],
             ],
         );
-
         $this->mockRequest(
             '/foo/baz/bar',
             [
@@ -331,13 +317,11 @@ abstract class AbstractSlugRedirect extends TestCase
     public function testRedirectsIfNoLanguageInUrlAndAcceptedLanguageWithCountryMatchesCountryAlias(): void
     {
         $this->expectRedirect('/at/foo/baz/bar');
-
         $this->mockUrlLanguageManager(
             [
                 'languages' => ['de', 'at' => 'de-AT'],
             ],
         );
-
         $this->mockRequest(
             '/foo/baz/bar',
             [
@@ -354,13 +338,11 @@ abstract class AbstractSlugRedirect extends TestCase
     public function testRedirectsIfNoLanguageInUrlAndAcceptedLanguageWithCountryMatchesLanguage(): void
     {
         $this->expectRedirect('/de/foo/baz/bar');
-
         $this->mockUrlLanguageManager(
             [
                 'languages' => ['en-US', 'en', 'de'],
             ],
         );
-
         $this->mockRequest(
             '/foo/baz/bar',
             [
@@ -377,13 +359,11 @@ abstract class AbstractSlugRedirect extends TestCase
     public function testRedirectsIfNoLanguageInUrlAndAcceptedLanguageWithCountryMatchesWildcard(): void
     {
         $this->expectRedirect('/de-at/foo/baz/bar');
-
         $this->mockUrlLanguageManager(
             [
                 'languages' => ['en-US', 'en', 'de-*'],
             ],
         );
-
         $this->mockRequest(
             '/foo/baz/bar',
             [
@@ -400,13 +380,11 @@ abstract class AbstractSlugRedirect extends TestCase
     public function testRedirectsIfNoLanguageInUrlAndAcceptedLanguageWithLowercaseCountryMatches(): void
     {
         $this->expectRedirect('/de-at/foo/baz/bar');
-
         $this->mockUrlLanguageManager(
             [
                 'languages' => ['en-US', 'en', 'de', 'de-AT'],
             ],
         );
-
         $this->mockRequest(
             '/foo/baz/bar',
             [
@@ -430,7 +408,6 @@ abstract class AbstractSlugRedirect extends TestCase
                 'enableDefaultLanguageUrlCode' => true,
             ],
         );
-
         $this->mockRequest('/foo/baz/bar');
     }
 
@@ -454,7 +431,6 @@ abstract class AbstractSlugRedirect extends TestCase
                 ],
             ],
         );
-
         $this->mockRequest('/foo/baz/bar');
     }
 
@@ -478,7 +454,6 @@ abstract class AbstractSlugRedirect extends TestCase
                 ],
             ],
         );
-
         $this->mockRequest('/foo/baz/bar');
     }
 
@@ -502,7 +477,6 @@ abstract class AbstractSlugRedirect extends TestCase
                 ],
             ],
         );
-
         $this->mockRequest('/foo/baz/bar');
     }
 
@@ -526,7 +500,6 @@ abstract class AbstractSlugRedirect extends TestCase
                 ],
             ],
         );
-
         $this->mockRequest('/foo/baz/bar');
     }
 
@@ -550,7 +523,6 @@ abstract class AbstractSlugRedirect extends TestCase
                 ],
             ],
         );
-
         $this->mockRequest('/foo/baz/bar');
     }
 
@@ -570,7 +542,6 @@ abstract class AbstractSlugRedirect extends TestCase
                 'languages' => ['en-US', 'en', 'de'],
             ],
         );
-
         $this->mockRequest('/foo/baz/bar');
     }
 
@@ -590,7 +561,6 @@ abstract class AbstractSlugRedirect extends TestCase
                 'languages' => ['en-US', 'en', 'de-*'],
             ],
         );
-
         $this->mockRequest('/foo/baz/bar');
     }
 
@@ -612,7 +582,6 @@ abstract class AbstractSlugRedirect extends TestCase
                 'languages' => ['en-US', 'en', 'de'],
             ],
         );
-
         $this->mockRequest('/foo/baz/bar');
     }
 
@@ -634,7 +603,6 @@ abstract class AbstractSlugRedirect extends TestCase
                 'languages' => ['en-US', 'en', 'de-*'],
             ],
         );
-
         $this->mockRequest('/foo/baz/bar');
     }
 
@@ -646,7 +614,6 @@ abstract class AbstractSlugRedirect extends TestCase
     public function testRedirectsIfUrlDoesNotMatchIgnoresUrls(): void
     {
         $this->expectRedirect('/foo/baz/bar');
-
         $this->mockUrlLanguageManager(
             [
                 'languages' => ['en-US', 'en', 'de'],
@@ -655,7 +622,6 @@ abstract class AbstractSlugRedirect extends TestCase
                 ],
             ],
         );
-
         $this->mockRequest('/en/foo/baz/bar');
     }
 
@@ -667,7 +633,6 @@ abstract class AbstractSlugRedirect extends TestCase
     public function testRedirectsRootToDefaultLanguageIfDefaultLanguageUsesSuffixAndTrailingSlashEnabled(): void
     {
         $this->expectRedirect('/en/');
-
         $this->mockUrlLanguageManager(
             [
                 'languages' => ['en-US', 'en', 'de'],
@@ -675,7 +640,6 @@ abstract class AbstractSlugRedirect extends TestCase
                 'suffix' => '/',
             ],
         );
-
         $this->mockRequest('/');
     }
 
@@ -696,7 +660,6 @@ abstract class AbstractSlugRedirect extends TestCase
                 'keepUppercaseLanguageCode' => false,
             ],
         );
-
         $this->mockRequest('/foo/baz/bar');
     }
 
@@ -708,14 +671,12 @@ abstract class AbstractSlugRedirect extends TestCase
     public function testRedirectsToLowerCaseFromAcceptLanguageHeader(): void
     {
         $this->expectRedirect('/de-at/foo/baz/bar');
-
         $this->mockUrlLanguageManager(
             [
                 'languages' => ['de-AT'],
                 'keepUppercaseLanguageCode' => false,
             ],
         );
-
         $this->mockRequest(
             '/foo/baz/bar',
             [
@@ -743,7 +704,6 @@ abstract class AbstractSlugRedirect extends TestCase
                 'keepUppercaseLanguageCode' => false,
             ],
         );
-
         $this->mockRequest('/foo/baz/bar');
     }
 
@@ -755,24 +715,20 @@ abstract class AbstractSlugRedirect extends TestCase
     public function testRedirectsToRootIfOnlyDefaultLanguageInUrlAndDefaultLanguageUsesNoSuffixAndTrailingSlashEnabled(): void
     {
         $this->expectRedirect('/');
-
         $this->mockUrlLanguageManager(
             [
                 'languages' => ['en-US', 'en', 'de'],
                 'suffix' => '/',
             ],
         );
-
         $this->mockRequest('/en');
     }
 
-    protected function mockUrlLanguageManager(array $config = []): void
+    protected function mockUrlLanguageManager(array|false|string $config = []): void
     {
-        if (!isset($config['rules'])) {
-            $config['rules'] = [];
+        if (is_array($config)) {
+            $config['rules'] ??= ['/foo/<term:.+>/bar' => 'slug/action'];
         }
-
-        $config['rules']['/foo/<term:.+>/bar'] = 'slug/action';
 
         parent::mockUrlLanguageManager($config);
     }

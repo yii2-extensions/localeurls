@@ -21,7 +21,7 @@ use yii2\extensions\localeurls\tests\base\AbstractUrlCreation;
  * - Consistency of URL generation across different configurations.
  * - Language code placement with script name configuration.
  * - Parameter and query string handling with visible script name.
- * - Script name visibility in generated URLs.
+ * - Script name visibility in generated URL.
  * - SEO-friendly URL structure with script name.
  * - URL normalization and structure with script name present.
  *
@@ -32,7 +32,7 @@ use yii2\extensions\localeurls\tests\base\AbstractUrlCreation;
 final class UrlCreationWithScriptNameTest extends AbstractUrlCreation
 {
     /**
-     * @var bool Whether to show the script name in generated URLs.
+     * Whether to show the script name in generated URL.
      */
     protected bool $showScriptName = true;
 }

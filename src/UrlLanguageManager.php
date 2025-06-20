@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace yii2\extensions\localeurls;
 
+use Throwable;
 use Yii;
 use yii\base\{Exception, ExitException, InvalidConfigException, InvalidRouteException};
 use yii\helpers\Url;
@@ -65,29 +66,15 @@ use function usort;
  */
 class UrlLanguageManager extends UrlManager
 {
+    /**
+     * Event triggered when the application language changes.
+     */
     public const EVENT_LANGUAGE_CHANGED = 'languageChanged';
 
     /**
-     * @var array List of available language codes. More specific patterns should come first, for example, `en_us`
-     * before `en`.
+     * Whether the default language should use a URL code like any other configured language.
      *
-     * This can also contain mapping of `<url_value> => <language>`, (for example, `'english' => 'en'`).
-     *
-     * @phpstan-var array<array-key,string>
-     */
-    public array $languages = [];
-
-    /**
-     * @var bool Whether to enable locale URL specific features.
-     *
-     * Default is `true`, which enables locale URLs, language detection, and language persistence.
-     */
-    public bool $enableLocaleUrls = true;
-
-    /**
-     * @var bool Whether the default language should use a URL code like any other configured language.
-     *
-     * By default, this is `false`, so for URLs without a language code, the default language is assumed.
+     * By default, this is `false`, so for URL without a language code, the default language is assumed.
      *
      * In addition, any request to a URL that contains the default language code will be redirected to the same URL
      * without a language code. So if the default language is `fr` and a user requests `/fr/some/page` he gets
@@ -96,68 +83,55 @@ class UrlLanguageManager extends UrlManager
      * If this is `true`, then a URL that doesn't contain any language code will be redirected to the same URL with
      * default language code. So if, for example, the default language is `fr`, then any request to `/some/page` will be
      * redirected to `/fr/some/page`.
-     *
-     * Default is `false`.
      */
     public bool $enableDefaultLanguageUrlCode = false;
 
     /**
-     * @var bool Whether to detect the app language from the HTTP headers (that is browser settings).
-     *
-     * Default is `true`, which means that the language will be detected from the `Accept-Language` header.
+     * Whether to detect the app language from the HTTP headers (that is browser settings).
      */
     public bool $enableLanguageDetection = true;
 
     /**
-     * @var bool Whether to store the detected language in session and (optionally) a cookie.
+     * Whether to store the detected language in session and (optionally) a cookie.
      *
      * If this is `true` (default) and a returning user tries to access any URL without a language prefix, they will be
      * redirected to the respective stored language URL (for example, `/some/page -> /fr/some/page`).
-     *
-     * Default is `true`.
      */
     public bool $enableLanguagePersistence = true;
 
     /**
-     * @var bool Whether to keep upper case language codes in URL. Default is `false` which will, for example, redirect
-     * de-AT` to `de-at`.
-     *
-     * Default is `false`.
+     * Whether to enable locale URL specific features.
      */
-    public bool $keepUppercaseLanguageCode = false;
+    public bool $enableLocaleUrls = true;
 
     /**
-     * @var bool|string Name of the session key that is used to store the language. If `false` no session is used.
-     *
-     * Default is '_language'.
+     * Whether to show the script name in URLs.
      */
-    public string|bool $languageSessionKey = '_language';
+    public $enablePrettyUrl = true;
 
     /**
-     * @var string the name of the language cookie.
+     * List of GeoIP countries indexed by corresponding language code.
      *
-     * Default is '_language'.
+     * Usage example:
+     *
+     * ```php
+     * [
+     *     // Set app language to 'ru' for these GeoIp countries
+     *     'ru' => ['RUS','AZE','ARM','BLR','KAZ','KGZ','MDA','TJK','TKM','UZB','UKR']
+     * ]
+     * ```
+     *
+     * @phpstan-var array<string, array<int, string>>
      */
-    public string $languageCookieName = '_language';
+    public array $geoIpLanguageCountries = [];
 
     /**
-     * @var int Number of seconds how long the language information should be stored in cookie.
-     * - If  {@see LocaleUrls::enableLanguagePersistence} is `true`.
-     * - Set to `false` to disable the language cookie completely.
-     *
-     * Default is `30` days.
+     * Key in that contains the detected GeoIP country.
      */
-    public int $languageCookieDuration = 2592000;
+    public string $geoIpServerVar = 'HTTP_X_GEO_COUNTRY';
 
     /**
-     * @var array Configuration options for the language cookie.
-     *
-     * @phpstan-var array<string,bool|int|string>
-     */
-    public array $languageCookieOptions = [];
-
-    /**
-     * @var array List of route and URL regex patterns to ignore during language processing.
+     * List of route and URL regex patterns to ignore during language processing.
      *
      * The keys of the array are patterns for routes, the values are patterns for URLs.
      *
@@ -176,68 +150,81 @@ class UrlLanguageManager extends UrlManager
      * ]
      * ```
      *
-     * @phpstan-var array<string,string>
+     * @phpstan-var array<string, string>
      */
     public array $ignoreLanguageUrlPatterns = [];
 
-    public $enablePrettyUrl = true;
+    /**
+     * List of available language codes.
+     *
+     * More specific patterns should come first, for example, `en_us` before `en`.
+     *
+     * This can also contain mapping of `<url_value> => <language>`, (for example, `'english' => 'en'`).
+     *
+     * @phpstan-var array<array-key, string>
+     */
+    public array $languages = [];
 
     /**
-     * @var string If a parameter with this name is passed to any {@see LocaleUrls::createUrl} Method, the created URL
-     * will use the language specified there.
+     * Number of seconds how long the language information should be stored in cookie.
+     * - If {@see LocaleUrls::enableLanguagePersistence} is `true`.
+     * - Set to `false` to disable the language cookie completely.
+     */
+    public int $languageCookieDuration = 2592000;
+
+    /**
+     * Name of the language cookie.
+     */
+    public string $languageCookieName = '_language';
+
+    /**
+     * Configuration options for the language cookie.
+     *
+     * @phpstan-var array<string, bool|int|string>
+     */
+    public array $languageCookieOptions = [];
+
+    /**
+     * If a parameter with this name is passed to any {@see LocaleUrls::createUrl} Method, the created URL will use the
+     * language specified there.
      *
      * URLs created this way can be used to switch to a different language.
      *
      * If no such parameter is used, the currently detected application language is used.
-     *
-     * Default is 'language'.
      */
     public string $languageParam = 'language';
 
     /**
-     * @var string Key in that contains the detected GeoIP country.
-     *
-     * Default is 'HTTP_X_GEO_COUNTRY' as used by mod_geoip in apache.
-     */
-    public string $geoIpServerVar = 'HTTP_X_GEO_COUNTRY';
-
-    /**
-     * @var array List of GeoIP countries indexed by corresponding language code.
-     *
-     * The default is an empty list which disables GeoIP detection.
-     *
-     * Usage example:
-     *
-     * ```php
-     * [
-     *     // Set app language to 'ru' for these GeoIp countries
-     *     'ru' => ['RUS','AZE','ARM','BLR','KAZ','KGZ','MDA','TJK','TKM','UZB','UKR']
-     * ]
-     * ```
-     *
-     * @phpstan-var array<string,array<int, string>>
-     */
-    public array $geoIpLanguageCountries = [];
-
-    /**
-     * @var int HTTP status code. Default is `302`.
+     * HTTP status code. Default is `302`.
      */
     public int $languageRedirectCode = 302;
 
     /**
-     * @var string Language that was initially set in the application configuration.
+     * Name of the session key that is used to store the language. If `false` no session is used.
+     */
+    public string|bool $languageSessionKey = '_language';
+
+    /**
+     * Whether to keep upper case language codes in URL.
+     *
+     * Default is `false` which will, for example, redirect `de-AT` to `de-at`.
+     */
+    public bool $keepUppercaseLanguageCode = false;
+
+    /**
+     * Language that was initially set in the application configuration.
      */
     protected string $_defaultLanguage = '';
 
     /**
-     * @var Request|null Request object that is currently being processed.
-     */
-    protected Request|null $_request = null;
-
-    /**
-     * @var bool Whether locale URL was processed.
+     * Whether locale URL was processed.
      */
     protected bool $_processed = false;
+
+    /**
+     * Request object that is currently being processed.
+     */
+    protected Request|null $_request = null;
 
     /**
      * @throws InvalidConfigException if the configuration is invalid or incomplete.
@@ -255,15 +242,6 @@ class UrlLanguageManager extends UrlManager
 
     /**
      * Returns the application's default language as set in the initial configuration.
-     *
-     * Usage example:
-     * ```php
-     * $default = $manager->getDefaultLanguage();
-     *
-     * if ($language === $default) {
-     *     // your code here
-     * }
-     * ```
      *
      * @return string Language code initially set in the application configuration (for example, 'en', 'fr').
      */
@@ -290,7 +268,7 @@ class UrlLanguageManager extends UrlManager
             if ($this->ignoreLanguageUrlPatterns !== []) {
                 $pathInfo = $request->getPathInfo();
 
-                foreach ($this->ignoreLanguageUrlPatterns as $_k => $pattern) {
+                foreach ($this->ignoreLanguageUrlPatterns as $pattern) {
                     if (preg_match($pattern, $pathInfo) !== 0) {
                         $message = "Ignore pattern '{$pattern}' matches '{$pathInfo}.' Skipping language processing.";
 
@@ -308,7 +286,7 @@ class UrlLanguageManager extends UrlManager
                 if ($this->normalizer !== false) {
                     try {
                         parent::parseRequest($request);
-                    } catch (UrlNormalizerRedirectException) {
+                    } catch (Throwable) {
                         $normalized = true;
                     }
                 }
@@ -319,10 +297,8 @@ class UrlLanguageManager extends UrlManager
             }
         }
 
-        /** @phpstan-var array<string>|bool $result */
-        $result = parent::parseRequest($request);
-
-        return $result;
+        // @phpstan-ignore return.type
+        return parent::parseRequest($request);
     }
 
     /**
@@ -332,8 +308,7 @@ class UrlLanguageManager extends UrlManager
      *
      * @return string the created URL with the appropriate language handling applied.
      *
-     * @phpstan-param array<string,string>|string $params
-     *
+     * @phpstan-param array<string, string>|string $params
      * @phpstan-ignore method.childParameterType
      */
     public function createUrl($params): string
@@ -819,7 +794,7 @@ class UrlLanguageManager extends UrlManager
 
         array_unshift($params, $route);
 
-        /** @phpstan-var non-empty-array<string,string> $params */
+        /** @phpstan-var non-empty-array<string, string> $params */
         $url = $this->createUrl($params);
 
         // Required to prevent double slashes on generated URLs

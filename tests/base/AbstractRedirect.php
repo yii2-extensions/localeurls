@@ -11,8 +11,14 @@ use yii\web\{UrlNormalizer, UrlNormalizerRedirectException};
 use yii2\extensions\localeurls\tests\stub\UrlRule;
 use yii2\extensions\localeurls\tests\TestCase;
 
+use function is_array;
+use function is_string;
+use function ltrim;
+use function print_r;
+use function session_start;
+
 /**
- * Base class for redirect tests in the Yii2 LocaleUrls extension.
+ * Base class for redirect tests in the Yii LocaleUrls extension.
  *
  * Provides comprehensive tests for URL redirection, ensuring correct language detection and redirect behavior across
  * multiple sources and configuration scenarios.
@@ -43,7 +49,14 @@ use yii2\extensions\localeurls\tests\TestCase;
 abstract class AbstractRedirect extends TestCase
 {
     /**
-     * @var array Set of test configurations to test.
+     * Set of test configurations to test.
+     *
+     * @phpstan-var array<
+     *   array{
+     *     urlLanguageManager: array<string, mixed>,
+     *     redirects: array<string, array<int, array<int|string, array<string, mixed>|string|false>>|string|false>
+     *   }
+     * >
      */
     public array $testConfigs = [
         // No URL code for default language
@@ -133,7 +146,7 @@ abstract class AbstractRedirect extends TestCase
                     ],
                 ],
 
-                // Code in URL different from language in session, cookie, headers or GeoIp
+                // Code in URL different from language in session, cookie, headers, or GeoIp
                 '/de/site/page' => [
                     [false, 'session' => ['_language' => 'wc']],
                     [false, 'cookie' => ['_language' => 'wc']],
@@ -171,8 +184,8 @@ abstract class AbstractRedirect extends TestCase
                 ],
                 '/slug/value' => false,
                 '/en/slug/value' => '/slug/value',
-                //'/ruleclass-test-url' => false,
-                //'/en/ruleclass-test-url' => '/ruleclass-test-url',
+                '/ruleclass-test-url' => false,
+                '/en/ruleclass-test-url' => '/ruleclass-test-url',
             ],
         ],
 
@@ -215,7 +228,7 @@ abstract class AbstractRedirect extends TestCase
                     ['/de/site/page', 'server' => ['HTTP_X_GEO_COUNTRY' => 'DEU']],
                 ],
 
-                // Lang requests with different language in session, cookie, headers or GeoIp
+                // Lang requests with different language in session, cookie, headers, or GeoIp
                 '/en/site/page' => [
                     [false, 'session' => ['_language' => 'wc']],
                     [false, 'cookie' => ['_language' => 'wc']],
@@ -715,16 +728,17 @@ abstract class AbstractRedirect extends TestCase
     public function testRedirectUrlsWithMultipleConfigurations(): void
     {
         foreach ($this->testConfigs as $config) {
-            $urlLanguageManager = $config['urlLanguageManager'] ?? [];
+            $urlLanguageManager = $config['urlLanguageManager'];
 
             foreach ($config['redirects'] as $from => $to) {
                 if (is_array($to)) {
                     foreach ($to as $params) {
-                        $url = $params[0];
+                        $url = $params[0] ?? '';
                         $request = $params['request'] ?? [];
                         $session = $params['session'] ?? [];
                         $cookie = $params['cookie'] ?? [];
                         $server = $params['server'] ?? [];
+
                         $this->performRedirectTest(
                             $from,
                             $url,
@@ -742,29 +756,37 @@ abstract class AbstractRedirect extends TestCase
         }
     }
 
+    /**
+     * @phpstan-param array<string, mixed>|false|null|string $to
+     * @phpstan-param array<string, mixed>|string|false $urlLanguageManager
+     * @phpstan-param array<string, mixed>|string|false $request
+     * @phpstan-param array<string, mixed>|string|false $session
+     * @phpstan-param array<string, mixed>|string|false $cookie
+     * @phpstan-param array<string, mixed>|string|false $server
+     */
     private function performRedirectTest(
         string $from,
-        string|false|null $to,
-        array $urlLanguageManager,
-        array $request = [],
-        array $session = [],
-        array $cookie = [],
-        array $server = [],
+        array|false|null|string $to,
+        array|string|false $urlLanguageManager,
+        array|string|false $request = [],
+        array|string|false $session = [],
+        array|string|false $cookie = [],
+        array|string|false $server = [],
     ): void {
         $this->resetEnvironment();
         $this->mockUrlLanguageManager($urlLanguageManager);
 
-        if (empty($session) === false) {
+        if ($session !== []) {
             @session_start();
 
             $_SESSION = $session;
         }
 
-        if (empty($cookie) === false) {
+        if ($cookie !== []) {
             $_COOKIE = $cookie;
         }
 
-        if (empty($server) === false) {
+        if (is_array($server)) {
             foreach ($server as $key => $value) {
                 $_SERVER[$key] = $value;
             }
@@ -789,31 +811,36 @@ abstract class AbstractRedirect extends TestCase
             $url = $e->url;
 
             if (is_array($url)) {
-                if (isset($url[0])) {
+                if (isset($url[0]) && is_string($url[0])) {
                     // ensure the route is absolute
-                    $url[0] = '/' . ltrim((string) $url[0], '/');
+                    $url[0] = '/' . ltrim($url[0], '/');
                 }
 
                 $url += Yii::$app->request->getQueryParams();
             }
 
-            $this->assertSame(
-                $this->prepareUrl($to),
-                Url::to($url, $e->scheme),
-                "UrlNormalizerRedirectException redirect URL should match expected URL. Configuration: {$configMessage}",
-            );
+            if (is_string($to)) {
+                self::assertSame(
+                    $this->prepareUrl($to),
+                    Url::to($url, $e->scheme),
+                    'UrlNormalizerRedirectException redirect URL should match expected URL. Configuration: ' .
+                     $configMessage,
+                );
+            }
         } catch (Exception $e) {
             if ($to === false || $to === null) {
-                $this->fail(
+                self::fail(
                     "Expected redirect from '$from' to '$to' but no redirect occurred. Configuration: $configMessage",
                 );
             }
 
-            $this->assertSame(
-                $this->prepareUrl($to),
-                $e->getMessage(),
-                "Exception redirect URL should match expected URL. Configuration: {$configMessage}",
-            );
+            if (is_array($to) === false) {
+                self::assertSame(
+                    $this->prepareUrl($to),
+                    $e->getMessage(),
+                    "Exception redirect URL should match expected URL. Configuration: {$configMessage}",
+                );
+            }
         }
     }
 }

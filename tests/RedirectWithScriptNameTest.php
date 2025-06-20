@@ -10,8 +10,8 @@ use yii2\extensions\localeurls\tests\base\AbstractRedirect;
 /**
  * Test suite for URL redirection functionality with script name configuration enabled.
  *
- * Extends the base redirection test suite to verify that URL redirection logic correctly handles language detection
- * and redirect rules when the application is configured to show script names in URLs (for example, index.php).
+ * Extends the base redirection test suite to verify that URL redirection logic correctly handles language detection and
+ * redirect rules when the application is configured to show script names in URLs (for example, index.php).
  *
  * Test coverage.
  * - Cookie-based language detection and redirection behavior with script names.
@@ -33,5 +33,8 @@ use yii2\extensions\localeurls\tests\base\AbstractRedirect;
 #[Group('locale-urls')]
 final class RedirectWithScriptNameTest extends AbstractRedirect
 {
+    /**
+     * Whether to show the script name in generated URL.
+     */
     protected bool $showScriptName = true;
 }
