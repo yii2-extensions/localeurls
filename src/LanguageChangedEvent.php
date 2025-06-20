@@ -7,19 +7,19 @@ namespace yii2\extensions\localeurls;
 use yii\base\Event;
 
 /**
- * Event triggered when the application's language changes.
+ * Event triggered when the application language changes.
  *
- * This event is dispatched whenever the application's language is switched, providing both the new and previous
- * language codes.
+ * This event is dispatched whenever the application language is switched, providing both the new and previous language
+ * codes.
  *
  * It enables components and listeners to react to language changes, such as updating UI elements, reloading resources,
  * or logging language transitions.
  *
  * Key features.
  * - Exposes the new language code via {@see LanguageChangedEvent::language}.
- * - Integrates with Yii's event system for seamless notification.
+ * - Integrates with a Yii event system for seamless notification.
  * - Provides the previous language code via {@see LanguageChangedEvent::oldLanguage}.
- * - Supports null for the old language if not previously set.
+ * - Supports `null` for the old language if not previously set.
  *
  * @see Event for base event.
  *
