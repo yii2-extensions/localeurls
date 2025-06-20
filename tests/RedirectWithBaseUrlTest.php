@@ -28,7 +28,7 @@ use yii2\extensions\localeurls\tests\base\AbstractRedirect;
 final class RedirectWithBaseUrlTest extends AbstractRedirect
 {
     /**
-     * @var string Base URL prefix for test scenarios.
+     * Base URL prefix for test scenarios.
      */
     protected string $baseUrl = '/base';
 }

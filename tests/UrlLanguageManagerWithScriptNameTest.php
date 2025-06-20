@@ -29,7 +29,7 @@ use yii2\extensions\localeurls\tests\base\AbstractUrlLanguageManager;
 final class UrlLanguageManagerWithScriptNameTest extends AbstractUrlLanguageManager
 {
     /**
-     * @var bool Whether to show the script name in generated URLs.
+     * Whether to show the script name in generated URL.
      */
     protected bool $showScriptName = true;
 }

@@ -9,6 +9,17 @@ use yii\base\Exception;
 use yii\helpers\Url;
 use yii\web\UrlRuleInterface;
 
+/**
+ * Custom URL rule implementation for testing language-based routing and redirects.
+ *
+ * Provides a minimal UrlRuleInterface implementation for simulating language slug handling in URLs and request parsing.
+ *
+ * This class is used in test scenarios to verify correct URL creation and request parsing based on language slugs,
+ * including redirect logic and exception handling for test environments.
+ *
+ * @copyright Copyright (C) 2023 Terabytesoftw.
+ * @license https://opensource.org/license/bsd-3-clause BSD 3-Clause License.
+ */
 final class UrlRule implements UrlRuleInterface
 {
     public function createUrl($manager, $route, $params)
@@ -47,12 +58,13 @@ final class UrlRule implements UrlRuleInterface
 
         // Redirect to correct slug language
         $url = ['/ruleclass/test', 'slugLanguage' => $language];
+
         Yii::$app->response->redirect($url);
 
         if (YII_ENV === 'test') {
             /**
              * Response::redirect($url) above will call `Url::to()` internally.
-             * So to really test for the same final redirect URL here, we need to call Url::to(), too.
+             * So to test for the same final redirect URL here, we need to call Url::to(), too.
              */
             throw new Exception(Url::to($url));
         }

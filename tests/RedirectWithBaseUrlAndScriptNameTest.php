@@ -29,12 +29,12 @@ use yii2\extensions\localeurls\tests\base\AbstractRedirect;
 final class RedirectWithBaseUrlAndScriptNameTest extends AbstractRedirect
 {
     /**
-     * @var string Base URL prefix for test scenarios.
+     * Base URL prefix for test scenarios.
      */
     protected string $baseUrl = '/base';
 
     /**
-     * @var bool Whether to show the script name in generated URLs.
+     * Whether to show the script name in generated URL.
      */
     protected bool $showScriptName = true;
 }

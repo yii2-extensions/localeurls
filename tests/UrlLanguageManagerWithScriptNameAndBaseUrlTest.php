@@ -20,7 +20,7 @@ use yii2\extensions\localeurls\tests\base\AbstractUrlLanguageManager;
  * - Combined base URL and script name in language detection and URL generation.
  * - Language code placement with base URL and script name configuration.
  * - Parameter and query string preservation in complex URL structures.
- * - Script name visibility in generated and parsed URLs.
+ * - Script name visibility in generated and parsed URL.
  * - Subdirectory deployment scenarios with language-aware routing.
  * - URL normalization and language switching with both base URL and script name.
  *
@@ -31,12 +31,12 @@ use yii2\extensions\localeurls\tests\base\AbstractUrlLanguageManager;
 final class UrlLanguageManagerWithScriptNameAndBaseUrlTest extends AbstractUrlLanguageManager
 {
     /**
-     * @var string Base URL prefix for test scenarios.
+     * Base URL prefix for test scenarios.
      */
     protected string $baseUrl = '/base';
 
     /**
-     * @var bool Whether to show the script name in generated URLs.
+     * Whether to show the script name in generated URL.
      */
     protected bool $showScriptName = true;
 }

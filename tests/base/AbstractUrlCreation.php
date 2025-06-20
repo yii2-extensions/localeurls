@@ -11,8 +11,12 @@ use yii\web\NotFoundHttpException;
 use yii2\extensions\localeurls\tests\stub\UrlRule;
 use yii2\extensions\localeurls\tests\TestCase;
 
+use function array_shift;
+use function json_encode;
+use function preg_match;
+
 /**
- * Base class for URL creation and parsing tests in the Yii2 LocaleUrls extension.
+ * Base class for URL creation and parsing tests in the Yii LocaleUrls extension.
  *
  * Provides comprehensive tests for language-aware URL generation and route parsing, ensuring correct handling of
  * language codes, aliases, custom rules, and parameter extraction across multiple configuration scenarios.
@@ -40,7 +44,12 @@ use yii2\extensions\localeurls\tests\TestCase;
 abstract class AbstractUrlCreation extends TestCase
 {
     /**
-     * @var array Set of test configurations to test.
+     * Set of test configurations to test.
+     *
+     * @var array<
+     *   int,
+     *   array{urlManager: array<string, mixed>, urls: array<string, array<string, array<int|string, mixed>>>}
+     * >
      */
     public array $testConfigs = [
         [
@@ -130,7 +139,7 @@ abstract class AbstractUrlCreation extends TestCase
                     'http://www.example.com/de/foo/baz/bar' => ['/demo/absolute-slug', 'term' => 'baz'],
                     'http://www.example.com/de/foo/baz/bar?x=y' => ['/demo/absolute-slug', 'term' => 'baz', 'x' => 'y'],
 
-                    // Other language
+                    // Another language
                     '/en-us' => ['/', 'language' => 'en-US'],
                     '/en-us?x=y' => ['/site/index', 'language' => 'en-US', 'x' => 'y'],
                     '/en-us/demo/action' => ['/demo/action', 'language' => 'en-US'],
@@ -306,7 +315,7 @@ abstract class AbstractUrlCreation extends TestCase
                     'http://www.example.com/de/foo/baz/bar/' => ['/demo/absolute-slug', 'term' => 'baz'],
                     'http://www.example.com/de/foo/baz/bar/?x=y' => ['/demo/absolute-slug', 'term' => 'baz', 'x' => 'y'],
 
-                    // Other language
+                    // Another language
                     '/en-us/' => ['/site/index', 'language' => 'en-US'],
                     '/en-us/?x=y' => ['/site/index', 'language' => 'en-US', 'x' => 'y'],
                     '/en-us/demo/action/' => ['/demo/action', 'language' => 'en-US'],
@@ -535,10 +544,16 @@ abstract class AbstractUrlCreation extends TestCase
         ],
     ];
 
+    /**
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws JsonException if there is an error encoding or decodes JSON data.
+     * @throws NotFoundHttpException if the requested resource can't be found.
+     */
     public function testGenerateUrlsWithMultipleLanguageConfigurations(): void
     {
         foreach ($this->testConfigs as $config) {
-            $urlManager = $config['urlManager'] ?? [];
+            $urlManager = $config['urlManager'];
 
             foreach ($config['urls'] as $requestUrl => $routes) {
                 $this->performUrlCreationTest($requestUrl, $urlManager, $routes);
@@ -551,30 +566,32 @@ abstract class AbstractUrlCreation extends TestCase
      * @throws InvalidConfigException if the configuration is invalid or incomplete.
      * @throws JsonException if there is an error encoding or decodes JSON data.
      * @throws NotFoundHttpException if the requested resource can't be found.
+     *
+     * @phpstan-param array<string, mixed> $urlManager
+     * @phpstan-param array<string, array<array-key, mixed>> $routes
      */
     private function performUrlCreationTest(string $requestUrl, array $urlManager, array $routes): void
     {
         $this->resetEnvironment();
         $this->mockUrlLanguageManager($urlManager);
-
         $this->mockRequest($requestUrl);
 
         foreach ($routes as $url => $route) {
-            if (preg_match('#^(https?)://([^/]*)(.*)#', $url, $matches)) {
-                $schema = $matches[1];
-                $host = $matches[2];
-                $relativeUrl = $matches[3];
+            if (preg_match('#^(https?)://([^/]*)(.*)#', $url, $matches) !== 0) {
+                $schema = $matches[1] ?? '';
+                $host = $matches[2] ?? '';
+                $relativeUrl = $matches[3] ?? '';
 
-                if ($route[0] === false) {
+                if (isset($route[0]) && $route[0] === false) {
                     array_shift($route);
-                    $this->assertSame(
+                    self::assertSame(
                         $schema . '://' . $host . $this->prepareUrl($relativeUrl),
                         Url::to($route),
                         'Absolute URL should be generated correctly as relative URL when forced with \'false\' ' .
                         'parameter  for route: ' . json_encode($route, JSON_THROW_ON_ERROR),
                     );
                 } else {
-                    $this->assertSame(
+                    self::assertSame(
                         $schema . '://' . $host . $this->prepareUrl($relativeUrl),
                         Url::to($route, $schema),
                         "Absolute URL should be generated correctly with schema '{$schema}' for route: " .
@@ -582,7 +599,7 @@ abstract class AbstractUrlCreation extends TestCase
                     );
                 }
             } else {
-                $this->assertSame(
+                self::assertSame(
                     $this->prepareUrl($url),
                     Url::to($route),
                     'Relative URL should be generated correctly for route: ' .

@@ -5,10 +5,16 @@ parameters:
     bootstrapFiles:
         - tests/bootstrap.php
 
+    excludePaths:
+        analyse:
+            - tests/stub/*
+            - tests/runtime/*
+
     level: max
 
     paths:
         - src
+        - tests
 
     tmpDir: %currentWorkingDirectory%/tests/runtime
 

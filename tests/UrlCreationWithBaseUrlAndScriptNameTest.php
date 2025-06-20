@@ -19,7 +19,7 @@ use yii2\extensions\localeurls\tests\base\AbstractUrlCreation;
  * - Combined base URL and script name in generated URLs.
  * - Language code placement with base URL and script name.
  * - Parameter and query string preservation in complex URL structures.
- * - Script name visibility in generated URLs.
+ * - Script name visibility in generated URL.
  * - URL generation accuracy with subdirectory deployment and script name visibility.
  * - URL normalization with base URL and script name configuration.
  *
@@ -30,12 +30,12 @@ use yii2\extensions\localeurls\tests\base\AbstractUrlCreation;
 final class UrlCreationWithBaseUrlAndScriptNameTest extends AbstractUrlCreation
 {
     /**
-     * @var string Base URL prefix for test scenarios.
+     * Base URL prefix for test scenarios.
      */
     protected string $baseUrl = '/base';
 
     /**
-     * @var bool Whether to show the script name in generated URLs.
+     * Whether to show the script name in generated URL.
      */
     protected bool $showScriptName = true;
 }

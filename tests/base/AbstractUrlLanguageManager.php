@@ -14,7 +14,7 @@ use yii2\extensions\localeurls\UrlLanguageManager;
 use function array_column;
 
 /**
- * Base class for language-aware URL manager and language detection tests in the Yii2 LocaleUrls extension.
+ * Base class for language-aware URL manager and language detection tests in the Yii LocaleUrls extension.
  *
  * Provides comprehensive tests for language code extraction, persistence, and normalization, ensuring correct handling
  * of language selection, alias mapping, disabling of detection or persistence, and robust fallback logic across
@@ -55,29 +55,28 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'languageCookieDuration' => false,
             ],
         );
-
         $this->mockRequest('/en-us/site/page');
 
-        $this->assertSame(
+        self::assertSame(
             'en-US',
             Yii::$app->language,
             'Application language should be set to \'en-US\' when language is present in the URL and cookie is ' .
             'disabled.',
         );
-        $this->assertSame(
+        self::assertSame(
             'en-US',
             Yii::$app->session->get('_language'),
             'Session \'_language\' should be set to \'en-US\' when language is present in the URL and cookie is ' .
             'disabled.',
         );
-        $this->assertNull(
+        self::assertNull(
             Yii::$app->response->cookies->get('_language'),
             'Language cookie should not be set when \'languageCookieDuration\' is false.',
         );
 
         $request = Yii::$app->request;
 
-        $this->assertSame(
+        self::assertSame(
             'site/page',
             $request->pathInfo,
             'Request pathInfo should be \'site/page\' after language code is removed from the URL.',
@@ -97,7 +96,6 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'enableLanguageDetection' => false,
             ],
         );
-
         $this->mockRequest(
             '/site/page',
             [
@@ -105,7 +103,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
             ],
         );
 
-        $this->assertSame(
+        self::assertSame(
             'en',
             Yii::$app->language,
             'Application language should default to \'en\' when language detection is disabled, regardless of ' .
@@ -114,7 +112,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
 
         $request = Yii::$app->request;
 
-        $this->assertSame(
+        self::assertSame(
             'site/page',
             $request->pathInfo,
             'Request pathInfo should be \'site/page\' when no language code is present in the URL.',
@@ -134,26 +132,25 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'enableLanguagePersistence' => false,
             ],
         );
-
         $this->mockRequest('/en-us/site/page');
 
-        $this->assertSame(
+        self::assertSame(
             'en-US',
             Yii::$app->language,
             'Application language should be set to \'en-US\' from the URL even when language persistence is disabled.',
         );
-        $this->assertNull(
+        self::assertNull(
             Yii::$app->session->get('_language'),
             'Session \'_language\' should not be set when \'enableLanguagePersistence\' is false.',
         );
-        $this->assertNull(
+        self::assertNull(
             Yii::$app->response->cookies->get('_language'),
             'Language cookie should not be set when \'enableLanguagePersistence\' is false.',
         );
 
         $request = Yii::$app->request;
 
-        $this->assertSame(
+        self::assertSame(
             'site/page',
             $request->pathInfo,
             'Request pathInfo should be \'site/page\' after language code is removed from the URL.',
@@ -173,10 +170,9 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'languageSessionKey' => false,
             ],
         );
-
         $this->mockRequest('/en-us/site/page');
 
-        $this->assertSame(
+        self::assertSame(
             'en-US',
             Yii::$app->language,
             'Application language should be set to \'en-US\' from the URL when session persistence is disabled.',
@@ -184,11 +180,11 @@ abstract class AbstractUrlLanguageManager extends TestCase
 
         $cookie = Yii::$app->response->cookies->get('_language');
 
-        $this->assertNotNull(
+        self::assertNotNull(
             $cookie,
             "Language cookie should be set when 'languageSessionKey' is false and language is present in the URL.",
         );
-        $this->assertSame(
+        self::assertSame(
             'en-US',
             $cookie->value,
             'Language cookie value should be \'en-US\' when session persistence is disabled and language is present ' .
@@ -197,7 +193,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
 
         $request = Yii::$app->request;
 
-        $this->assertSame(
+        self::assertSame(
             'site/page',
             $request->pathInfo,
             'Request pathInfo should be \'site/page\' after language code is removed from the URL.',
@@ -216,15 +212,14 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'languages' => ['en-US', 'en', 'deutsch' => 'de'],
             ],
         );
-
         $this->mockRequest('/deutsch/site/page');
 
-        $this->assertSame(
+        self::assertSame(
             'de',
             Yii::$app->language,
             'Application language should be set to \'de\' when using a language alias in the URL.',
         );
-        $this->assertSame(
+        self::assertSame(
             'de',
             Yii::$app->session->get('_language'),
             'Session \'_language\' should be set to \'de\' when using a language alias in the URL.',
@@ -232,11 +227,11 @@ abstract class AbstractUrlLanguageManager extends TestCase
 
         $cookie = Yii::$app->response->cookies->get('_language');
 
-        $this->assertNotNull(
+        self::assertNotNull(
             $cookie,
             'Language cookie should be set when using a language alias in the URL.',
         );
-        $this->assertSame(
+        self::assertSame(
             'de',
             $cookie->value,
             'Language cookie value should be \'de\' when using a language alias in the URL.',
@@ -244,7 +239,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
 
         $request = Yii::$app->request;
 
-        $this->assertSame(
+        self::assertSame(
             'site/page',
             $request->pathInfo,
             'Request pathInfo should be \'site/page\' after language alias is removed from the URL.',
@@ -263,15 +258,14 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'languages' => ['en-US', 'deutsch' => 'de', 'sr-Latn'],
             ],
         );
-
         $this->mockRequest('/sr-latn/site/page');
 
-        $this->assertSame(
+        self::assertSame(
             'sr-Latn',
             Yii::$app->language,
             'Application language should be set to \'sr-Latn\' when using a language with script code in the URL.',
         );
-        $this->assertSame(
+        self::assertSame(
             'sr-Latn',
             Yii::$app->session->get('_language'),
             'Session \'_language\' should be set to \'sr-Latn\' when using a language with script code in the URL.',
@@ -279,11 +273,11 @@ abstract class AbstractUrlLanguageManager extends TestCase
 
         $cookie = Yii::$app->response->cookies->get('_language');
 
-        $this->assertNotNull(
+        self::assertNotNull(
             $cookie,
             'Language cookie should be set when using a language with script code in the URL.',
         );
-        $this->assertSame(
+        self::assertSame(
             'sr-Latn',
             $cookie->value,
             'Language cookie value should be \'sr-Latn\' when using a language with script code in the URL.',
@@ -291,7 +285,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
 
         $request = Yii::$app->request;
 
-        $this->assertSame(
+        self::assertSame(
             'site/page',
             $request->pathInfo,
             'Request pathInfo should be \'site/page\' after language with script code is removed from the URL.',
@@ -310,15 +304,14 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'languages' => ['en-US', 'deutsch' => 'de', 'es-*'],
             ],
         );
-
         $this->mockRequest('/es-bo/site/page');
 
-        $this->assertSame(
+        self::assertSame(
             'es-BO',
             Yii::$app->language,
             'Application language should be set to \'es-BO\' when using a wildcard country language in the URL.',
         );
-        $this->assertSame(
+        self::assertSame(
             'es-BO',
             Yii::$app->session->get('_language'),
             'Session \'_language\' should be set to \'es-BO\' when using a wildcard country language in the URL.',
@@ -326,11 +319,11 @@ abstract class AbstractUrlLanguageManager extends TestCase
 
         $cookie = Yii::$app->response->cookies->get('_language');
 
-        $this->assertNotNull(
+        self::assertNotNull(
             $cookie,
             'Language cookie should be set when using a wildcard country language in the URL.',
         );
-        $this->assertSame(
+        self::assertSame(
             'es-BO',
             $cookie->value,
             'Language cookie value should be \'es-BO\' when using a wildcard country language in the URL.',
@@ -338,7 +331,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
 
         $request = Yii::$app->request;
 
-        $this->assertSame(
+        self::assertSame(
             'site/page',
             $request->pathInfo,
             'Request pathInfo should be \'site/page\' after wildcard country language is removed from the URL.',
@@ -367,7 +360,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
         $loggerMessages = Yii::getLogger()->messages;
         $expectedMessages = array_column($loggerMessages, 0);
 
-        $this->assertContains(
+        self::assertContains(
             'Found persisted language \'fr\' in cookie.',
             $expectedMessages,
             'Logger should record a message when an invalid language \'fr\' is found in the cookie and not in the ' .
@@ -399,7 +392,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
         $loggerMessages = Yii::getLogger()->messages;
         $expectedMessages = array_column($loggerMessages, 0);
 
-        $this->assertContains(
+        self::assertContains(
             'Found persisted language \'fr\' in session.',
             $expectedMessages,
             'Logger should record a message when an invalid language \'fr\' is found in the session and not in the ' .
@@ -423,7 +416,6 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 ],
             ],
         );
-
         $this->mockRequest(
             '/site/page',
             [
@@ -431,7 +423,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
             ],
         );
 
-        $this->assertSame(
+        self::assertSame(
             'en',
             Yii::$app->language,
             'Application language should default to \'en\' when locale URLs are disabled, regardless of acceptable ' .
@@ -440,7 +432,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
 
         $request = Yii::$app->request;
 
-        $this->assertSame(
+        self::assertSame(
             'site/page',
             $request->pathInfo,
             'Request pathInfo should be \'site/page\' when locale URLs are disabled and no language code is present ' .
@@ -448,24 +440,24 @@ abstract class AbstractUrlLanguageManager extends TestCase
         );
 
         // If a URL rule is configured for the home URL, it will always have a trailing slash
-        $this->assertSame(
+        self::assertSame(
             $this->prepareUrl('/'),
             Url::to(['/site/index']),
             'Home URL should always have a trailing slash when a URL rule is configured for it.',
         );
-        $this->assertSame(
+        self::assertSame(
             $this->prepareUrl('/?x=y'),
             Url::to(['/site/index', 'x' => 'y']),
             'Home URL with query parameters should have a trailing slash when a URL rule is configured for it.',
         );
 
         // Other URLs have no trailing slash
-        $this->assertSame(
+        self::assertSame(
             $this->prepareUrl('/site/test'),
             Url::to(['/site/test']),
             'Other URLs should not have a trailing slash when locale URLs are disabled.',
         );
-        $this->assertSame(
+        self::assertSame(
             $this->prepareUrl('/site/test?x=y'),
             Url::to(['/site/test', 'x' => 'y']),
             'Other URLs with query parameters should not have a trailing slash when locale URLs are disabled.',
@@ -484,7 +476,6 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'languages' => [],
             ],
         );
-
         $this->mockRequest(
             '/site/page',
             [
@@ -492,7 +483,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
             ],
         );
 
-        $this->assertSame(
+        self::assertSame(
             'en',
             Yii::$app->language,
             'Application language should default to \'en\' when no languages are configured, regardless of ' .
@@ -501,7 +492,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
 
         $request = Yii::$app->request;
 
-        $this->assertSame(
+        self::assertSame(
             'site/page',
             $request->pathInfo,
             'Request pathInfo should be \'site/page\' when no languages are configured and no language code is ' .
@@ -526,7 +517,6 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 ],
             ],
         );
-
         $this->mockRequest(
             '/site/page',
             [
@@ -534,7 +524,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
             ],
         );
 
-        $this->assertSame(
+        self::assertSame(
             'en',
             Yii::$app->language,
             'Application language should remain \'en\' when the URL matches an ignored pattern, regardless of ' .
@@ -543,7 +533,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
 
         $request = Yii::$app->request;
 
-        $this->assertSame(
+        self::assertSame(
             'site/page',
             $request->pathInfo,
             'Request pathInfo should remain \'site/page\' when the URL matches an ignored pattern and no language ' .
@@ -553,7 +543,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
         $loggerMessages = Yii::getLogger()->messages;
         $expectedMessages = array_column($loggerMessages, 0);
 
-        $this->assertContains(
+        self::assertContains(
             'Ignore pattern \'#^site/page#\' matches \'site/page.\' Skipping language processing.',
             $expectedMessages,
             'First log message should indicate that the URL is ignored due to matching an ignored pattern.',
@@ -575,9 +565,9 @@ abstract class AbstractUrlLanguageManager extends TestCase
         try {
             $this->mockRequest('/site/page');
 
-            $this->fail('Expected redirection exception was not thrown.');
+            self::fail('Expected redirection exception was not thrown.');
         } catch (Exception $e) {
-            $this->assertStringContainsString(
+            self::assertStringContainsString(
                 '/en-us-variant/site/page',
                 $e->getMessage(),
                 'Redirect URL should preserve all parts after first dash when explode limit is \'2\'.',
@@ -597,9 +587,9 @@ abstract class AbstractUrlLanguageManager extends TestCase
         try {
             $this->mockRequest('/site/page');
 
-            $this->fail('Expected redirection exception was not thrown for second test case.');
+            self::fail('Expected redirection exception was not thrown for second test case.');
         } catch (Exception $e) {
-            $this->assertStringContainsString(
+            self::assertStringContainsString(
                 '/es-mx-variant-extended/site/page',
                 $e->getMessage(),
                 'Redirect URL should handle multiple dashes correctly with explode limit of \'2\'.',
@@ -619,10 +609,9 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'languages' => ['en-US', 'en', 'de'],
             ],
         );
-
         $this->mockRequest('/');
 
-        $this->assertSame(
+        self::assertSame(
             'en',
             Yii::$app->language,
             'Application language should default to \'en\' when no language code is specified in the URL.',
@@ -630,7 +619,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
 
         $request = Yii::$app->request;
 
-        $this->assertSame(
+        self::assertSame(
             '',
             $request->pathInfo,
             'Request pathInfo should be empty when no language code is specified and the URL is root (\'/\').',
@@ -649,15 +638,14 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'languages' => ['en-US', 'en', 'de'],
             ],
         );
-
         $this->mockRequest('/en-us/site/page');
 
-        $this->assertSame(
+        self::assertSame(
             'en-US',
             Yii::$app->language,
             'Application language should be set to \'en-US\' when the language code is present in the URL.',
         );
-        $this->assertSame(
+        self::assertSame(
             'en-US',
             Yii::$app->session->get('_language'),
             'Session \'_language\' should be set to \'en-US\' when the language code is present in the URL.',
@@ -665,11 +653,11 @@ abstract class AbstractUrlLanguageManager extends TestCase
 
         $cookie = Yii::$app->response->cookies->get('_language');
 
-        $this->assertNotNull(
+        self::assertNotNull(
             $cookie,
             'Language cookie should be set when the language code is present in the URL.',
         );
-        $this->assertSame(
+        self::assertSame(
             'en-US',
             $cookie->value,
             'Language cookie value should be \'en-US\' when the language code is present in the URL.',
@@ -677,7 +665,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
 
         $request = Yii::$app->request;
 
-        $this->assertSame(
+        self::assertSame(
             'site/page',
             $request->pathInfo,
             'Request pathInfo should be \'site/page\' after the language code is removed from the URL.',
@@ -696,16 +684,15 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'languages' => ['en-US', 'de-*'],
             ],
         );
-
         $this->mockRequest('/de/site/page');
 
-        $this->assertSame(
+        self::assertSame(
             'de',
             Yii::$app->language,
             'Application language should be set to \'de\' when the language code matches a wildcard in the ' .
             'configuration.',
         );
-        $this->assertSame(
+        self::assertSame(
             'de',
             Yii::$app->session->get('_language'),
             'Session \'_language\' should be set to \'de\' when the language code matches a wildcard in the ' .
@@ -714,11 +701,11 @@ abstract class AbstractUrlLanguageManager extends TestCase
 
         $cookie = Yii::$app->response->cookies->get('_language');
 
-        $this->assertNotNull(
+        self::assertNotNull(
             $cookie,
             'Language cookie should be set when the language code matches a wildcard in the configuration.',
         );
-        $this->assertSame(
+        self::assertSame(
             'de',
             $cookie->value,
             'Language cookie value should be \'de\' when the language code matches a wildcard in the configuration.',
@@ -726,7 +713,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
 
         $request = Yii::$app->request;
 
-        $this->assertSame(
+        self::assertSame(
             'site/page',
             $request->pathInfo,
             'Request pathInfo should be \'site/page\' after the language code is removed from the URL when matching ' .
@@ -747,16 +734,15 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'keepUppercaseLanguageCode' => true,
             ],
         );
-
         $this->mockRequest('/en-US/site/page');
 
-        $this->assertSame(
+        self::assertSame(
             'en-US',
             Yii::$app->language,
             'Application language should be set to \'en-US\' when the language code is present in the URL and ' .
             'uppercase is enabled.',
         );
-        $this->assertSame(
+        self::assertSame(
             'en-US',
             Yii::$app->session->get('_language'),
             'Session \'_language\' should be set to \'en-US\' when the language code is present in the URL and ' .
@@ -765,11 +751,11 @@ abstract class AbstractUrlLanguageManager extends TestCase
 
         $cookie = Yii::$app->response->cookies->get('_language');
 
-        $this->assertNotNull(
+        self::assertNotNull(
             $cookie,
             'Language cookie should be set when the language code is present in the URL and uppercase is enabled.',
         );
-        $this->assertSame(
+        self::assertSame(
             'en-US',
             $cookie->value,
             'Language cookie value should be \'en-US\' when the language code is present in the URL and uppercase is ' .
@@ -778,7 +764,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
 
         $request = Yii::$app->request;
 
-        $this->assertSame(
+        self::assertSame(
             'site/page',
             $request->pathInfo,
             'Request pathInfo should be \'site/page\' after the language code is removed from the URL and uppercase ' .
@@ -798,16 +784,15 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'languages' => ['en', 'en-US', 'de'],
             ],
         );
-
         $this->mockRequest('/en-us/site/page');
 
-        $this->assertSame(
+        self::assertSame(
             'en-US',
             Yii::$app->language,
             'Application language should be set to \'en-US\' when the language code is present in the URL and ' .
             'matches the order in the configuration.',
         );
-        $this->assertSame(
+        self::assertSame(
             'en-US',
             Yii::$app->session->get('_language'),
             'Session \'_language\' should be set to \'en-US\' when the language code is present in the URL and ' .
@@ -816,12 +801,12 @@ abstract class AbstractUrlLanguageManager extends TestCase
 
         $cookie = Yii::$app->response->cookies->get('_language');
 
-        $this->assertNotNull(
+        self::assertNotNull(
             $cookie,
             'Language cookie should be set when the language code is present in the URL and matches the order in the ' .
             'configuration.',
         );
-        $this->assertSame(
+        self::assertSame(
             'en-US',
             $cookie->value,
             'Language cookie value should be \'en-US\' when the language code is present in the URL and matches the ' .
@@ -830,7 +815,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
 
         $request = Yii::$app->request;
 
-        $this->assertSame(
+        self::assertSame(
             'site/page',
             $request->pathInfo,
             'Request pathInfo should be \'site/page\' after the language code is removed from the URL and matches ' .
@@ -838,6 +823,9 @@ abstract class AbstractUrlLanguageManager extends TestCase
         );
     }
 
+    /**
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     */
     public function testThrowInvalidConfigExceptionWhenEnablePrettyUrlIsFalse(): void
     {
         $this->mockWebApplication();
@@ -853,6 +841,9 @@ abstract class AbstractUrlLanguageManager extends TestCase
         );
     }
 
+    /**
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     */
     public function testThrowNotFoundHttpExceptionWhenUrlIsInvalid(): void
     {
         $this->mockUrlLanguageManager(
@@ -862,13 +853,13 @@ abstract class AbstractUrlLanguageManager extends TestCase
                 'enableStrictParsing' => true,
             ],
         );
-
         $this->mockWebApplication();
 
         $_COOKIE['_language'] = 'de';
 
         $urlManager = Yii::$app->urlManager;
         $request = Yii::$app->request;
+
         $request->setUrl('/de/invalid-url');
 
         $this->expectException(NotFoundHttpException::class);
