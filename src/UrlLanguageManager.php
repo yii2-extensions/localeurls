@@ -57,21 +57,6 @@ use function usort;
  * - Redirects to canonical URLs based on language and configuration.
  * - Transparent persistence of language selection in session and cookie.
  *
- * Usage example:
- * ```php
- * $manager = new UrlLanguageManager(
- *     [
- *         'languages' => ['en', 'fr', 'de', 'ru' => 'ru'],
- *         'enableLocaleUrls' => true,
- *         'enableLanguageDetection' => true,
- *         'enableLanguagePersistence' => true,
- *     ],
- * );
- *
- * // Generates /fr/site/index for French
- * $url = $manager->createUrl(['site/index', 'language' => 'fr']);
- * ```
- *
  * @see LanguageChangedEvent for event details when language changes.
  * @see UrlManager for base URL management and routing.
  *
