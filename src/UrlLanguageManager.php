@@ -309,6 +309,7 @@ class UrlLanguageManager extends UrlManager
      * @return string the created URL with the appropriate language handling applied.
      *
      * @phpstan-param array<string, string>|string $params
+     *
      * @phpstan-ignore method.childParameterType
      */
     public function createUrl($params): string
