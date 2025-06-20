@@ -21,18 +21,6 @@ use yii\base\Event;
  * - Provides the previous language code via {@see LanguageChangedEvent::oldLanguage}.
  * - Supports null for the old language if not previously set.
  *
- * Usage example:
- * ```php
- * Event::on(
- *     SomeComponent::class,
- *     SomeComponent::EVENT_LANGUAGE_CHANGED,
- *     static function (LanguageChangedEvent $event) {
- *         $new = $event->language;
- *         $old = $event->oldLanguage;
- *     }
- * );
- * ```
- *
  * @see Event for base event.
  *
  * @copyright Copyright (C) 2023 Terabytesoftw.
