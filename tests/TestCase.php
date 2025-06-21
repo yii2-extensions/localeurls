@@ -176,9 +176,12 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
                 [
                     'id' => 'app',
                     'basePath' => __DIR__,
-                    'bootstrap' => ['log'],
+                    'bootstrap' => [
+                        'log',
+                    ],
                     'language' => 'en',
-                    'vendorPath' => __DIR__ . '/../vendor/',
+                    'runtimePath' => dirname(__DIR__) . '/runtime/',
+                    'vendorPath' => dirname(__DIR__) . '/vendor/',
                     'components' => [
                         'log' => [
                             'traceLevel' => 0,
