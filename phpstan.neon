@@ -8,7 +8,6 @@ parameters:
     excludePaths:
         analyse:
             - tests/stub/*
-            - tests/runtime/*
 
     level: max
 
@@ -16,7 +15,7 @@ parameters:
         - src
         - tests
 
-    tmpDir: %currentWorkingDirectory%/tests/runtime
+    tmpDir: %currentWorkingDirectory%/runtime
 
     yii2:
         config_path: %currentWorkingDirectory%/tests/phpstan-config.php

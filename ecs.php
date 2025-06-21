@@ -57,9 +57,4 @@ return ECSConfig::configure()
             OrderedTraitsFixer::class,
             SingleQuoteFixer::class,
         ]
-    )
-    ->withSkip(
-        [
-            __DIR__ . '/tests/runtime',
-        ],
     );
