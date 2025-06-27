@@ -1,5 +1,7 @@
 # Change Log
 
+## 0.1.2 Under development
+
 ## 0.1.1 June 27, 2025
 
 - Bug #19: Improve language in comments for clarity and consistency in `LanguageChangedEvent.php` and `UrlLanguageManager.php` (@terabytesoftw)
