@@ -7,9 +7,6 @@
 </p>
 
 <p align="center">
-    <a href="https://github.com/yii2-extensions/localeurls/releases" target="_blank">
-        <img src="https://img.shields.io/github/v/release/yii2-extensions/localeurls?color=blue" alt="GitHub Release">
-    </a>
     <a href="https://www.php.net/releases/8.1/en.php" target="_blank">
         <img src="https://img.shields.io/badge/PHP-%3E%3D8.1-787CB5" alt="PHP Version">
     </a>
@@ -148,13 +145,15 @@ For detailed configuration options and advanced usage patterns.
 
 ## Quality code
 
+[![Latest Stable Version](http://poser.pugx.org/yii2-extensions/localeurls/v)](https://github.com/yii2-extensions/localeurls/releases)
+[![Total Downloads](http://poser.pugx.org/yii2-extensions/localeurls/downloads)](https://packagist.org/packages/yii2-extensions/localeurls)
 [![codecov](https://codecov.io/gh/yii2-extensions/localeurls/graph/badge.svg?token=lYVGC7ZVCu)](https://codecov.io/gh/yii2-extensions/localeurls)
 [![phpstan-level](https://img.shields.io/badge/PHPStan%20level-max-blue)](https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml)
 [![StyleCI](https://github.styleci.io/repos/711867018/shield?branch=main)](https://github.styleci.io/repos/711867018?branch=main)
 
 ## Our social networks
 
-[![Twitter](https://img.shields.io/badge/twitter-follow-1DA1F2?logo=twitter&logoColor=1DA1F2&labelColor=555555?style=flat)](https://twitter.com/Terabytesoftw)
+[![X](https://img.shields.io/badge/follow-@terabytesoftw-1DA1F2?logo=x&logoColor=1DA1F2&labelColor=555555?style=flat)](https://x.com/Terabytesoftw)
 
 ## License
 
