@@ -8,12 +8,10 @@
         "locale"
     ],
     "license": "BSD-3-Clause",
-    "minimum-stability": "dev",
-    "prefer-stable": true,
     "require": {
         "php": ">=8.1",
         "ext-mbstring": "*",
-        "yiisoft/yii2": "^2.0.52 || ^22"
+        "yiisoft/yii2": "^2.0.53|^22"
     },
     "require-dev": {
         "infection/infection": "^0.27|^0.29",
@@ -24,7 +22,7 @@
         "phpunit/phpunit": "^10.5",
         "rector/rector": "^2.0",
         "symplify/easy-coding-standard": "^12.3",
-        "yii2-extensions/phpstan": "dev-main"
+        "yii2-extensions/phpstan": "^0.3.0"
     },
     "autoload": {
         "psr-4": {
