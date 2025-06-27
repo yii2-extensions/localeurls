@@ -27,10 +27,7 @@
     </a>    
     <a href="https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml" target="_blank">        
         <img src="https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml/badge.svg" alt="Static Analysis">
-    </a>
-    <a href="https://codecov.io/gh/yii2-extensions/localeurls" target="_blank">
-        <img src="https://codecov.io/gh/yii2-extensions/localeurls/graph/badge.svg?token=hLDHtLBgqV" alt="Codecov">
-    </a>   
+    </a>  
 </p>
 
 A powerful URL manager extension that provides transparent language detection, persistence, and locale-aware URL
@@ -151,6 +148,7 @@ For detailed configuration options and advanced usage patterns.
 
 ## Quality code
 
+[![codecov](https://codecov.io/gh/yii2-extensions/localeurls/graph/badge.svg?token=lYVGC7ZVCu)](https://codecov.io/gh/yii2-extensions/localeurls)
 [![phpstan-level](https://img.shields.io/badge/PHPStan%20level-max-blue)](https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml)
 [![StyleCI](https://github.styleci.io/repos/711867018/shield?branch=main)](https://github.styleci.io/repos/711867018?branch=main)
 
