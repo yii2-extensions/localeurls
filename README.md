@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-    <a href="https://github.com/yii2-extensions/phpstan" target="_blank">
+    <a href="https://github.com/yii2-extensions/localeurls/releases" target="_blank">
         <img src="https://img.shields.io/github/v/release/yii2-extensions/localeurls?color=blue" alt="GitHub Release">
     </a>
     <a href="https://www.php.net/releases/8.1/en.php" target="_blank">
