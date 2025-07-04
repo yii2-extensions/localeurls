@@ -1,6 +1,9 @@
 # Change Log
 
-## 0.1.2 Under development
+## 0.1.2 July 4, 2025
+
+- Bug #24: Update mutation workflow configuration and remove obsolete infection.json.dist file (@terabytesoftw)
+- Bug #25: Update README.md and installation documentation for clarity and consistency (@terabytesoftw)
 
 ## 0.1.1 June 27, 2025
 
