@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://github.com/yii2-extensions/localeurls" target="_blank">
-        <img src="https://www.yiiframework.com/image/yii_logo_light.svg" height="100px;" alt="Yii Framework">
+        <img src="https://www.yiiframework.com/image/yii_logo_light.svg" alt="Yii Framework">
     </a>
     <h1 align="center">Locale URLs</h1>
     <br>
