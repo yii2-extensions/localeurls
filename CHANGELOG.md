@@ -2,6 +2,8 @@
 
 ## 0.1.3 Under development
 
+- Bug #26: Order class elements in methods and properties (@terabytesoftw)
+
 ## 0.1.2 July 4, 2025
 
 - Bug #24: Update mutation workflow configuration and remove obsolete infection.json.dist file (@terabytesoftw)

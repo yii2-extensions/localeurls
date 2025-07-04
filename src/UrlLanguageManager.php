@@ -155,15 +155,11 @@ class UrlLanguageManager extends UrlManager
     public array $ignoreLanguageUrlPatterns = [];
 
     /**
-     * List of available language codes.
+     * Whether to keep upper case language codes in URL.
      *
-     * More specific patterns should come first, for example, `en_us` before `en`.
-     *
-     * This can also contain mapping of `<url_value> => <language>`, (for example, `'english' => 'en'`).
-     *
-     * @phpstan-var array<array-key, string>
+     * Default is `false` which will, for example, redirect `de-AT` to `de-at`.
      */
-    public array $languages = [];
+    public bool $keepUppercaseLanguageCode = false;
 
     /**
      * Number of seconds how long the language information should be stored in cookie.
@@ -200,16 +196,20 @@ class UrlLanguageManager extends UrlManager
     public int $languageRedirectCode = 302;
 
     /**
+     * List of available language codes.
+     *
+     * More specific patterns should come first, for example, `en_us` before `en`.
+     *
+     * This can also contain mapping of `<url_value> => <language>`, (for example, `'english' => 'en'`).
+     *
+     * @phpstan-var array<array-key, string>
+     */
+    public array $languages = [];
+
+    /**
      * Name of the session key that is used to store the language. If `false` no session is used.
      */
     public string|bool $languageSessionKey = '_language';
-
-    /**
-     * Whether to keep upper case language codes in URL.
-     *
-     * Default is `false` which will, for example, redirect `de-AT` to `de-at`.
-     */
-    public bool $keepUppercaseLanguageCode = false;
 
     /**
      * Language that was initially set in the application configuration.
@@ -225,81 +225,6 @@ class UrlLanguageManager extends UrlManager
      * Request object that is currently being processed.
      */
     protected Request|null $_request = null;
-
-    /**
-     * @throws InvalidConfigException if the configuration is invalid or incomplete.
-     */
-    public function init(): void
-    {
-        if ($this->enableLocaleUrls && $this->languages !== [] && $this->enablePrettyUrl === false) {
-            throw new InvalidConfigException('Locale URL support requires enablePrettyUrl to be set to true.');
-        }
-
-        $this->_defaultLanguage = Yii::$app->language;
-
-        parent::init();
-    }
-
-    /**
-     * Returns the application's default language as set in the initial configuration.
-     *
-     * @return string Language code initially set in the application configuration (for example, 'en', 'fr').
-     */
-    public function getDefaultLanguage(): string
-    {
-        return $this->_defaultLanguage;
-    }
-
-    /**
-     * @throws Exception if an unexpected error occurs during execution.
-     * @throws ExitException if execution should be halted without exiting the process.
-     * @throws InvalidConfigException if the configuration is invalid or incomplete.
-     * @throws NotFoundHttpException if the requested resource can't be found.
-     *
-     * @return array|bool Parsed request parameters or `false` if parsing failed.
-     *
-     * @phpstan-return array<string>|bool
-     */
-    public function parseRequest($request): array|bool
-    {
-        if ($this->enableLocaleUrls && $this->languages !== []) {
-            $process = true;
-
-            if ($this->ignoreLanguageUrlPatterns !== []) {
-                $pathInfo = $request->getPathInfo();
-
-                foreach ($this->ignoreLanguageUrlPatterns as $pattern) {
-                    if (preg_match($pattern, $pathInfo) !== 0) {
-                        $message = "Ignore pattern '{$pattern}' matches '{$pathInfo}.' Skipping language processing.";
-
-                        Yii::debug($message, __METHOD__);
-
-                        $process = false;
-                    }
-                }
-            }
-
-            if ($process && $this->_processed === false) {
-                // Check if a normalizer wants to redirect
-                $normalized = false;
-
-                if ($this->normalizer !== false) {
-                    try {
-                        parent::parseRequest($request);
-                    } catch (Throwable) {
-                        $normalized = true;
-                    }
-                }
-
-                $this->_processed = true;
-
-                $this->processLocaleUrl($normalized);
-            }
-        }
-
-        // @phpstan-ignore return.type
-        return parent::parseRequest($request);
-    }
 
     /**
      * @param array|string $params Parameters to be used for URL creation.
@@ -428,6 +353,281 @@ class UrlLanguageManager extends UrlManager
     }
 
     /**
+     * Returns the application's default language as set in the initial configuration.
+     *
+     * @return string Language code initially set in the application configuration (for example, 'en', 'fr').
+     */
+    public function getDefaultLanguage(): string
+    {
+        return $this->_defaultLanguage;
+    }
+
+    /**
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     */
+    public function init(): void
+    {
+        if ($this->enableLocaleUrls && $this->languages !== [] && $this->enablePrettyUrl === false) {
+            throw new InvalidConfigException('Locale URL support requires enablePrettyUrl to be set to true.');
+        }
+
+        $this->_defaultLanguage = Yii::$app->language;
+
+        parent::init();
+    }
+
+    /**
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws ExitException if execution should be halted without exiting the process.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
+     *
+     * @return array|bool Parsed request parameters or `false` if parsing failed.
+     *
+     * @phpstan-return array<string>|bool
+     */
+    public function parseRequest($request): array|bool
+    {
+        if ($this->enableLocaleUrls && $this->languages !== []) {
+            $process = true;
+
+            if ($this->ignoreLanguageUrlPatterns !== []) {
+                $pathInfo = $request->getPathInfo();
+
+                foreach ($this->ignoreLanguageUrlPatterns as $pattern) {
+                    if (preg_match($pattern, $pathInfo) !== 0) {
+                        $message = "Ignore pattern '{$pattern}' matches '{$pathInfo}.' Skipping language processing.";
+
+                        Yii::debug($message, __METHOD__);
+
+                        $process = false;
+                    }
+                }
+            }
+
+            if ($process && $this->_processed === false) {
+                // Check if a normalizer wants to redirect
+                $normalized = false;
+
+                if ($this->normalizer !== false) {
+                    try {
+                        parent::parseRequest($request);
+                    } catch (Throwable) {
+                        $normalized = true;
+                    }
+                }
+
+                $this->_processed = true;
+
+                $this->processLocaleUrl($normalized);
+            }
+        }
+
+        // @phpstan-ignore return.type
+        return parent::parseRequest($request);
+    }
+
+    /**
+     * Detects the preferred language from the current request using browser headers or GeoIP information.
+     *
+     * This method attempts to determine the most appropriate language for the user by checking, in order:
+     * - The `Accept-Language` HTTP header sent by the browser, matching it against configured languages and wildcards.
+     * - The GeoIP country code (if available and configured), mapping it to a language if a match is found.
+     *
+     * This detection is used as a fallback when no language is found in the URL or persisted storage, ensuring users
+     * are served content in their likely preferred language.
+     *
+     * @return string|null Detected language code, or `null` if no suitable language is found.
+     */
+    protected function detectLanguage(): string|null
+    {
+        if ($this->enableLanguageDetection) {
+            /** @phpstan-var list<string> $acceptableLanguages */
+            $acceptableLanguages = $this->ensureRequest()->getAcceptableLanguages();
+
+            foreach ($acceptableLanguages as $acceptable) {
+                [$language, $country] = $this->matchCode($acceptable);
+
+                if ($language !== null) {
+                    $language = $country === null ? $language : "$language-$country";
+                    Yii::debug("Detected browser language '{$language}'.", __METHOD__);
+
+                    return $language;
+                }
+            }
+        }
+
+        if (isset($_SERVER[$this->geoIpServerVar])) {
+            foreach ($this->geoIpLanguageCountries as $key => $codes) {
+                $country = $_SERVER[$this->geoIpServerVar];
+
+                if (in_array($country, $codes, true)) {
+                    Yii::debug("Detected GeoIp language '{$key}'.", __METHOD__);
+
+                    return $key;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Retrieves the persisted language code from session or cookie storage, if available.
+     *
+     * This method checks for a previously stored language preference in the user session (if enabled) and then in the
+     * language cookie.
+     *
+     * This mechanism allows the application to remember a user's language choice across requests and browser sessions,
+     * supporting seamless language persistence and user experience.
+     *
+     * @return string|null Persisted language code, or `null` if none is found in session or cookie.
+     */
+    protected function loadPersistedLanguage(): string|null
+    {
+        if (is_string($this->languageSessionKey)) {
+            $language = Yii::$app->session->get($this->languageSessionKey);
+
+            if (is_string($language)) {
+                Yii::debug("Found persisted language '$language' in session.", __METHOD__);
+
+                return $language;
+            }
+        }
+
+        $language = $this->ensureRequest()->getCookies()->getValue($this->languageCookieName);
+
+        if (is_string($language)) {
+            Yii::debug("Found persisted language '$language' in cookie.", __METHOD__);
+
+            return $language;
+        }
+
+        return null;
+    }
+
+    /**
+     * Determines if the provided language code matches any configured language or language pattern.
+     *
+     * This method checks the given code against the list of configured languages, supporting exact matches,
+     * language-country pairs, and wildcards (for example, `en-*`).
+     *
+     * The return value is an array of the form `[$language, $country]`, where either value can be `null` if no match
+     * is found.
+     *
+     * Matching rules:
+     * - If `$code` is a single language (for example, `en`), returns `[$language, null]` if it matches an exact
+     *   language or a wildcard (for example, `en-*`).
+     * - If `$code` is a language-country pair (for example, `en-US`), returns `[$language, $country]` if it matches an
+     *   exact language-country code or a wildcard (for example, `en-*`).
+     * - If only the language part matches, returns `[$language, null]`.
+     * - If no match is found, returns `[null, null]`.
+     *
+     * This method is used to validate and normalize language codes from URLs, browser headers, or persisted values,
+     * ensuring that only supported languages are accepted and mapped correctly.
+     *
+     * @param string $code Language code to match (for example, `en`, `en-US`, `es-MX`).
+     *
+     * @return array An array with the matched language and country, or `null` values if not matched.
+     *
+     * @phpstan-return array{string|null, string|null}
+     */
+    protected function matchCode(string $code): array
+    {
+        $hasDash = str_contains($code, '-');
+        $lcCode = strtolower($code);
+        $lcLanguages = array_map('strtolower', $this->languages);
+
+        if (($key = array_search($lcCode, $lcLanguages, true)) === false) {
+            if ($hasDash) {
+                $parts = explode('-', $code, 2);
+                $language = $parts[0];
+                $country = $parts[1] ?? '';
+            } else {
+                $language = $code;
+                $country = '';
+            }
+
+            if (in_array($language . '-*', $this->languages, true)) {
+                if ($hasDash === true) {
+                    return [$language, strtoupper($country)];
+                }
+
+                return [$language, null];
+            }
+
+            if ($hasDash && in_array($language, $this->languages, true)) {
+                return [$language, null];
+            }
+
+            return [null, null];
+        }
+
+        $result = $this->languages[$key] ?? $lcCode;
+
+        if ($hasDash) {
+            $parts = explode('-', $result, 2);
+            return [$parts[0], $parts[1] ?? null];
+        }
+
+        return [$result, null];
+    }
+
+    /**
+     * Persists the given language code in the user session and/or a cookie for future requests.
+     *
+     * This method stores the provided language code in the session (if enabled) and in a cookie (if configured),
+     * allowing the application to remember the user's language preference across requests and browser sessions.
+     *
+     * If the language changes, the {@see LanguageChangedEvent} event is triggered, providing both the old and new
+     * language codes.
+     *
+     * @param string $language Language code to persist in session and cookie (for example, 'en', 'de-AT').
+     */
+    protected function persistLanguage(string $language): void
+    {
+        if ($this->hasEventHandlers(self::EVENT_LANGUAGE_CHANGED)) {
+            $oldLanguage = $this->loadPersistedLanguage();
+
+            if ($oldLanguage !== $language) {
+                Yii::debug("Triggering languageChanged event: {$oldLanguage} -> {$language}", __METHOD__);
+
+                $this->trigger(
+                    self::EVENT_LANGUAGE_CHANGED,
+                    new LanguageChangedEvent(
+                        [
+                            'oldLanguage' => $oldLanguage,
+                            'language' => $language,
+                        ],
+                    ),
+                );
+            }
+        }
+
+        if (is_string($this->languageSessionKey)) {
+            Yii::$app->session->set($this->languageSessionKey, $language);
+            Yii::debug("Persisting language '$language' in session.", __METHOD__);
+        }
+
+        if ($this->languageCookieDuration > 0) {
+            $cookie = new Cookie(
+                array_merge(
+                    ['httpOnly' => true],
+                    $this->languageCookieOptions,
+                    [
+                        'name' => $this->languageCookieName,
+                        'value' => $language,
+                        'expire' => time() + $this->languageCookieDuration,
+                    ],
+                ),
+            );
+
+            Yii::$app->getResponse()->cookies->add($cookie);
+            Yii::debug("Persisting language '{$language}' in cookie.", __METHOD__);
+        }
+    }
+
+    /**
      * Processes the current request to extract and apply a language or locale code from the URL, session, cookie, or
      * browser settings.
      *
@@ -545,203 +745,22 @@ class UrlLanguageManager extends UrlManager
     }
 
     /**
-     * Persists the given language code in the user session and/or a cookie for future requests.
+     * Ensures a request instance is available for language processing operations.
      *
-     * This method stores the provided language code in the session (if enabled) and in a cookie (if configured),
-     * allowing the application to remember the user's language preference across requests and browser sessions.
+     * This method provides lazy initialization of the request object, retrieving it from the Yii application instance
+     * only when needed and caching it for later calls.
      *
-     * If the language changes, the {@see LanguageChangedEvent} event is triggered, providing both the old and new
-     * language codes.
+     * The method uses the null coalescing assignment operator to efficiently handle the initialization, avoiding
+     * multiple calls to `Yii::$app->request` during the same request lifecycle.
      *
-     * @param string $language Language code to persist in session and cookie (for example, 'en', 'de-AT').
+     * This approach improves performance by preventing repeated access to the application's request component while
+     * ensuring the request object is always available for URL parsing, language detection, and redirect operations.
+     *
+     * @return Request The current HTTP request instance from the Yii application.
      */
-    protected function persistLanguage(string $language): void
+    private function ensureRequest(): Request
     {
-        if ($this->hasEventHandlers(self::EVENT_LANGUAGE_CHANGED)) {
-            $oldLanguage = $this->loadPersistedLanguage();
-
-            if ($oldLanguage !== $language) {
-                Yii::debug("Triggering languageChanged event: {$oldLanguage} -> {$language}", __METHOD__);
-
-                $this->trigger(
-                    self::EVENT_LANGUAGE_CHANGED,
-                    new LanguageChangedEvent(
-                        [
-                            'oldLanguage' => $oldLanguage,
-                            'language' => $language,
-                        ],
-                    ),
-                );
-            }
-        }
-
-        if (is_string($this->languageSessionKey)) {
-            Yii::$app->session->set($this->languageSessionKey, $language);
-            Yii::debug("Persisting language '$language' in session.", __METHOD__);
-        }
-
-        if ($this->languageCookieDuration > 0) {
-            $cookie = new Cookie(
-                array_merge(
-                    ['httpOnly' => true],
-                    $this->languageCookieOptions,
-                    [
-                        'name' => $this->languageCookieName,
-                        'value' => $language,
-                        'expire' => time() + $this->languageCookieDuration,
-                    ],
-                ),
-            );
-
-            Yii::$app->getResponse()->cookies->add($cookie);
-            Yii::debug("Persisting language '{$language}' in cookie.", __METHOD__);
-        }
-    }
-
-    /**
-     * Retrieves the persisted language code from session or cookie storage, if available.
-     *
-     * This method checks for a previously stored language preference in the user session (if enabled) and then in the
-     * language cookie.
-     *
-     * This mechanism allows the application to remember a user's language choice across requests and browser sessions,
-     * supporting seamless language persistence and user experience.
-     *
-     * @return string|null Persisted language code, or `null` if none is found in session or cookie.
-     */
-    protected function loadPersistedLanguage(): string|null
-    {
-        if (is_string($this->languageSessionKey)) {
-            $language = Yii::$app->session->get($this->languageSessionKey);
-
-            if (is_string($language)) {
-                Yii::debug("Found persisted language '$language' in session.", __METHOD__);
-
-                return $language;
-            }
-        }
-
-        $language = $this->ensureRequest()->getCookies()->getValue($this->languageCookieName);
-
-        if (is_string($language)) {
-            Yii::debug("Found persisted language '$language' in cookie.", __METHOD__);
-
-            return $language;
-        }
-
-        return null;
-    }
-
-    /**
-     * Detects the preferred language from the current request using browser headers or GeoIP information.
-     *
-     * This method attempts to determine the most appropriate language for the user by checking, in order:
-     * - The `Accept-Language` HTTP header sent by the browser, matching it against configured languages and wildcards.
-     * - The GeoIP country code (if available and configured), mapping it to a language if a match is found.
-     *
-     * This detection is used as a fallback when no language is found in the URL or persisted storage, ensuring users
-     * are served content in their likely preferred language.
-     *
-     * @return string|null Detected language code, or `null` if no suitable language is found.
-     */
-    protected function detectLanguage(): string|null
-    {
-        if ($this->enableLanguageDetection) {
-            /** @phpstan-var list<string> $acceptableLanguages */
-            $acceptableLanguages = $this->ensureRequest()->getAcceptableLanguages();
-
-            foreach ($acceptableLanguages as $acceptable) {
-                [$language, $country] = $this->matchCode($acceptable);
-
-                if ($language !== null) {
-                    $language = $country === null ? $language : "$language-$country";
-                    Yii::debug("Detected browser language '{$language}'.", __METHOD__);
-
-                    return $language;
-                }
-            }
-        }
-
-        if (isset($_SERVER[$this->geoIpServerVar])) {
-            foreach ($this->geoIpLanguageCountries as $key => $codes) {
-                $country = $_SERVER[$this->geoIpServerVar];
-
-                if (in_array($country, $codes, true)) {
-                    Yii::debug("Detected GeoIp language '{$key}'.", __METHOD__);
-
-                    return $key;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Determines if the provided language code matches any configured language or language pattern.
-     *
-     * This method checks the given code against the list of configured languages, supporting exact matches,
-     * language-country pairs, and wildcards (for example, `en-*`).
-     *
-     * The return value is an array of the form `[$language, $country]`, where either value can be `null` if no match
-     * is found.
-     *
-     * Matching rules:
-     * - If `$code` is a single language (for example, `en`), returns `[$language, null]` if it matches an exact
-     *   language or a wildcard (for example, `en-*`).
-     * - If `$code` is a language-country pair (for example, `en-US`), returns `[$language, $country]` if it matches an
-     *   exact language-country code or a wildcard (for example, `en-*`).
-     * - If only the language part matches, returns `[$language, null]`.
-     * - If no match is found, returns `[null, null]`.
-     *
-     * This method is used to validate and normalize language codes from URLs, browser headers, or persisted values,
-     * ensuring that only supported languages are accepted and mapped correctly.
-     *
-     * @param string $code Language code to match (for example, `en`, `en-US`, `es-MX`).
-     *
-     * @return array An array with the matched language and country, or `null` values if not matched.
-     *
-     * @phpstan-return array{string|null, string|null}
-     */
-    protected function matchCode(string $code): array
-    {
-        $hasDash = str_contains($code, '-');
-        $lcCode = strtolower($code);
-        $lcLanguages = array_map('strtolower', $this->languages);
-
-        if (($key = array_search($lcCode, $lcLanguages, true)) === false) {
-            if ($hasDash) {
-                $parts = explode('-', $code, 2);
-                $language = $parts[0];
-                $country = $parts[1] ?? '';
-            } else {
-                $language = $code;
-                $country = '';
-            }
-
-            if (in_array($language . '-*', $this->languages, true)) {
-                if ($hasDash === true) {
-                    return [$language, strtoupper($country)];
-                }
-
-                return [$language, null];
-            }
-
-            if ($hasDash && in_array($language, $this->languages, true)) {
-                return [$language, null];
-            }
-
-            return [null, null];
-        }
-
-        $result = $this->languages[$key] ?? $lcCode;
-
-        if ($hasDash) {
-            $parts = explode('-', $result, 2);
-            return [$parts[0], $parts[1] ?? null];
-        }
-
-        return [$result, null];
+        return $this->_request ??= Yii::$app->request;
     }
 
     /**
@@ -822,24 +841,5 @@ class UrlLanguageManager extends UrlManager
         }
 
         Yii::$app->end();
-    }
-
-    /**
-     * Ensures a request instance is available for language processing operations.
-     *
-     * This method provides lazy initialization of the request object, retrieving it from the Yii application instance
-     * only when needed and caching it for later calls.
-     *
-     * The method uses the null coalescing assignment operator to efficiently handle the initialization, avoiding
-     * multiple calls to `Yii::$app->request` during the same request lifecycle.
-     *
-     * This approach improves performance by preventing repeated access to the application's request component while
-     * ensuring the request object is always available for URL parsing, language detection, and redirect operations.
-     *
-     * @return Request The current HTTP request instance from the Yii application.
-     */
-    private function ensureRequest(): Request
-    {
-        return $this->_request ??= Yii::$app->request;
     }
 }

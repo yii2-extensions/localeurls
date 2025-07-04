@@ -70,6 +70,15 @@ final class EventTest extends TestCase
         $this->expectedOldLanguage = null;
     }
 
+    public function languageChangedHandler(LanguageChangedEvent $event): void
+    {
+        self::assertTrue($this->eventExpected);
+        self::assertEquals($this->expectedLanguage, $event->language);
+        self::assertEquals($this->expectedOldLanguage, $event->oldLanguage);
+
+        $this->eventFired = true;
+    }
+
     /**
      * @throws Exception if an unexpected error occurs during execution.
      * @throws InvalidConfigException if the configuration is invalid or incomplete.
@@ -276,14 +285,5 @@ final class EventTest extends TestCase
             $this->eventFired,
             'Language changed event should be fired when URL language differs from session language.',
         );
-    }
-
-    public function languageChangedHandler(LanguageChangedEvent $event): void
-    {
-        self::assertTrue($this->eventExpected);
-        self::assertEquals($this->expectedLanguage, $event->language);
-        self::assertEquals($this->expectedOldLanguage, $event->oldLanguage);
-
-        $this->eventFired = true;
     }
 }
