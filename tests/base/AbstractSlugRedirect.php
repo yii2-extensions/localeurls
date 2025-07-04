@@ -648,26 +648,6 @@ abstract class AbstractSlugRedirect extends TestCase
      * @throws InvalidConfigException if the configuration is invalid or incomplete.
      * @throws NotFoundHttpException if the requested resource can't be found.
      */
-    public function testRedirectsToLowerCaseFromUpperCaseCookie(): void
-    {
-        $this->expectRedirect('/de-at/foo/baz/bar');
-
-        $_COOKIE['_language'] = 'DE-AT';
-
-        $this->mockUrlLanguageManager(
-            [
-                'languages' => ['de-AT'],
-                'keepUppercaseLanguageCode' => false,
-            ],
-        );
-        $this->mockRequest('/foo/baz/bar');
-    }
-
-    /**
-     * @throws Exception if an unexpected error occurs during execution.
-     * @throws InvalidConfigException if the configuration is invalid or incomplete.
-     * @throws NotFoundHttpException if the requested resource can't be found.
-     */
     public function testRedirectsToLowerCaseFromAcceptLanguageHeader(): void
     {
         $this->expectRedirect('/de-at/foo/baz/bar');
@@ -683,6 +663,26 @@ abstract class AbstractSlugRedirect extends TestCase
                 'acceptableLanguages' => ['DE-AT'],
             ],
         );
+    }
+
+    /**
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
+     */
+    public function testRedirectsToLowerCaseFromUpperCaseCookie(): void
+    {
+        $this->expectRedirect('/de-at/foo/baz/bar');
+
+        $_COOKIE['_language'] = 'DE-AT';
+
+        $this->mockUrlLanguageManager(
+            [
+                'languages' => ['de-AT'],
+                'keepUppercaseLanguageCode' => false,
+            ],
+        );
+        $this->mockRequest('/foo/baz/bar');
     }
 
     /**

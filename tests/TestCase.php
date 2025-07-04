@@ -28,16 +28,16 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
     protected string $baseUrl = '';
 
     /**
+     * @var bool Whether to show the script name in generated URLs.
+     */
+    protected bool $showScriptName = false;
+
+    /**
      * UrlManager component configuration for test scenarios.
      *
      * @phpstan-var array<string, mixed>|false|string
      */
     protected array|false|string $urlManager = [];
-
-    /**
-     * @var bool Whether to show the script name in generated URLs.
-     */
-    protected bool $showScriptName = false;
 
     protected function setUp(): void
     {
