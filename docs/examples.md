@@ -17,7 +17,7 @@ use yii\web\Controller;
 
 final class SiteController extends Controller
 {
-    // URLs are automatically localized based on current language
+    // URLs are automatically localized based on the current language
     public function actionIndex(): string
     {
         // /en/ (if current language is 'en')
@@ -125,7 +125,7 @@ class LanguageSwitcher extends Widget
             $isActive = $currentLanguage === $languageCode;
             $class = $isActive ? 'active' : '';
             
-            // Generate URL for current page in different language
+            // Generate URL of current page in different language
             $url = Url::current(['language' => $languageCode]);
             
             $links[] = Html::a(

@@ -14,14 +14,13 @@
         "yiisoft/yii2": "^2.0.53|^22"
     },
     "require-dev": {
-        "infection/infection": "^0.27|^0.29",
+        "infection/infection": "^0.27|^0.30",
         "maglnet/composer-require-checker": "^4.1",
-        "nikic/php-parser": "^4.1|^5.4.0",
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan-strict-rules": "^2.0.3",
         "phpunit/phpunit": "^10.5",
-        "rector/rector": "^2.0",
-        "symplify/easy-coding-standard": "^12.3",
+        "rector/rector": "^2.1",
+        "symplify/easy-coding-standard": "^12.5",
         "yii2-extensions/phpstan": "^0.3.0"
     },
     "autoload": {
@@ -51,6 +50,7 @@
         "check-dependencies": "./vendor/bin/composer-require-checker check",
         "ecs": "./vendor/bin/ecs --fix",
         "mutation": "./vendor/bin/infection --threads=4 --ignore-msi-with-no-mutations --only-covered --min-msi=100 --min-covered-msi=100",
+        "mutation-static": "./vendor/bin/infection --threads=4 --ignore-msi-with-no-mutations --only-covered --min-msi=100 --min-covered-msi=100 --static-analysis-tool=phpstan",
         "rector": "./vendor/bin/rector process src",
         "static": "./vendor/bin/phpstan --memory-limit=512M",
         "tests": "./vendor/bin/phpunit"
