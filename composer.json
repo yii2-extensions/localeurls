@@ -14,7 +14,7 @@
         "yiisoft/yii2": "^2.0.53|^22"
     },
     "require-dev": {
-        "infection/infection": "*",
+        "infection/infection": "^0.27||^0.30",
         "maglnet/composer-require-checker": "^4.1",
         "nikic/php-parser": "^4.1",
         "phpstan/extension-installer": "^1.4",
