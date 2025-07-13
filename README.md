@@ -157,7 +157,7 @@ For detailed configuration options and advanced usage patterns.
 
 ## License
 
-[![License](https://poser.pugx.org/yii2-extensions/localeurls/license)](LICENSE.md)
+[![License](https://img.shields.io/github/license/yii2-extensions/localeurls)](LICENSE.md)
 
 ## Fork 
 
