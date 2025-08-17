@@ -21,7 +21,6 @@ jobs:
   mutation:
     uses: php-forge/actions/.github/workflows/infection.yml@v1
     with:
-      command-coverage-options: --with-uncovered
       phpstan: true
     secrets:
       STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
