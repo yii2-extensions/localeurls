@@ -5,7 +5,9 @@
 - Bug #26: Order class elements in methods and properties (@terabytesoftw)
 - Bug #27: Add `case` to the ordered class elements in ECS configuration (@terabytesoftw)
 - Bug #28: Correct badge URL formatting in `README.md`(@terabytesoftw)
-- Bug #29: Update license badge URL in `README.md` and add missing header in `LICENSE.md` (@terabytesoftw)
+- Bug #29: Add missing `Composer` requirement in the installation guide (@terabytesoftw)
+- Bug #30: Update license badge URL in `README.md` and add missing header in `LICENSE.md` (@terabytesoftw)
+- Bug #32: Update `.gitattributes` to exclude additional files from the package, update `LICENSE.md`, and add stable version workflow actions (@terabytesoftw)
 
 ## 0.1.2 July 4, 2025
 
