@@ -802,7 +802,6 @@ class UrlLanguageManager extends UrlManager
             return $result;
         }
 
-        /** @phpstan-var array{0: string, 1: array<array-key, mixed>} $route */
         return $this->normalizer->normalizeRoute($result);
     }
 

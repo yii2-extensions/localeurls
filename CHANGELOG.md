@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - docs: keep prose guides in `docs/`, correct the URL examples and the language switcher, link the docs site, `llms.txt` and agent skill.
 - refactor: simplify request processing in `UrlLanguageManager`: normalize language-only URLs on the parsed route, resolve URL codes and aliases in one place, and build the redirect with a single exception site.
 - chore: rewrite the PHPDoc of `UrlLanguageManager` and `LanguageChangedEvent`, empty the `composer-require-checker.json` whitelist, analyse the whole `tests/` directory with PHPStan, and drop the unused `ext-mbstring` requirement.
+- chore: narrow the Yii PHPDoc of `UrlManager::$suffix` (`string|null`) and `UrlNormalizer::normalizeRoute()` (`[$route, $params]`) with the PHPStan stub `tests/support/yii-web.stub`, so static analysis passes on Yii `2.0.x` and `22.0` alike.
 - ci: migrate workflows to pinned `yii2-framework/actions` reusable workflows and add `quality` and `security` workflows.
 - ci: run the compatibility job against Yii `~2.0.54` on PHP 8.3 to 8.5 and the mutation job on the default PHP version.
 - chore: adopt `php-forge/coding-standard` (`ecs-83`, `rector-83`), `php-forge/baseline` metadata files and the organization `.github/linters` configuration.
@@ -37,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - chore: remove `.github` community files provided by the organization `.github` repository.
 - docs: restructure `README.md`, `docs/installation.md`, `docs/testing.md` and `docs/examples.md` to the organization layout; rename `LICENSE.md` to `LICENSE`, which now carries the standard BSD-3-Clause text instead of the customized clause 3 of the previous `LICENSE.md`.
 - docs: add the features overview SVGs (`docs/svgs/features.svg`, `features-mobile.svg`) to the README.
+- docs: state that generated URLs of the default language carry no code unless `enableDefaultLanguageUrlCode` is `true` (README quick start, `docs/examples.md`).
 - fix: order class elements in methods and properties (#26).
 - fix: add `case` to the ordered class elements in ECS configuration (#27).
 - fix: correct badge URL formatting in `README.md` (#28).

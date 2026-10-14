@@ -25,9 +25,10 @@ return [
 
 ## Creating URLs
 
-`Url::to()`, `Url::toRoute()`, and `Html::a()` with a route go through the manager, so every URL created in a view or
-a controller carries the code of the current language. The `language` parameter selects another language, and an
-alias replaces its language in the URL.
+`Url::to()`, `Url::toRoute()`, and `Html::a()` with a route go through the manager, so URLs created in a view or a
+controller carry the code of the current language, except for the default language unless
+`enableDefaultLanguageUrlCode` is `true`. The `language` parameter selects another language, and an alias replaces
+its language in the URL.
 
 ```php
 use yii\helpers\Url;

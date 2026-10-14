@@ -1,0 +1,30 @@
+<?php
+
+// Narrows Yii PHPDoc types that are imprecise for static analysis. Only the PHPDoc of the listed members is overridden;
+// the class structure still comes from the installed `yiisoft/yii2` package.
+
+namespace yii\web {
+    class UrlManager
+    {
+        /**
+         * Declared as `string` by Yii, but the property defaults to `null` until it is configured.
+         *
+         * @var string|null
+         */
+        public $suffix;
+    }
+
+    class UrlNormalizer
+    {
+        /**
+         * Receives and returns the `[$route, $params]` pair that {@see UrlManager::parseRequest()} produces.
+         *
+         * @param array{0: string, 1: array<array-key, mixed>} $route
+         *
+         * @return array{0: string, 1: array<array-key, mixed>}
+         */
+        public function normalizeRoute($route)
+        {
+        }
+    }
+}

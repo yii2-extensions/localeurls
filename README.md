@@ -50,7 +50,7 @@ Until `0.2.0` is tagged, require `^0.2@dev` instead.
 
 1. Detects the language from the URL path (`/es/about` sets Spanish).
 2. Falls back to the persisted language, then to browser headers or GeoIP, then to the default language.
-3. Adds the language prefix to all generated URLs.
+3. Adds the language code to generated URLs, except for the default language (see `enableDefaultLanguageUrlCode`).
 4. Remembers the choice in session and cookie.
 
 #### Basic configuration

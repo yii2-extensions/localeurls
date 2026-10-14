@@ -5,6 +5,9 @@ parameters:
     bootstrapFiles:
         - tests/support/bootstrap.php
 
+    stubFiles:
+        - tests/support/yii-web.stub
+
     level: max
 
     paths:
