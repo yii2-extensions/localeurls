@@ -1,36 +1,38 @@
+---
 on:
-  pull_request:
+  pull_request: &ignore-paths
     paths-ignore:
-      - 'docs/**'
-      - 'README.md'
-      - 'CHANGELOG.md'
-      - '.gitignore'
-      - '.gitattributes'
+      - ".gitattributes"
+      - ".gitignore"
+      - "CHANGELOG.md"
+      - "docs/**"
+      - "README.md"
 
-  push:
-    paths-ignore:
-      - 'docs/**'
-      - 'README.md'
-      - 'CHANGELOG.md'
-      - '.gitignore'
-      - '.gitattributes'
+  push: *ignore-paths
 
 name: build
 
+permissions:
+  contents: read
+
 jobs:
   phpunit:
-    uses: php-forge/actions/.github/workflows/phpunit.yml@v2
+    uses: yii2-framework/actions/.github/workflows/phpunit.yml@a28eb7d4ab03abd53ccd7c79014b3b27d09932ff # v2.0.1
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     with:
-      composer-command: |
-        composer require yiisoft/yii2:22.0.x-dev --prefer-dist --no-progress --no-interaction --no-scripts --ansi
+      composer-command: require yiisoft/yii2:22.0.x-dev
       concurrency-group: phpunit-${{ github.workflow }}-${{ github.ref }}
       extensions: mbstring, intl
+      php-version: '["8.3","8.4","8.5"]'
+
   phpunit-compatibility:
-    uses: php-forge/actions/.github/workflows/phpunit.yml@v2
+    uses: yii2-framework/actions/.github/workflows/phpunit.yml@a28eb7d4ab03abd53ccd7c79014b3b27d09932ff # v2.0.1
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     with:
-      concurrency-group: compatibility-${{ github.workflow }}-${{ github.ref }}
+      composer-command: require yiisoft/yii2:~2.0.54
+      concurrency-group: |
+        phpunit-compatibility-${{ github.workflow }}-${{ github.ref }}
       extensions: mbstring, intl
+      php-version: '["8.3","8.4","8.5"]'

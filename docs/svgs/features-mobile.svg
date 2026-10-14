@@ -1,0 +1,52 @@
+<!-- Mobile version - Single column -->
+<svg viewBox="0 0 620 620" width="100%" height="580" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .box-bg { fill: #e6f4ea; stroke: #a7cdb3; stroke-width: 1; }
+        .title { font-weight: 700; font-size: 14px; fill: #1a202c; }
+        .content { font-size: 11px; fill: #4a5568; }
+    </style>
+
+    <g>
+        <rect class="box-bg" x="16" y="16" width="588" height="84" rx="6"/>
+        <rect x="16" y="16" width="4" height="84" fill="#1f883d"/>
+        <text class="title" x="32" y="42">Language Detection</text>
+        <text class="content" x="32" y="66">URL code &#8226; session &#8226; cookie &#8226; Accept-Language &#8226; GeoIP</text>
+        <text class="content" x="32" y="84">Default language has no URL code unless configured</text>
+    </g>
+    <g>
+        <rect class="box-bg" x="16" y="116" width="588" height="84" rx="6"/>
+        <rect x="16" y="116" width="4" height="84" fill="#1f883d"/>
+        <text class="title" x="32" y="142">Flexible Language Setup</text>
+        <text class="content" x="32" y="166">Aliases (deutsch =&gt; de) &#8226; wildcards (es-*)</text>
+        <text class="content" x="32" y="184">Regions in any case, canonical lowercase URLs</text>
+    </g>
+    <g>
+        <rect class="box-bg" x="16" y="216" width="588" height="84" rx="6"/>
+        <rect x="16" y="216" width="4" height="84" fill="#1f883d"/>
+        <text class="title" x="32" y="242">Locale-aware URLs</text>
+        <text class="content" x="32" y="266">Url::to() adds the language code (/es/about)</text>
+        <text class="content" x="32" y="284">language parameter switches the target language</text>
+    </g>
+    <g>
+        <rect class="box-bg" x="16" y="316" width="588" height="84" rx="6"/>
+        <rect x="16" y="316" width="4" height="84" fill="#1f883d"/>
+        <text class="title" x="32" y="342">Canonical Redirects</text>
+        <text class="content" x="32" y="366">One redirect per request &#8226; configurable status</text>
+        <text class="content" x="32" y="384">Query keys preserved &#8226; ignore patterns for APIs</text>
+    </g>
+    <g>
+        <rect class="box-bg" x="16" y="416" width="588" height="84" rx="6"/>
+        <rect x="16" y="416" width="4" height="84" fill="#1f883d"/>
+        <text class="title" x="32" y="442">Persistence &amp; Events</text>
+        <text class="content" x="32" y="466">Language stored in session and cookie</text>
+        <text class="content" x="32" y="484">languageChanged event when the URL language changes</text>
+    </g>
+    <g>
+        <rect class="box-bg" x="16" y="516" width="588" height="84" rx="6"/>
+        <rect x="16" y="516" width="4" height="84" fill="#1f883d"/>
+        <text class="title" x="32" y="542">Worker-mode Safe</text>
+        <text class="content" x="32" y="566">Redirects as UrlNormalizerRedirectException, no exit()</text>
+        <text class="content" x="32" y="584">psr-bridge &#8226; FrankenPHP &#8226; RoadRunner &#8226; defaultLanguage</text>
+    </g>
+</svg>

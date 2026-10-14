@@ -6,33 +6,16 @@ namespace yii2\extensions\localeurls\tests;
 
 use PHPUnit\Framework\Attributes\Group;
 use yii2\extensions\localeurls\tests\base\AbstractUrlCreation;
+use yii2\extensions\localeurls\tests\provider\UrlCreationProvider;
+use yii2\extensions\localeurls\UrlLanguageManager;
 
 /**
- * Test suite for URL creation functionality with script name configuration.
+ * Unit tests for {@see UrlLanguageManager} URL creation with the `index.php` script name.
  *
- * Extends the base URL creation test suite to verify URL generation behavior when the script name is visible in the
- * URL manager configuration.
- *
- * This covers scenarios where applications are deployed with visible entry scripts (for example, `index.php`), ensuring
- * that generated URLs include the script name as expected.
- *
- * Test coverage.
- * - Compatibility with subdirectory and root deployments.
- * - Consistency of URL generation across different configurations.
- * - Language code placement with script name configuration.
- * - Parameter and query string handling with visible script name.
- * - Script name visibility in generated URL.
- * - SEO-friendly URL structure with script name.
- * - URL normalization and structure with script name present.
- *
- * @copyright Copyright (C) 2023 Terabytesoftw.
- * @license https://opensource.org/license/bsd-3-clause BSD 3-Clause License.
+ * {@see UrlCreationProvider} for test case data providers.
  */
 #[Group('locale-urls')]
 final class UrlCreationWithScriptNameTest extends AbstractUrlCreation
 {
-    /**
-     * Whether to show the script name in generated URL.
-     */
     protected bool $showScriptName = true;
 }

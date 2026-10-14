@@ -6,37 +6,14 @@ namespace yii2\extensions\localeurls\tests;
 
 use PHPUnit\Framework\Attributes\Group;
 use yii2\extensions\localeurls\tests\base\AbstractUrlLanguageManager;
+use yii2\extensions\localeurls\UrlLanguageManager;
 
 /**
- * Test suite for language detection, persistence, and URL parsing with both script name and base URL configuration.
- *
- * Extends the base URL language manager test suite to verify language detection, URL parsing, and generation behavior
- * when both a base URL and script name are configured in the URL manager. This covers scenarios where applications are
- * deployed in subdirectories with visible script names in URLs, ensuring correct language handling and URL
- * normalization.
- *
- * Test coverage.
- * - Base URL prefix handling in language-aware URL management.
- * - Combined base URL and script name in language detection and URL generation.
- * - Language code placement with base URL and script name configuration.
- * - Parameter and query string preservation in complex URL structures.
- * - Script name visibility in generated and parsed URL.
- * - Subdirectory deployment scenarios with language-aware routing.
- * - URL normalization and language switching with both base URL and script name.
- *
- * @copyright Copyright (C) 2023 Terabytesoftw.
- * @license https://opensource.org/license/bsd-3-clause BSD 3-Clause License.
+ * Unit tests for {@see UrlLanguageManager} language handling with the `/base` base URL and the `index.php` script name.
  */
 #[Group('locale-urls')]
 final class UrlLanguageManagerWithScriptNameAndBaseUrlTest extends AbstractUrlLanguageManager
 {
-    /**
-     * Base URL prefix for test scenarios.
-     */
     protected string $baseUrl = '/base';
-
-    /**
-     * Whether to show the script name in generated URL.
-     */
     protected bool $showScriptName = true;
 }

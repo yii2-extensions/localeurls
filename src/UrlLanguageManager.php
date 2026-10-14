@@ -4,148 +4,128 @@ declare(strict_types=1);
 
 namespace yii2\extensions\localeurls;
 
-use Throwable;
+use WeakMap;
 use Yii;
-use yii\base\{Exception, ExitException, InvalidConfigException, InvalidRouteException};
-use yii\helpers\Url;
-use yii\web\{Cookie, NotFoundHttpException, Request, UrlManager, UrlNormalizerRedirectException};
+use yii\base\InvalidConfigException;
+use yii\web\{Cookie, NotFoundHttpException, Request, UrlManager, UrlNormalizer, UrlNormalizerRedirectException};
 
-use function array_map;
+use function array_keys;
 use function array_search;
-use function array_shift;
-use function array_unshift;
 use function count;
 use function explode;
+use function implode;
 use function in_array;
 use function is_array;
 use function is_string;
-use function mb_strlen;
-use function mb_substr;
+use function method_exists;
 use function preg_match;
+use function preg_quote;
 use function rtrim;
-use function str_contains;
 use function str_ends_with;
+use function str_replace;
+use function str_starts_with;
+use function strcasecmp;
+use function strcspn;
 use function strlen;
-use function strncmp;
 use function strpos;
+use function strtolower;
 use function strtoupper;
+use function strval;
 use function substr;
 use function substr_replace;
-use function usort;
+use function time;
+use function trim;
 
 /**
- * URL manager with transparent language detection, persistence, and locale-aware URL generation.
+ * Resolves the application language from a URL code, the persisted choice, the browser, or GeoIP, and adds the language
+ * code to created URLs.
  *
- * Extends Yii {@see UrlManager} to provide automatic language detection from the URL, browser settings, session, or
- * GeoIP, and ensures the language is consistently reflected in all generated URLs.
+ * A URL without a code redirects to the persisted or detected language; a URL with the default language code redirects
+ * to the URL without it unless {@see $enableDefaultLanguageUrlCode} is `true`.
  *
- * This enables seamless multilingual support for web applications, allowing users to interact in their preferred
- * language while maintaining clean and predictable URLs.
+ * The manager keeps no per-request state and is safe for long-running workers; redirects are raised as
+ * {@see UrlNormalizerRedirectException} and handled by the application.
  *
- * The manager can persist the detected language in the user session and/or a cookie, and supports redirecting users to
- * the correct language-prefixed URL as needed.
- *
- * It also provides flexible configuration for language code formats, default language handling, and exclusion patterns
- * for routes or URLs that shouldn't be processed for localization.
- *
- * Key features:
- * - Automatic detection of language from URL, browser headers, session, cookie, or GeoIP.
- * - Configurable language code handling (case, default language prefix, aliases, wildcards).
- * - Event support for language change notifications.
- * - Exclusion patterns for routes/URLs to skip language processing.
- * - Integration with Yii pretty URLs and URL normalization.
- * - Locale-aware URL creation with language parameter injection.
- * - Redirects to canonical URLs based on language and configuration.
- * - Transparent persistence of language selection in session and cookie.
- *
- * @see LanguageChangedEvent for event details when language changes.
- * @see UrlManager for base URL management and routing.
- *
- * @copyright Copyright (C) 2023 Terabytesoftw.
- * @license https://opensource.org/license/bsd-3-clause BSD 3-Clause License.
+ * @see LanguageChangedEvent
  */
 class UrlLanguageManager extends UrlManager
 {
     /**
-     * Event triggered when the application language changes.
+     * @event LanguageChangedEvent Raised before a language from the URL that differs from the persisted one is
+     * persisted.
      */
     public const EVENT_LANGUAGE_CHANGED = 'languageChanged';
-
     /**
-     * Whether the default language should use a URL code like any other configured language.
+     * Default language: the language of URLs without a code when {@see $enableDefaultLanguageUrlCode} is `false`.
      *
-     * By default, this is `false`, so for URL without a language code, the default language is assumed.
+     * `null` captures `Yii::$app->language` in {@see init()}. Set it explicitly in long-running workers, where the
+     * application object and its language persist between requests; it is also applied to `Yii::$app->language` at the
+     * start of each request.
+     */
+    public string|null $defaultLanguage = null;
+    /**
+     * Whether the default language uses a URL code like any other language.
      *
-     * In addition, any request to a URL that contains the default language code will be redirected to the same URL
-     * without a language code. So if the default language is `fr` and a user requests `/fr/some/page` he gets
-     * redirected to `/some/page`. This way the persistent language can be reset to the default language.
-     *
-     * If this is `true`, then a URL that doesn't contain any language code will be redirected to the same URL with
-     * default language code. So if, for example, the default language is `fr`, then any request to `/some/page` will be
-     * redirected to `/fr/some/page`.
+     * When `false`, a URL without a code uses the default language, and a URL with the default code redirects to the
+     * URL without it (default `fr`: `/fr/some/page` -> `/some/page`), which also resets the persisted language. When
+     * `true`, a URL without a code redirects to the default code (`/some/page` -> `/fr/some/page`).
      */
     public bool $enableDefaultLanguageUrlCode = false;
-
     /**
-     * Whether to detect the app language from the HTTP headers (that is browser settings).
+     * Whether to detect the language from the `Accept-Language` header when the URL has no code and no language is
+     * persisted.
+     *
+     * GeoIP detection through {@see $geoIpLanguageCountries} applies regardless of this setting.
      */
     public bool $enableLanguageDetection = true;
-
     /**
-     * Whether to store the detected language in session and (optionally) a cookie.
+     * Whether to persist the language from the URL in the session and the language cookie.
      *
-     * If this is `true` (default) and a returning user tries to access any URL without a language prefix, they will be
-     * redirected to the respective stored language URL (for example, `/some/page -> /fr/some/page`).
+     * When `true`, a URL without a code redirects to the persisted language (`/some/page` -> `/fr/some/page`).
      */
     public bool $enableLanguagePersistence = true;
-
     /**
-     * Whether to enable locale URL specific features.
+     * Whether to enable language processing; when `false`, the manager behaves like {@see UrlManager}.
      */
     public bool $enableLocaleUrls = true;
-
     /**
-     * Whether to show the script name in URLs.
+     * Whether to enable pretty URLs; must be `true` while locale URLs are enabled.
+     *
+     * Declared without a native type to match {@see UrlManager::$enablePrettyUrl}.
      */
     public $enablePrettyUrl = true;
-
     /**
-     * List of GeoIP countries indexed by corresponding language code.
-     *
-     * Usage example:
+     * GeoIP country codes indexed by the language they select.
      *
      * ```php
      * [
-     *     // Set app language to 'ru' for these GeoIp countries
-     *     'ru' => ['RUS','AZE','ARM','BLR','KAZ','KGZ','MDA','TJK','TKM','UZB','UKR']
+     *     'de' => ['DEU', 'AUT'],
+     *     'ru' => ['RUS', 'BLR', 'KAZ'],
      * ]
      * ```
      *
      * @phpstan-var array<string, array<int, string>>
      */
     public array $geoIpLanguageCountries = [];
-
     /**
-     * Key in that contains the detected GeoIP country.
+     * Name of the server variable that carries the GeoIP country code.
+     *
+     * Names starting with `HTTP_` are read as the request header they represent (`HTTP_X_GEO_COUNTRY` ->
+     * `X-Geo-Country`); other names are read from `getServerParams()` when the request provides it, otherwise from
+     * `$_SERVER`.
      */
     public string $geoIpServerVar = 'HTTP_X_GEO_COUNTRY';
-
     /**
-     * List of route and URL regex patterns to ignore during language processing.
+     * Regular expressions that exclude routes and URLs from language processing.
      *
-     * The keys of the array are patterns for routes, the values are patterns for URLs.
+     * Keys match routes in {@see createUrl()}, which then adds no language code; values match the path info in
+     * {@see parseRequest()}, which then resolves no language.
      *
-     * Route patterns are checked during URL creation.
-     * - If a pattern matches, no language parameter will be added to the created URL.
-     *
-     * URL patterns are checked during processing incoming requests.
-     * - If a pattern matches, the language processing will be skipped for that URL.
-     *
-     * Usage example:
+     * The first pair assumes URL rules that map `login` and `register` to `site/login` and `site/register`.
      *
      * ```php
      * [
-     *     '#^site/(login|register)#' => '#^(login|register)#'
+     *     '#^site/(login|register)#' => '#^(login|register)#',
      *     '#^api/#' => '#^api/#',
      * ]
      * ```
@@ -153,209 +133,113 @@ class UrlLanguageManager extends UrlManager
      * @phpstan-var array<string, string>
      */
     public array $ignoreLanguageUrlPatterns = [];
-
     /**
-     * Whether to keep upper case language codes in URL.
+     * Whether to keep uppercase letters of language codes in URLs.
      *
-     * Default is `false` which will, for example, redirect `de-AT` to `de-at`.
+     * When `false`, created URLs use lowercase codes, and a URL with an uppercase country (`/de-AT/page`) or with an
+     * alias spelled differently from its configuration (`/AT/page`) redirects to the lowercase URL.
      */
     public bool $keepUppercaseLanguageCode = false;
-
     /**
-     * Number of seconds how long the language information should be stored in cookie.
-     * - If {@see LocaleUrls::enableLanguagePersistence} is `true`.
-     * - Set to `false` to disable the language cookie completely.
+     * Lifetime of the language cookie in seconds; `0` disables the cookie.
+     *
+     * Applies only when {@see $enableLanguagePersistence} is `true`.
      */
     public int $languageCookieDuration = 2592000;
-
     /**
      * Name of the language cookie.
      */
     public string $languageCookieName = '_language';
-
     /**
-     * Configuration options for the language cookie.
+     * Additional {@see Cookie} properties for the language cookie.
+     *
+     * `httpOnly` defaults to `true`; `name`, `value`, and `expire` always come from {@see $languageCookieName}, the
+     * language, and {@see $languageCookieDuration}.
      *
      * @phpstan-var array<string, bool|int|string>
      */
     public array $languageCookieOptions = [];
-
     /**
-     * If a parameter with this name is passed to any {@see LocaleUrls::createUrl} Method, the created URL will use the
-     * language specified there.
+     * Name of the {@see createUrl()} parameter that selects the language of the created URL.
      *
-     * URLs created this way can be used to switch to a different language.
-     *
-     * If no such parameter is used, the currently detected application language is used.
+     * URLs created with this parameter switch to that language; without it, the current application language is used.
      */
     public string $languageParam = 'language';
-
     /**
-     * HTTP status code. Default is `302`.
+     * HTTP status code of language redirects.
+     *
+     * Redirects caused only by the URL normalizer keep the normalizer status code.
      */
     public int $languageRedirectCode = 302;
-
     /**
-     * List of available language codes.
-     *
-     * More specific patterns should come first, for example, `en_us` before `en`.
-     *
-     * This can also contain mapping of `<url_value> => <language>`, (for example, `'english' => 'en'`).
+     * Available languages: codes (`en-US`), wildcards (`es-*`), or URL aliases mapped to codes (`'english' => 'en'`).
      *
      * @phpstan-var array<array-key, string>
      */
     public array $languages = [];
-
     /**
-     * Name of the session key that is used to store the language. If `false` no session is used.
+     * Session key that stores the language; `false` disables session persistence.
      */
     public string|bool $languageSessionKey = '_language';
 
     /**
-     * Language that was initially set in the application configuration.
+     * Default language resolved by {@see init()} from {@see $defaultLanguage} or the application language.
      */
     protected string $_defaultLanguage = '';
 
     /**
-     * Whether locale URL was processed.
+     * Requests already processed by {@see parseRequest()}; entries disappear with their request objects.
+     *
+     * @phpstan-var WeakMap<Request, true>|null
      */
-    protected bool $_processed = false;
+    private WeakMap|null $processedRequests = null;
 
     /**
-     * Request object that is currently being processed.
-     */
-    protected Request|null $_request = null;
-
-    /**
-     * @param array|string $params Parameters to be used for URL creation.
+     * Creates a URL and inserts the language code after the base URL or the script name.
      *
-     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @param array|string $params Route and parameters; {@see $languageParam} selects the language of the URL.
      *
-     * @return string the created URL with the appropriate language handling applied.
+     * @throws InvalidConfigException if the base URL or the script URL cannot be determined.
      *
-     * @phpstan-param array<string, string>|string $params
+     * @return string Created URL.
+     *
+     * @phpstan-param array<array-key, string>|string $params
      *
      * @phpstan-ignore method.childParameterType
      */
     public function createUrl($params): string
     {
-        if ($this->ignoreLanguageUrlPatterns !== []) {
-            $params = is_string($params) ? [$params] : $params;
+        $params = (array) $params;
 
-            if (isset($params[0]) === false) {
-                return parent::createUrl($params);
-            }
-
-            $route = trim($params[0], '/');
-
-            foreach ($this->ignoreLanguageUrlPatterns as $pattern => $v) {
-                if (preg_match($pattern, $route) !== 0) {
-                    return parent::createUrl($params);
-                }
-            }
+        if ($this->enableLocaleUrls === false || $this->languages === []) {
+            return parent::createUrl($params);
         }
 
-        if ($this->enableLocaleUrls && $this->languages !== []) {
-            $params = is_string($params) ? [$params] : $params;
-            $isLanguageGiven = isset($params[$this->languageParam]);
-            $language = $params[$this->languageParam] ?? Yii::$app->language;
-            $isDefaultLanguage = $language === $this->getDefaultLanguage();
+        $route = trim($params[0] ?? '', '/');
 
-            if ($isLanguageGiven) {
-                unset($params[$this->languageParam]);
-            }
+        if ($this->firstMatchingPattern(array_keys($this->ignoreLanguageUrlPatterns), $route) !== null) {
+            return parent::createUrl($params);
+        }
 
-            $url = parent::createUrl($params);
+        $isLanguageGiven = isset($params[$this->languageParam]);
+        $language = $params[$this->languageParam] ?? Yii::$app->language;
 
-            if (
-                // Only add language if it is not empty and ...
-                $language !== '' && (
-                    // ... it is not the default language or default language uses URL code ...
-                    $isDefaultLanguage === false || $this->enableDefaultLanguageUrlCode ||
+        unset($params[$this->languageParam]);
 
-                    /**
-                     * ... or if a language is explicitly given, but only if either persistence or detection is enabled.
-                     * This way, a "reset URL" can be created for the default language.
-                     */
-                    ($isLanguageGiven && ($this->enableLanguagePersistence || $this->enableLanguageDetection))
-                )
-            ) {
-                $key = array_search($language, $this->languages, true);
+        $url = parent::createUrl($params);
 
-                if (is_string($key)) {
-                    $language = $key;
-                }
-
-                if ($this->keepUppercaseLanguageCode === false) {
-                    $language = strtolower($language);
-                }
-
-                /**
-                 * Calculate the position where the language code has to be inserted depending on the showScriptName and
-                 * baseUrl configuration:
-                 * - /foo/bar -> /de/foo/bar
-                 * - /base/foo/bar -> /base/de/foo/bar
-                 * - /index.php/foo/bar -> /index.php/de/foo/bar
-                 * - /base/index.php/foo/bar -> /base/index.php/de/foo/bar
-                 */
-                $prefix = $this->showScriptName ? $this->getScriptUrl() : $this->getBaseUrl();
-                $insertPos = strlen($prefix);
-
-                // Remove any trailing slashes for root URLs
-                if ($this->suffix !== '/') {
-                    if (count($params) === 1) {
-                        /**
-                         * / -> ''
-                         * /base/ -> /base
-                         * /index.php/ -> /index.php
-                         * /base/index.php/ -> /base/index.php
-                         */
-                        if ($url === $prefix . '/') {
-                            $url = rtrim($url, '/');
-                        }
-                    } elseif (strncmp($url, $prefix . '/?', $insertPos + 2) === 0) {
-                        /**
-                         * /?x=y -> ?x=y
-                         * /base/?x=y -> /base?x=y
-                         * /index.php/?x=y -> /index.php?x=y
-                         * /base/index.php/?x=y -> /base/index.php?x=y
-                         */
-                        $url = substr_replace($url, '', $insertPos, 1);
-                    }
-                }
-
-                /**
-                 * If we have an absolute URL, the length of the host URL has to be added:
-                 * - http://www.example.com
-                 * - http://www.example.com?x=y
-                 * - http://www.example.com/foo/bar
-                 */
-                if (str_contains($url, '://')) {
-                    // Host URL ends at first '/' or '?' after the schema
-                    if (($pos = strpos($url, '/', 8)) !== false || ($pos = strpos($url, '?', 8)) !== false) {
-                        $insertPos += $pos;
-                    } else {
-                        $insertPos += strlen($url);
-                    }
-                }
-
-                if ($insertPos > 0) {
-                    return substr_replace($url, '/' . $language, $insertPos, 0);
-                }
-
-                return '/' . $language . $url;
-            }
-
+        if ($this->shouldPrefixLanguage($language, $isLanguageGiven) === false) {
             return $url;
         }
 
-        return parent::createUrl($params);
+        return $this->insertLanguageCode($url, $this->toUrlCode($language), count($params));
     }
 
     /**
-     * Returns the application's default language as set in the initial configuration.
+     * Returns the default language: {@see $defaultLanguage}, or the application language captured when the manager was
+     * initialized.
      *
-     * @return string Language code initially set in the application configuration (for example, 'en', 'fr').
+     * @return string Default language code, for example `en`.
      */
     public function getDefaultLanguage(): string
     {
@@ -363,7 +247,10 @@ class UrlLanguageManager extends UrlManager
     }
 
     /**
-     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * Captures the default language and validates the configuration.
+     *
+     * @throws InvalidConfigException if locale URLs are enabled while {@see $enablePrettyUrl} is `false`, or if the
+     * parent configuration is invalid.
      */
     public function init(): void
     {
@@ -371,134 +258,120 @@ class UrlLanguageManager extends UrlManager
             throw new InvalidConfigException('Locale URL support requires enablePrettyUrl to be set to true.');
         }
 
-        $this->_defaultLanguage = Yii::$app->language;
+        $this->_defaultLanguage = $this->defaultLanguage ?? Yii::$app->language;
 
         parent::init();
     }
 
     /**
-     * @throws Exception if an unexpected error occurs during execution.
-     * @throws ExitException if execution should be halted without exiting the process.
-     * @throws InvalidConfigException if the configuration is invalid or incomplete.
-     * @throws NotFoundHttpException if the requested resource can't be found.
+     * Resolves the request language, removes its code from the path info, and parses the request.
      *
-     * @return array|bool Parsed request parameters or `false` if parsing failed.
+     * Each request object is processed once; later calls only parse it. A request not processed yet first resets
+     * `Yii::$app->language` to {@see $defaultLanguage} when it is set. When the request must move to its canonical
+     * language URL, {@see UrlNormalizerRedirectException} carries the target URL and {@see $languageRedirectCode}, or
+     * the normalizer status code when only the URL normalizer requires the redirect. A redirect raised by a URL rule
+     * with a string URL is rethrown unchanged.
      *
-     * @phpstan-return array<string>|bool
+     * @param Request $request Request to parse.
+     *
+     * @throws InvalidConfigException if the path info of the request cannot be determined.
+     * @throws NotFoundHttpException if no rule matches the request while a language redirect is pending, or if the URL
+     * normalizer action is `ACTION_NOT_FOUND` and the path info is not normalized.
+     * @throws UrlNormalizerRedirectException if the request must be redirected.
+     *
+     * @return array|bool Route and parameters, or `false` if no rule matches the request.
+     *
+     * @phpstan-return array<array-key, mixed>|bool
      */
     public function parseRequest($request): array|bool
     {
-        if ($this->enableLocaleUrls && $this->languages !== []) {
-            $process = true;
+        $isProcessed = $this->processedRequests[$request] ?? false;
 
-            if ($this->ignoreLanguageUrlPatterns !== []) {
-                $pathInfo = $request->getPathInfo();
-
-                foreach ($this->ignoreLanguageUrlPatterns as $pattern) {
-                    if (preg_match($pattern, $pathInfo) !== 0) {
-                        $message = "Ignore pattern '{$pattern}' matches '{$pathInfo}.' Skipping language processing.";
-
-                        Yii::debug($message, __METHOD__);
-
-                        $process = false;
-                    }
-                }
-            }
-
-            if ($process && $this->_processed === false) {
-                // Check if a normalizer wants to redirect
-                $normalized = false;
-
-                if ($this->normalizer !== false) {
-                    try {
-                        parent::parseRequest($request);
-                    } catch (Throwable) {
-                        $normalized = true;
-                    }
-                }
-
-                $this->_processed = true;
-
-                $this->processLocaleUrl($normalized);
-            }
+        // Long-running workers keep the application language of the previous request.
+        if ($isProcessed === false && $this->defaultLanguage !== null) {
+            Yii::$app->language = $this->defaultLanguage;
         }
 
-        // @phpstan-ignore return.type
-        return parent::parseRequest($request);
+        if (
+            $this->enableLocaleUrls === false
+            || $this->languages === []
+            || $isProcessed
+            || $this->matchesIgnoredUrl($request)
+        ) {
+            return parent::parseRequest($request);
+        }
+
+        $this->processedRequests ??= new WeakMap();
+        $this->processedRequests[$request] = true;
+
+        $pathInfo = $request->getPathInfo();
+        // `null`: no language redirect; `''`: redirect to the URL without code; otherwise the code to redirect to.
+        $language = $this->processLocaleUrl($request);
+        [$result, $redirect] = $this->parseLocalizedRequest($request, $pathInfo, $language === null);
+
+        if ($result === false) {
+            // A pending language redirect needs a route; without one, the page does not exist.
+            return $language === null ? false : throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
+        }
+
+        if ($language === null && $redirect === null) {
+            return $result;
+        }
+
+        $url = $this->createRedirectUrl($request, $result, $language ?? '');
+
+        // Prevents redirect loops in some UrlNormalizer and custom rule combinations.
+        if ($url === $request->getUrl()) {
+            return $result;
+        }
+
+        Yii::debug("Redirecting to {$url}.", __METHOD__);
+
+        // A redirect caused only by the normalizer keeps the normalizer status code and scheme.
+        [$statusCode, $scheme] = $language === null
+            ? [$redirect->statusCode, $redirect->scheme]
+            : [$this->languageRedirectCode, false];
+
+        throw new UrlNormalizerRedirectException($url, $statusCode, $scheme);
     }
 
     /**
-     * Detects the preferred language from the current request using browser headers or GeoIP information.
+     * Detects the language from the `Accept-Language` header, then from the GeoIP country.
      *
-     * This method attempts to determine the most appropriate language for the user by checking, in order:
-     * - The `Accept-Language` HTTP header sent by the browser, matching it against configured languages and wildcards.
-     * - The GeoIP country code (if available and configured), mapping it to a language if a match is found.
+     * @param Request $request Request that provides the header and the GeoIP country.
      *
-     * This detection is used as a fallback when no language is found in the URL or persisted storage, ensuring users
-     * are served content in their likely preferred language.
-     *
-     * @return string|null Detected language code, or `null` if no suitable language is found.
+     * @return string|null Detected language code, or `null` if no configured language matches.
      */
-    protected function detectLanguage(): string|null
+    protected function detectLanguage(Request $request): string|null
     {
-        if ($this->enableLanguageDetection) {
-            /** @phpstan-var list<string> $acceptableLanguages */
-            $acceptableLanguages = $this->ensureRequest()->getAcceptableLanguages();
-
-            foreach ($acceptableLanguages as $acceptable) {
-                [$language, $country] = $this->matchCode($acceptable);
-
-                if ($language !== null) {
-                    $language = $country === null ? $language : "$language-$country";
-                    Yii::debug("Detected browser language '{$language}'.", __METHOD__);
-
-                    return $language;
-                }
-            }
-        }
-
-        if (isset($_SERVER[$this->geoIpServerVar])) {
-            foreach ($this->geoIpLanguageCountries as $key => $codes) {
-                $country = $_SERVER[$this->geoIpServerVar];
-
-                if (in_array($country, $codes, true)) {
-                    Yii::debug("Detected GeoIp language '{$key}'.", __METHOD__);
-
-                    return $key;
-                }
-            }
-        }
-
-        return null;
+        return $this->detectBrowserLanguage($request) ?? $this->detectGeoIpLanguage($request);
     }
 
     /**
-     * Retrieves the persisted language code from session or cookie storage, if available.
+     * Returns the language persisted in the session or, failing that, in the language cookie.
      *
-     * This method checks for a previously stored language preference in the user session (if enabled) and then in the
-     * language cookie.
+     * @param Request $request Request that provides the language cookie.
      *
-     * This mechanism allows the application to remember a user's language choice across requests and browser sessions,
-     * supporting seamless language persistence and user experience.
-     *
-     * @return string|null Persisted language code, or `null` if none is found in session or cookie.
+     * @return string|null Persisted language code, or `null` if none is stored.
      */
-    protected function loadPersistedLanguage(): string|null
+    protected function loadPersistedLanguage(Request $request): string|null
     {
-        if (is_string($this->languageSessionKey)) {
-            $language = Yii::$app->session->get($this->languageSessionKey);
+        $sessionKey = $this->sessionKey();
+
+        if ($sessionKey !== null) {
+            $language = Yii::$app->session->get($sessionKey);
 
             if (is_string($language)) {
-                Yii::debug("Found persisted language '$language' in session.", __METHOD__);
+                Yii::debug("Found persisted language '{$language}' in session.", __METHOD__);
 
                 return $language;
             }
         }
 
-        $language = $this->ensureRequest()->getCookies()->getValue($this->languageCookieName);
+        $language = $request->getCookies()->getValue($this->languageCookieName);
 
         if (is_string($language)) {
-            Yii::debug("Found persisted language '$language' in cookie.", __METHOD__);
+            Yii::debug("Found persisted language '{$language}' in cookie.", __METHOD__);
 
             return $language;
         }
@@ -507,87 +380,66 @@ class UrlLanguageManager extends UrlManager
     }
 
     /**
-     * Determines if the provided language code matches any configured language or language pattern.
+     * Matches a language code against {@see $languages}, case-insensitively and including wildcards.
      *
-     * This method checks the given code against the list of configured languages, supporting exact matches,
-     * language-country pairs, and wildcards (for example, `en-*`).
+     * Exact matches skip wildcards and return the configured spelling. A wildcard match (`es-*`) returns the configured
+     * spelling of the language and the first subtag when it is a 2-3 letter region, in uppercase: `ES-mx-variant` ->
+     * `['es', 'MX']`; any other subtag is dropped: `es-Latn` -> `['es', null]`. A code whose region is not configured
+     * falls back to its language when that language is configured: `de-CH` -> `['de', null]`.
      *
-     * The return value is an array of the form `[$language, $country]`, where either value can be `null` if no match
-     * is found.
+     * @param string $code Language code to match, for example `en`, `en-US`, or `es-MX`.
      *
-     * Matching rules:
-     * - If `$code` is a single language (for example, `en`), returns `[$language, null]` if it matches an exact
-     *   language or a wildcard (for example, `en-*`).
-     * - If `$code` is a language-country pair (for example, `en-US`), returns `[$language, $country]` if it matches an
-     *   exact language-country code or a wildcard (for example, `en-*`).
-     * - If only the language part matches, returns `[$language, null]`.
-     * - If no match is found, returns `[null, null]`.
-     *
-     * This method is used to validate and normalize language codes from URLs, browser headers, or persisted values,
-     * ensuring that only supported languages are accepted and mapped correctly.
-     *
-     * @param string $code Language code to match (for example, `en`, `en-US`, `es-MX`).
-     *
-     * @return array An array with the matched language and country, or `null` values if not matched.
+     * @return array Matched language and country, or `[null, null]` if no configured language matches.
      *
      * @phpstan-return array{string|null, string|null}
      */
     protected function matchCode(string $code): array
     {
-        $hasDash = str_contains($code, '-');
-        $lcCode = strtolower($code);
-        $lcLanguages = array_map('strtolower', $this->languages);
-
-        if (($key = array_search($lcCode, $lcLanguages, true)) === false) {
-            if ($hasDash) {
-                $parts = explode('-', $code, 2);
-                $language = $parts[0];
-                $country = $parts[1] ?? '';
-            } else {
-                $language = $code;
-                $country = '';
+        foreach ($this->languages as $configured) {
+            // A wildcard is not a language code: `es-*` never matches exactly.
+            if (str_ends_with($configured, '-*')) {
+                continue;
             }
 
-            if (in_array($language . '-*', $this->languages, true)) {
-                if ($hasDash === true) {
-                    return [$language, strtoupper($country)];
-                }
+            if (strcasecmp($configured, $code) === 0) {
+                $position = strpos($configured, '-');
 
-                return [$language, null];
+                return $position === false
+                    ? [$configured, null]
+                    : [substr($configured, 0, $position), substr($configured, $position + 1)];
             }
-
-            if ($hasDash && in_array($language, $this->languages, true)) {
-                return [$language, null];
-            }
-
-            return [null, null];
         }
 
-        $result = $this->languages[$key] ?? $lcCode;
+        $parts = explode('-', $code);
+        $language = $parts[0];
 
-        if ($hasDash) {
-            $parts = explode('-', $result, 2);
-            return [$parts[0], $parts[1] ?? null];
+        foreach ($this->languages as $configured) {
+            if (strcasecmp($configured, "{$language}-*") === 0) {
+                $region = $parts[1] ?? '';
+
+                return [
+                    substr($configured, 0, -2),
+                    preg_match('/^[a-z]{2,3}$/i', $region) === 1 ? strtoupper($region) : null,
+                ];
+            }
         }
 
-        return [$result, null];
+        return in_array($language, $this->languages, true) ? [$language, null] : [null, null];
     }
 
     /**
-     * Persists the given language code in the user session and/or a cookie for future requests.
+     * Stores the language in the session and the language cookie.
      *
-     * This method stores the provided language code in the session (if enabled) and in a cookie (if configured),
-     * allowing the application to remember the user's language preference across requests and browser sessions.
+     * Triggers {@see EVENT_LANGUAGE_CHANGED} first when handlers are attached and the language differs from the
+     * persisted one.
      *
-     * If the language changes, the {@see LanguageChangedEvent} event is triggered, providing both the old and new
-     * language codes.
-     *
-     * @param string $language Language code to persist in session and cookie (for example, 'en', 'de-AT').
+     * @param Request $request Request that provides the previously persisted language.
+     * @param string $language Language code to persist, for example `en` or `de-AT`.
      */
-    protected function persistLanguage(string $language): void
+    protected function persistLanguage(Request $request, string $language): void
     {
         if ($this->hasEventHandlers(self::EVENT_LANGUAGE_CHANGED)) {
-            $oldLanguage = $this->loadPersistedLanguage();
+            $oldLanguage = $this->loadPersistedLanguage($request);
 
             if ($oldLanguage !== $language) {
                 Yii::debug("Triggering languageChanged event: {$oldLanguage} -> {$language}", __METHOD__);
@@ -604,22 +456,21 @@ class UrlLanguageManager extends UrlManager
             }
         }
 
-        if (is_string($this->languageSessionKey)) {
-            Yii::$app->session->set($this->languageSessionKey, $language);
-            Yii::debug("Persisting language '$language' in session.", __METHOD__);
+        $sessionKey = $this->sessionKey();
+
+        if ($sessionKey !== null) {
+            Yii::$app->session->set($sessionKey, $language);
+            Yii::debug("Persisting language '{$language}' in session.", __METHOD__);
         }
 
         if ($this->languageCookieDuration > 0) {
             $cookie = new Cookie(
-                array_merge(
-                    ['httpOnly' => true],
-                    $this->languageCookieOptions,
-                    [
-                        'name' => $this->languageCookieName,
-                        'value' => $language,
-                        'expire' => time() + $this->languageCookieDuration,
-                    ],
-                ),
+                [
+                    ...$this->languageCookieOptions,
+                    'name' => $this->languageCookieName,
+                    'value' => $language,
+                    'expire' => time() + $this->languageCookieDuration,
+                ],
             );
 
             Yii::$app->getResponse()->cookies->add($cookie);
@@ -628,218 +479,477 @@ class UrlLanguageManager extends UrlManager
     }
 
     /**
-     * Processes the current request to extract and apply a language or locale code from the URL, session, cookie, or
-     * browser settings.
+     * Resolves the language of the request and returns the language redirect it requires.
      *
-     * This method checks the incoming URL of a language or locale prefix and updates the application language
-     * accordingly.
-     * - If no language is found in the URL, it attempts to load a persisted language from session or cookie, or detect
-     *   it from browser headers or GeoIP.
-     * - If a valid language is found, it is set as the application language and optionally persisted.
+     * A language code at the start of the path info is removed from it, applied to `Yii::$app->language`, and
+     * persisted. Without a code, the persisted language, then the detected language, then (with
+     * {@see $enableDefaultLanguageUrlCode}) the default language selects the redirect target.
      *
-     * The method also handles redirects to canonical URLs based on language configuration, ensuring consistent and
-     * SEO-friendly.
+     * @param Request $request Request whose path info is processed.
      *
-     * @param bool $normalized Whether a UrlNormalizer attempted a redirect for this request.
+     * @throws InvalidConfigException if the path info of the request cannot be determined.
      *
-     * @throws Exception if an unexpected error occurs during execution.
-     * @throws ExitException if execution should be halted without exiting the process.
-     * @throws InvalidConfigException if the configuration is invalid or incomplete.
-     * @throws NotFoundHttpException if the requested resource can't be found.
+     * @return string|null Language code or alias to redirect to, `''` to redirect to the URL without a language code,
+     * or `null` if no language redirect is required.
      */
-    protected function processLocaleUrl(bool $normalized): void
+    protected function processLocaleUrl(Request $request): string|null
     {
-        $pathInfo = $this->ensureRequest()->getPathInfo();
+        $pathInfo = $request->getPathInfo();
+
+        if (preg_match($this->buildLanguagePattern(), $pathInfo, $matches) !== 1) {
+            return $this->findRedirectLanguage($request);
+        }
+
+        /** @phpstan-var array{string, string} $matches */
+        $code = $matches[1];
+        // `setPathInfo()` removes the slash that follows the code.
+        $request->setPathInfo(substr($pathInfo, strlen($code)));
+        [$language, $isCanonical] = $this->resolveCode($code);
+
+        // A code or alias spelled differently from its canonical form redirects to the lowercase spelling of the URL.
+        if ($isCanonical === false && $this->keepUppercaseLanguageCode === false) {
+            return strtolower($code);
+        }
+
+        Yii::$app->language = $language;
+        Yii::debug("Language code found in URL. Setting application language to '{$language}'.", __METHOD__);
+
+        if ($this->enableLanguagePersistence) {
+            $this->persistLanguage($request, $language);
+        }
+
+        // "Reset" case: the default language code is removed from the URL.
+        return $this->enableDefaultLanguageUrlCode === false && $language === $this->getDefaultLanguage() ? '' : null;
+    }
+
+    /**
+     * Builds the pattern that matches a configured language code or alias as the first path info segment.
+     *
+     * @return string Case-insensitive regular expression; group `1` captures the code.
+     */
+    private function buildLanguagePattern(): string
+    {
         $parts = [];
 
-        foreach ($this->languages as $k => $v) {
-            $value = is_string($k) ? $k : $v;
+        foreach ($this->languages as $key => $value) {
+            $code = preg_quote(is_string($key) ? $key : $value, '#');
 
-            if (str_ends_with($value, '-*')) {
-                // @infection-ignore-all
-                $lng = substr($value, 0, -2);
-                $parts[] = "{$lng}\-[a-z]{2,3}";
-                $parts[] = $lng;
+            // `\-\*` is the quoted wildcard suffix `-*`.
+            if (str_ends_with($code, '\-\*')) {
+                $language = substr($code, 0, -4);
+                $parts[] = "{$language}-[a-z]{2,3}";
+                $parts[] = $language;
             } else {
-                $parts[] = $value;
+                $parts[] = $code;
             }
         }
 
-        // order by length to make longer patterns match before short patterns, for example, put "en-GB" before "en"
-        usort($parts, static fn($a, $b): int => mb_strlen($b) <=> mb_strlen($a));
-
-        $pattern = implode('|', $parts);
-
-        if (preg_match("#^($pattern)\b(/?)#i", $pathInfo, $m) !== 0) {
-            $this->ensureRequest()->setPathInfo(mb_substr($pathInfo, mb_strlen(($m[1] ?? '') . ($m[2] ?? ''))));
-            $code = $m[1] ?? '';
-
-            if (isset($this->languages[$code])) {
-                // Replace alias with language code
-                $language = $this->languages[$code];
-            } else {
-                // lowercase language, uppercase country
-                [$language, $country] = $this->matchCode($code);
-
-                if ($country !== null) {
-                    if ($code === "$language-$country" && $this->keepUppercaseLanguageCode === false) {
-                        $this->redirectToLanguage($code);
-                    } else {
-                        $language = "$language-$country";
-                    }
-                }
-
-                if ($language === null) {
-                    $language = $code;
-                }
-            }
-
-            Yii::$app->language = $language;
-            Yii::debug("Language code found in URL. Setting application language to '{$language}'.", __METHOD__);
-
-            if ($this->enableLanguagePersistence) {
-                $this->persistLanguage($language);
-            }
-
-            /**
-             * "Reset" case: We called, for example, /fr/demo/page, so the persisted language was set back to "fr".
-             * Now we can redirect to the URL without language prefix, if default prefixes are disabled.
-             */
-            $reset = $this->enableDefaultLanguageUrlCode === false && $language === $this->_defaultLanguage;
-
-            if ($reset || $normalized) {
-                $this->redirectToLanguage('');
-            }
-        } else {
-            $language = null;
-
-            if ($this->enableLanguagePersistence) {
-                $language = $this->loadPersistedLanguage();
-            }
-
-            if ($language === null) {
-                $language = $this->detectLanguage();
-            }
-
-            if ($language === null || $language === $this->_defaultLanguage) {
-                if ($this->enableDefaultLanguageUrlCode === false) {
-                    return;
-                }
-
-                $language = $this->_defaultLanguage;
-            }
-
-            // #35: Only redirect if a valid language was found
-            if ($this->matchCode($language) === [null, null]) {
-                return;
-            }
-
-            $key = array_search($language, $this->languages, true);
-
-            if (is_string($key)) {
-                $language = $key;
-            }
-
-            $this->redirectToLanguage($language);
-        }
+        return '#^(' . implode('|', $parts) . ')(?:/|$)#i';
     }
 
     /**
-     * Ensures a request instance is available for language processing operations.
+     * Creates the URL of the parsed route with the given language and the query parameters of the request.
      *
-     * This method provides lazy initialization of the request object, retrieving it from the Yii application instance
-     * only when needed and caching it for later calls.
+     * @param Request $request Request that provides the query parameters.
+     * @param array $result Parsed route and parameters.
+     * @param string $language Language code of the URL, or `''` for the current application language.
      *
-     * The method uses the null coalescing assignment operator to efficiently handle the initialization, avoiding
-     * multiple calls to `Yii::$app->request` during the same request lifecycle.
+     * @throws InvalidConfigException if the base URL or the script URL cannot be determined.
      *
-     * This approach improves performance by preventing repeated access to the application's request component while
-     * ensuring the request object is always available for URL parsing, language detection, and redirect operations.
+     * @return string Redirect URL.
      *
-     * @return Request The current HTTP request instance from the Yii application.
+     * @phpstan-param array{0: string, 1: array<array-key, mixed>} $result
      */
-    private function ensureRequest(): Request
+    private function createRedirectUrl(Request $request, array $result, string $language): string
     {
-        return $this->_request ??= Yii::$app->request;
-    }
-
-    /**
-     * Redirects the user to the current URL with the specified language code applied.
-     *
-     * This method generates a new URL of the current route, injecting the provided language code as a parameter.
-     *
-     * If the language code is empty, the URL will be generated without a language prefix, resetting to the default
-     * language if configured.
-     *
-     * The method ensures that redirects don't occur if the generated URL matches the current request URL, preventing
-     * redirect loops.
-     *
-     * It also handles special cases for URL suffixes and script name configurations to produce canonical URLs.
-     *
-     * @param string $language Language code to add to the URL. Can be empty to remove the language code.
-     *
-     * @throws Exception if an unexpected error occurs during execution.
-     * @throws ExitException if execution should be halted without exiting the process.
-     * @throws InvalidConfigException if the configuration is invalid or incomplete.
-     * @throws InvalidRouteException if the route can't be resolved.
-     * @throws NotFoundHttpException if the requested resource can't be found.
-     */
-    private function redirectToLanguage(string $language): void
-    {
-        try {
-            /** @phpstan-var array{0: string, 1: array<string, string>}|false $result */
-            $result = parent::parseRequest($this->ensureRequest());
-        } catch (UrlNormalizerRedirectException $e) {
-            if (is_array($e->url)) {
-                $params = $e->url;
-                $route = array_shift($params);
-                $result = [$route, $params];
-            } else {
-                $result = [$e->url, []];
-            }
-        }
-
-        if ($result === false) {
-            throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
-        }
-
         [$route, $params] = $result;
+
+        // The language of the redirect never comes from the query: `?language=//evil.com` must not become the host.
+        $query = $request->getQueryParams();
+
+        unset($query[$this->languageParam]);
 
         if ($language !== '') {
             $params[$this->languageParam] = $language;
         }
 
-        // See Yii Issues #8291 and #9161:
-        $params += $this->ensureRequest()->getQueryParams();
+        // See Yii issues #8291 and #9161; the union keeps numeric query keys, and index `0` is always the route.
+        $params = [$route] + $params + $query;
 
-        array_unshift($params, $route);
-
-        /** @phpstan-var non-empty-array<string, string> $params */
         $url = $this->createUrl($params);
 
-        // Required to prevent double slashes on generated URLs
+        // Prevents double slashes on root URLs.
         if ($route === '' && count($params) === 1) {
             $url = rtrim($url, '/') . '/';
         }
 
+        return $url;
+    }
+
+    /**
+     * Detects the language from the `Accept-Language` header while {@see $enableLanguageDetection} is `true`.
+     *
+     * @param Request $request Request that provides the header.
+     *
+     * @return string|null Detected language code, or `null` if no acceptable language matches.
+     */
+    private function detectBrowserLanguage(Request $request): string|null
+    {
+        if ($this->enableLanguageDetection === false) {
+            return null;
+        }
+
+        /** @phpstan-var list<string> $acceptableLanguages */
+        $acceptableLanguages = $request->getAcceptableLanguages();
+
+        foreach ($acceptableLanguages as $acceptable) {
+            [$language, $country] = $this->matchCode($acceptable);
+
+            if ($language !== null) {
+                $language = $country === null ? $language : "{$language}-{$country}";
+
+                Yii::debug("Detected browser language '{$language}'.", __METHOD__);
+
+                return $language;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Detects the language from the GeoIP country through {@see $geoIpLanguageCountries}.
+     *
+     * @param Request $request Request that provides the GeoIP country.
+     *
+     * @return string|null Detected language code, or `null` if no configured country matches.
+     */
+    private function detectGeoIpLanguage(Request $request): string|null
+    {
+        $geoCountry = $this->readGeoIpCountry($request);
+
+        foreach ($this->geoIpLanguageCountries as $language => $countries) {
+            if (in_array($geoCountry, $countries, true)) {
+                Yii::debug("Detected GeoIp language '{$language}'.", __METHOD__);
+
+                return $language;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns the language a URL without a language code redirects to.
+     *
+     * @param Request $request Request that provides the persisted and detected language.
+     *
+     * @return string|null Configured language code, or `null` if the URL stays without a code.
+     */
+    private function findRedirectLanguage(Request $request): string|null
+    {
+        $language = $this->enableLanguagePersistence ? $this->loadPersistedLanguage($request) : null;
+        $language ??= $this->detectLanguage($request);
+
+        if ($language === null || $language === $this->getDefaultLanguage()) {
+            if ($this->enableDefaultLanguageUrlCode === false) {
+                return null;
+            }
+
+            $language = $this->getDefaultLanguage();
+        }
+
+        // Redirects only to the canonical form of a configured language, never to the raw value
+        // (codemix/yii2-localeurls#35); no match yields `[null, null]`, so no redirect.
+        [$code, $country] = $this->matchCode($language);
+
+        return $country === null ? $code : "{$code}-{$country}";
+    }
+
+    /**
+     * Returns the first regular expression of a list that matches a subject.
+     *
+     * @param array $patterns Regular expressions to try in order.
+     * @param string $subject Route or path info to match.
+     *
+     * @return string|null Matching regular expression, or `null` if none matches.
+     *
+     * @phpstan-param array<array-key, string> $patterns
+     */
+    private function firstMatchingPattern(array $patterns, string $subject): string|null
+    {
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $subject) === 1) {
+                return $pattern;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Inserts the language code after the base URL or the script name of a created URL.
+     *
+     * @param string $url URL created by the parent {@see UrlManager}.
+     * @param string $code Language code as it appears in the URL.
+     * @param int $paramCount Number of route parameters, the route included.
+     *
+     * @throws InvalidConfigException if the base URL or the script URL cannot be determined.
+     *
+     * @return string URL with the language code.
+     */
+    private function insertLanguageCode(string $url, string $code, int $paramCount): string
+    {
         /**
-         * Prevent redirects to the same URL which could happen in certain UrlNormalizer / custom rule combinations
+         * Calculate the position where the language code has to be inserted depending on the showScriptName and
+         * baseUrl configuration:
+         * - /foo/bar -> /de/foo/bar
+         * - /base/foo/bar -> /base/de/foo/bar
+         * - /index.php/foo/bar -> /index.php/de/foo/bar
+         * - /base/index.php/foo/bar -> /base/index.php/de/foo/bar
          */
-        if ($url === $this->ensureRequest()->url) {
-            return;
+        $prefix = $this->showScriptName ? $this->getScriptUrl() : $this->getBaseUrl();
+        $insertPos = strlen($prefix);
+
+        // Remove any trailing slashes for root URLs
+        if ($this->suffix !== '/') {
+            if ($paramCount === 1) {
+                /**
+                 * / -> ''
+                 * /base/ -> /base
+                 * /index.php/ -> /index.php
+                 * /base/index.php/ -> /base/index.php
+                 */
+                if ($url === $prefix . '/') {
+                    $url = rtrim($url, '/');
+                }
+            } elseif (str_starts_with($url, "{$prefix}/?")) {
+                /**
+                 * /?x=y -> ?x=y
+                 * /base/?x=y -> /base?x=y
+                 * /index.php/?x=y -> /index.php?x=y
+                 * /base/index.php/?x=y -> /base/index.php?x=y
+                 */
+                $url = substr_replace($url, '', $insertPos, 1);
+            }
         }
 
-        Yii::debug("Redirecting to {$url}.", __METHOD__);
-        Yii::$app->response->redirect($url, $this->languageRedirectCode);
-
-        if (YII_ENV === 'test') {
-            /**
-             * Response::redirect($url) above will call `Url::to()` internally.
-             * So to test for the same final redirect URL here, we need to call Url::to(), too.
-             */
-            throw new Exception(Url::to($url));
+        /**
+         * If we have an absolute URL (a scheme at the start), the length of the host URL has to be added:
+         * - http://www.example.com
+         * - http://www.example.com?x=y
+         * - http://www.example.com/foo/bar
+         */
+        if (preg_match('#^[a-z][a-z0-9+.-]*://#i', $url) === 1) {
+            // Host URL ends at the first '/' or '?' after the scheme ('https://' has 8 characters).
+            $insertPos += 8 + strcspn($url, '/?', 8);
         }
 
-        Yii::$app->end();
+        return substr_replace($url, '/' . $code, $insertPos, 0);
+    }
+
+    /**
+     * Returns whether a URL pattern of {@see $ignoreLanguageUrlPatterns} matches the path info of the request.
+     *
+     * @param Request $request Request to check.
+     *
+     * @throws InvalidConfigException if the path info of the request cannot be determined.
+     *
+     * @return bool Whether language processing is skipped for the request.
+     */
+    private function matchesIgnoredUrl(Request $request): bool
+    {
+        $pathInfo = $request->getPathInfo();
+        $pattern = $this->firstMatchingPattern($this->ignoreLanguageUrlPatterns, $pathInfo);
+
+        if ($pattern === null) {
+            return false;
+        }
+
+        Yii::debug("Ignore pattern '{$pattern}' matches '{$pathInfo}.' Skipping language processing.", __METHOD__);
+
+        return true;
+    }
+
+    /**
+     * Applies the URL normalizer to the route of a URL that consists of a language code only, such as `/de` with
+     * suffix `/`.
+     *
+     * The parent cannot normalize such a URL because the path info is empty once the code is removed.
+     *
+     * @param string $pathInfo Path info before the language code was removed.
+     * @param array $result Route and parameters parsed from the empty path info.
+     *
+     * @throws InvalidConfigException if the normalizer action is invalid.
+     * @throws NotFoundHttpException if the path info changes and the normalizer action is `ACTION_NOT_FOUND`.
+     * @throws UrlNormalizerRedirectException if the path info changes and the normalizer action is a redirect.
+     *
+     * @return array Route and parameters, normalized when the path info changes.
+     *
+     * @phpstan-param array{0: string, 1: array<array-key, mixed>} $result
+     *
+     * @phpstan-return array{0: string, 1: array<array-key, mixed>}
+     */
+    private function normalizeLanguageRoot(string $pathInfo, array $result): array
+    {
+        if ($this->normalizer instanceof UrlNormalizer === false) {
+            return $result;
+        }
+
+        // The parent declares `$suffix` as `string`, but it defaults to `null`.
+        $this->normalizer->normalizePathInfo($pathInfo, strval($this->suffix), $changed);
+
+        if ($changed === false) {
+            return $result;
+        }
+
+        /** @phpstan-var array{0: string, 1: array<array-key, mixed>} $route */
+        $route = $this->normalizer->normalizeRoute($result);
+
+        return $route;
+    }
+
+    /**
+     * Parses a request whose language code was removed and turns an array redirect of a URL rule into its route.
+     *
+     * @param Request $request Request to parse.
+     * @param string $pathInfo Path info before the language code was removed.
+     * @param bool $normalizeRoot Whether a language-only URL is normalized on the parsed route.
+     *
+     * @throws InvalidConfigException if the path info of the request cannot be determined.
+     * @throws NotFoundHttpException if the URL normalizer action is `ACTION_NOT_FOUND` and the path info changes.
+     * @throws UrlNormalizerRedirectException if a URL rule redirects to a string URL.
+     *
+     * @return array Route and parameters, or `false`, and the redirect raised by the parent, or `null`.
+     *
+     * @phpstan-return array{
+     *   array{0: string, 1: array<array-key, mixed>}|false,
+     *   UrlNormalizerRedirectException|null,
+     * }
+     */
+    private function parseLocalizedRequest(Request $request, string $pathInfo, bool $normalizeRoot): array
+    {
+        try {
+            /** @phpstan-var array{0: string, 1: array<array-key, mixed>}|false $result */
+            $result = parent::parseRequest($request);
+
+            if ($result !== false && $normalizeRoot && $pathInfo !== '' && $request->getPathInfo() === '') {
+                $result = $this->normalizeLanguageRoot($pathInfo, $result);
+            }
+
+            return [$result, null];
+        } catch (UrlNormalizerRedirectException $e) {
+            $params = $e->url;
+
+            // A string URL is a final target chosen by a URL rule; an array URL needs its route at index `0`.
+            if (is_array($params) === false || is_string($params[0] ?? null) === false) {
+                throw $e;
+            }
+
+            $route = $params[0];
+
+            // Keeps the keys of the parameters, numeric ones included.
+            unset($params[0]);
+
+            return [[$route, $params], $e];
+        }
+    }
+
+    /**
+     * Reads the GeoIP country code named by {@see $geoIpServerVar} from the request.
+     *
+     * @param Request $request Request that provides the headers or the server parameters.
+     *
+     * @return mixed Country code, or `null` if the request does not provide it.
+     */
+    private function readGeoIpCountry(Request $request): mixed
+    {
+        $name = $this->geoIpServerVar;
+
+        if (str_starts_with($name, 'HTTP_')) {
+            return $request->getHeaders()->get(str_replace('_', '-', substr($name, 5)));
+        }
+
+        /** @phpstan-var array<array-key, mixed> $params */
+        $params = method_exists($request, 'getServerParams') ? $request->getServerParams() : $_SERVER;
+
+        return $params[$name] ?? null;
+    }
+
+    /**
+     * Resolves a language code or alias found in the URL to its configured language.
+     *
+     * @param string $code Code as written in the URL.
+     *
+     * @return array Language code, and whether the URL spelling is canonical: the lowercase alias, or the lowercase
+     * language code.
+     *
+     * @phpstan-return array{string, bool}
+     */
+    private function resolveCode(string $code): array
+    {
+        foreach ($this->languages as $alias => $language) {
+            if (is_string($alias) && strcasecmp($alias, $code) === 0) {
+                return [$language, strtolower($alias) === $code];
+            }
+        }
+
+        [$language, $country] = $this->matchCode($code);
+
+        $language ??= $code;
+
+        if ($country !== null) {
+            $language = "{$language}-{$country}";
+        }
+
+        return [$language, strtolower($language) === $code];
+    }
+
+    /**
+     * Returns the session key of the language, or `null` when {@see $languageSessionKey} disables session persistence.
+     *
+     * @return string|null Session key, or `null` if the language is not stored in the session.
+     */
+    private function sessionKey(): string|null
+    {
+        return is_string($this->languageSessionKey) ? $this->languageSessionKey : null;
+    }
+
+    /**
+     * Returns whether a created URL gets a language code.
+     *
+     * @param string $language Language of the URL.
+     * @param bool $isLanguageGiven Whether the language comes from {@see $languageParam}.
+     *
+     * @return bool Whether the language code is added to the URL.
+     */
+    private function shouldPrefixLanguage(string $language, bool $isLanguageGiven): bool
+    {
+        // Only add language if it is not empty and ...
+        return $language !== '' && (
+            // ... it is not the default language or default language uses URL code ...
+            $language !== $this->getDefaultLanguage() || $this->enableDefaultLanguageUrlCode
+            // ... or it is given explicitly while persistence or detection is enabled ("reset URL").
+            || ($isLanguageGiven && ($this->enableLanguagePersistence || $this->enableLanguageDetection))
+        );
+    }
+
+    /**
+     * Returns the URL spelling of a language: its alias when one is configured, lowercase unless
+     * {@see $keepUppercaseLanguageCode} is `true`.
+     *
+     * @param string $language Language code, for example `de-AT`.
+     *
+     * @return string Language code or alias as it appears in the URL.
+     */
+    private function toUrlCode(string $language): string
+    {
+        $alias = array_search($language, $this->languages, true);
+
+        if (is_string($alias)) {
+            $language = $alias;
+        }
+
+        return $this->keepUppercaseLanguageCode ? $language : strtolower($language);
     }
 }
