@@ -30,7 +30,6 @@ use function strlen;
 use function strpos;
 use function strtolower;
 use function strtoupper;
-use function strval;
 use function substr;
 use function substr_replace;
 use function time;
@@ -797,16 +796,14 @@ class UrlLanguageManager extends UrlManager
         }
 
         // The parent declares `$suffix` as `string`, but it defaults to `null`.
-        $this->normalizer->normalizePathInfo($pathInfo, strval($this->suffix), $changed);
+        $this->normalizer->normalizePathInfo($pathInfo, (string) $this->suffix, $changed);
 
         if ($changed === false) {
             return $result;
         }
 
         /** @phpstan-var array{0: string, 1: array<array-key, mixed>} $route */
-        $route = $this->normalizer->normalizeRoute($result);
-
-        return $route;
+        return $this->normalizer->normalizeRoute($result);
     }
 
     /**
