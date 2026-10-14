@@ -480,6 +480,22 @@ final class WorkerModeTest extends TestCase
      * @throws InvalidConfigException if the application configuration is invalid or incomplete.
      * @throws NotFoundHttpException if the requested resource can't be found.
      */
+    public function testKeepsSchemeOfCustomRuleRedirectMergedWithPendingLanguageRedirect(): void
+    {
+        $this->withCookies(['_language' => 'de']);
+
+        $this->mockExceptionRuleManager(
+            new UrlNormalizerRedirectException(['site/new', 'a' => 'b'], 301, 'https'),
+            'site/old',
+        );
+        $this->assertRedirect('https://localhost/de/site/new?a=b', '/site/old');
+    }
+
+    /**
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the application configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
+     */
     public function testMergesCustomRuleRedirectWithPendingLanguageRedirect(): void
     {
         $this->withCookies(['_language' => 'de']);

@@ -110,12 +110,16 @@ Url::to(['site/contact', 'language' => 'fr']); // /fr/site/contact
 The guides and the [API reference](https://yii2-framework.github.io/docs/extensions/localeurls/reference/) generated
 from the PHPDoc in `src/` are published at <https://yii2-framework.github.io/docs/extensions/localeurls/>.
 
+## AI assistance
+
 AI agents: read <https://yii2-framework.github.io/docs/llms.txt>, the index of the documentation site, and fetch the
 Markdown version of a page by appending `index.md` to its URL, for example
 <https://yii2-framework.github.io/docs/extensions/localeurls/installation/index.md>. For the Yii conventions this
 package builds on, install the
 [`yii2-framework` agent skill](https://github.com/yii2-framework/docs/blob/main/skills/yii2-framework/SKILL.md) with
 `npx skills add yii2-framework/docs --skill yii2-framework`.
+
+If the hosted sources are unavailable, use the repository guides and locally available skills.
 
 ## Package information
 

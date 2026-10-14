@@ -9,10 +9,12 @@ use Yii;
 use yii\base\InvalidConfigException;
 use yii\web\{Cookie, NotFoundHttpException, Request, UrlManager, UrlNormalizer, UrlNormalizerRedirectException};
 
+use function array_key_exists;
 use function array_keys;
 use function array_search;
 use function count;
 use function explode;
+use function http_build_query;
 use function implode;
 use function in_array;
 use function is_array;
@@ -21,6 +23,7 @@ use function method_exists;
 use function preg_match;
 use function preg_quote;
 use function rtrim;
+use function str_contains;
 use function str_ends_with;
 use function str_replace;
 use function str_starts_with;
@@ -326,10 +329,10 @@ class UrlLanguageManager extends UrlManager
 
         Yii::debug("Redirecting to {$url}.", __METHOD__);
 
-        // A redirect caused only by the normalizer keeps the normalizer status code and scheme.
+        // A redirect caused only by the normalizer keeps its status code; a rule redirect always keeps its scheme.
         [$statusCode, $scheme] = $language === null
             ? [$redirect->statusCode, $redirect->scheme]
-            : [$this->languageRedirectCode, false];
+            : [$this->languageRedirectCode, $redirect->scheme ?? false];
 
         throw new UrlNormalizerRedirectException($url, $statusCode, $scheme);
     }
@@ -582,6 +585,11 @@ class UrlLanguageManager extends UrlManager
             $url = rtrim($url, '/') . '/';
         }
 
+        // `createUrl()` reads the route from index `0`, so a query parameter with that key is appended afterwards.
+        if (array_key_exists(0, $query)) {
+            $url .= (str_contains($url, '?') ? '&' : '?') . http_build_query([$query[0]]);
+        }
+
         return $url;
     }
 
@@ -739,9 +747,10 @@ class UrlLanguageManager extends UrlManager
          * - http://www.example.com?x=y
          * - http://www.example.com/foo/bar
          */
-        if (preg_match('#^[a-z][a-z0-9+.-]*://#i', $url) === 1) {
-            // Host URL ends at the first '/' or '?' after the scheme ('https://' has 8 characters).
-            $insertPos += 8 + strcspn($url, '/?', 8);
+        if (preg_match('#^[a-z][a-z0-9+.-]*://#i', $url, $matches) === 1) {
+            // The host URL ends at the first `/` or `?` after the scheme delimiter.
+            $schemeLength = strlen($matches[0]);
+            $insertPos += $schemeLength + strcspn($url, '/?', $schemeLength);
         }
 
         return substr_replace($url, '/' . $code, $insertPos, 0);
