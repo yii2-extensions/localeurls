@@ -878,6 +878,20 @@ final class RedirectProvider
             302,
             self::fixtures(),
         ];
+        yield 'no-code: /EN/site/page' => [
+            $noCode,
+            '/EN/site/page',
+            '/site/page',
+            302,
+            self::fixtures(),
+        ];
+        yield 'default-code: /EN/site/page' => [
+            $defaultCode,
+            '/EN/site/page',
+            '/en/site/page',
+            302,
+            self::fixtures(),
+        ];
         yield 'no-code: /en' => [
             $noCode,
             '/en',

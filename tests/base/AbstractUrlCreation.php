@@ -136,6 +136,34 @@ abstract class AbstractUrlCreation extends TestCase
      * @throws InvalidConfigException if the configuration is invalid or incomplete.
      * @throws NotFoundHttpException if the requested resource can't be found.
      */
+    public function testCreateUrlInsertsLanguageCodeBeforeFragmentOfAbsoluteUrlWithoutPath(): void
+    {
+        $this->mockUrlLanguageManager(
+            [
+                'languages' => ['en', 'de'],
+                'rules' => [
+                    [
+                        'host' => 'http://www.example.com',
+                        'pattern' => '',
+                        'route' => 'site/home',
+                    ],
+                ],
+            ],
+        );
+        $this->mockRequest('/de/site/page');
+
+        self::assertSame(
+            'http://www.example.com' . $this->prepareUrl('/de') . '#top',
+            Yii::$app->urlManager->createUrl(['site/home', '#' => 'top']),
+            'Code must precede the fragment.',
+        );
+    }
+
+    /**
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
+     */
     public function testCreateUrlInsertsLanguageCodeBeforePathContainingScheme(): void
     {
         $this->mockUrlLanguageManager(['languages' => ['en', 'de']]);

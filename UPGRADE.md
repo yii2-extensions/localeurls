@@ -52,6 +52,8 @@
   - A language configured with a lowercase region, such as `de-at`, applies on `/de-at/page` without a redirect.
   - An uppercase code without a region, such as `/DE/page` with `de`, redirects to `/de/page` while
     `keepUppercaseLanguageCode` is `false`, instead of applying the spelling `DE` without a redirect.
+  - A default-language code spelled in another case, such as `/EN/page` with `en` as the default language, redirects
+    to `/page` in one step while `enableDefaultLanguageUrlCode` is `false`, and persists `en` like `/en/page` does.
   - Language codes and aliases are regex-quoted, so an alias such as `en.us` matches only itself.
 - With a normalizer `action` of `UrlNormalizer::ACTION_NOT_FOUND`, a language-only URL that is not canonical (for
   example, `/de` with suffix `/`) now returns 404 like any other non-canonical URL, instead of redirecting.

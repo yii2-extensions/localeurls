@@ -724,6 +724,37 @@ abstract class AbstractUrlLanguageManager extends TestCase
      * @throws InvalidConfigException if the configuration is invalid or incomplete.
      * @throws NotFoundHttpException if the requested resource can't be found.
      */
+    public function testRedirectsNonCanonicalDefaultCodeToUrlWithoutCodeAndPersistsLanguage(): void
+    {
+        $this->mockUrlLanguageManager(
+            [
+                'languages' => ['en', 'de'],
+            ],
+        );
+        $this->assertRedirect('/site/page', '/EN/site/page');
+
+        self::assertSame(
+            'en',
+            Yii::$app->language,
+            'Default language must be active.',
+        );
+        self::assertSame(
+            'en',
+            Yii::$app->session->get('_language'),
+            'Session must store the default language.',
+        );
+        self::assertSame(
+            'en',
+            Yii::$app->response->cookies->getValue('_language'),
+            'Cookie must store the default language.',
+        );
+    }
+
+    /**
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
+     */
     public function testRedirectsToLanguageOnlyWhenWildcardSubtagIsNotRegion(): void
     {
         $this->withServer(['HTTP_ACCEPT_LANGUAGE' => 'sr-Latn']);

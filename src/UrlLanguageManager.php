@@ -512,8 +512,11 @@ class UrlLanguageManager extends UrlManager
         Yii::$app->language = $language;
         Yii::debug("Language code found in URL. Setting application language to '{$language}'.", __METHOD__);
 
+        // "Reset" case: the default language code is removed from the URL, whatever its spelling.
+        $isReset = $this->enableDefaultLanguageUrlCode === false && $language === $this->getDefaultLanguage();
+
         // A code or alias spelled differently from its canonical form redirects to the lowercase spelling of the URL.
-        if ($isCanonical === false && $this->keepUppercaseLanguageCode === false) {
+        if ($isReset === false && $isCanonical === false && $this->keepUppercaseLanguageCode === false) {
             return strtolower($code);
         }
 
@@ -521,8 +524,7 @@ class UrlLanguageManager extends UrlManager
             $this->persistLanguage($request, $language);
         }
 
-        // "Reset" case: the default language code is removed from the URL.
-        return $this->enableDefaultLanguageUrlCode === false && $language === $this->getDefaultLanguage() ? '' : null;
+        return $isReset ? '' : null;
     }
 
     /**
@@ -750,12 +752,13 @@ class UrlLanguageManager extends UrlManager
          * If we have an absolute URL (a scheme at the start), the length of the host URL has to be added:
          * - http://www.example.com
          * - http://www.example.com?x=y
+         * - http://www.example.com#top
          * - http://www.example.com/foo/bar
          */
         if (preg_match('#^[a-z][a-z0-9+.-]*://#i', $url, $matches) === 1) {
-            // The host URL ends at the first `/` or `?` after the scheme delimiter.
+            // The host URL ends at the first `/`, `?` or `#` after the scheme delimiter.
             $schemeLength = strlen($matches[0]);
-            $insertPos += $schemeLength + strcspn($url, '/?', $schemeLength);
+            $insertPos += $schemeLength + strcspn($url, '/?#', $schemeLength);
         }
 
         return substr_replace($url, '/' . $code, $insertPos, 0);
