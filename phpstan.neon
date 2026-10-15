@@ -3,11 +3,10 @@ includes:
 
 parameters:
     bootstrapFiles:
-        - tests/bootstrap.php
+        - tests/support/bootstrap.php
 
-    excludePaths:
-        analyse:
-            - tests/stub/*
+    stubFiles:
+        - tests/support/yii-web.stub
 
     level: max
 
@@ -18,7 +17,7 @@ parameters:
     tmpDir: %currentWorkingDirectory%/runtime
 
     yii2:
-        config_path: %currentWorkingDirectory%/tests/phpstan-config.php
+        config_path: %currentWorkingDirectory%/tests/support/phpstan-config.php
 
     # Enable strict advanced checks
     checkImplicitMixed: true

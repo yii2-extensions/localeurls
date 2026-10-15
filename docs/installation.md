@@ -1,43 +1,18 @@
 # Installation guide
 
-## System requirements
+## Requirements
 
-- [`PHP`](https://www.php.net/downloads) 8.1 or higher.
-- [`Composer`](https://getcomposer.org/download/) for dependency management.
-- [`Yii2`](https://github.com/yiisoft/yii2) 2.0.53+ or 22.x.
+- [PHP](https://www.php.net/downloads) 8.3 or later.
+- [Yii2](https://github.com/yiisoft/yii2) `2.0.54` or a later `2.0.x` release, or the Yii2 `22.x` development line.
+- [Composer](https://getcomposer.org/download/) for dependency management.
 
-## Installation
-
-### Method 1: Using [Composer](https://getcomposer.org/download/) (recommended)
-
-Install the extension.
+## Install the extension
 
 ```bash
-composer require yii2-extensions/localeurls
+composer require yii2-extensions/localeurls:^0.2
 ```
 
-### Method 2: Manual installation
+Until `0.2.0` is tagged, require `^0.2@dev` instead.
 
-Add to your `composer.json`.
-
-```json
-{
-    "require": {
-        "yii2-extensions/localeurls": "^0.1"
-    }
-}
-```
-
-Then run.
-
-```bash
-composer update
-```
-
-## Next steps
-
-Once the installation is complete.
-
-- ⚙️ [Configuration Reference](configuration.md)
-- 💡 [Usage Examples](examples.md)
-- 🧪 [Testing Guide](testing.md)
+The package has no frontend assets and no bootstrap class: replacing the `urlManager` component, as shown in the
+[configuration guide](configuration.md), enables it.

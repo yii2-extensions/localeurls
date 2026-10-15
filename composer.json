@@ -3,25 +3,33 @@
     "type": "library",
     "description": "Automatic locale/language management for URLs.",
     "keywords": [
-        "yii2",
         "i18n",
-        "locale"
+        "locale",
+        "yii2",
+        "yii2-extension"
     ],
     "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Wilmer Arambula",
+            "email": "terabytesoftw@gmail.com",
+            "homepage": "https://github.com/terabytesoftw",
+            "role": "Developer"
+        }
+    ],
     "require": {
-        "php": ">=8.1",
-        "ext-mbstring": "*",
-        "yiisoft/yii2": "^2.0.53|^22"
+        "php": ">=8.3",
+        "yiisoft/yii2": "~2.0.54 || ^22.0@dev"
     },
     "require-dev": {
-        "infection/infection": "^0.27|^0.31",
+        "infection/infection": "^0.35",
         "maglnet/composer-require-checker": "^4.1",
+        "php-forge/coding-standard": "^0.3",
         "phpstan/extension-installer": "^1.4",
+        "phpstan/phpstan-phpunit": "^2.0",
         "phpstan/phpstan-strict-rules": "^2.0.3",
-        "phpunit/phpunit": "^10.5",
-        "rector/rector": "^2.1",
-        "symplify/easy-coding-standard": "^12.5",
-        "yii2-extensions/phpstan": "^0.3.0"
+        "phpunit/phpunit": "^12.5",
+        "yii2-extensions/phpstan": "^0.5@dev"
     },
     "autoload": {
         "psr-4": {
@@ -49,10 +57,13 @@
     "scripts": {
         "check-dependencies": "./vendor/bin/composer-require-checker check",
         "ecs": "./vendor/bin/ecs --fix",
-        "mutation": "./vendor/bin/infection --threads=4 --ignore-msi-with-no-mutations --only-covered --min-msi=100 --min-covered-msi=100",
-        "mutation-static": "./vendor/bin/infection --threads=4 --ignore-msi-with-no-mutations --only-covered --min-msi=100 --min-covered-msi=100 --static-analysis-tool=phpstan",
-        "rector": "./vendor/bin/rector process src",
-        "static": "./vendor/bin/phpstan --memory-limit=512M",
+        "mutation": "php -d memory_limit=-1 vendor/bin/infection --threads=4 --ignore-msi-with-no-mutations --min-msi=100 --min-covered-msi=100",
+        "mutation-static": [
+            "Composer\\Config::disableProcessTimeout",
+            "php -d memory_limit=-1 vendor/bin/infection --threads=4 --ignore-msi-with-no-mutations --min-msi=100 --min-covered-msi=100 --static-analysis-tool=phpstan --static-analysis-tool-options='--memory-limit=-1'"
+        ],
+        "rector": "./vendor/bin/rector process",
+        "static": "./vendor/bin/phpstan --memory-limit=-1",
         "tests": "./vendor/bin/phpunit"
     },
     "repositories": [
