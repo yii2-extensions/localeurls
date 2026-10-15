@@ -578,23 +578,27 @@ class UrlLanguageManager extends UrlManager
             $params[$this->languageParam] = $language;
         }
 
-        // See Yii issues #8291 and #9161; the union keeps numeric query keys, and index `0` is always the route.
-        $params = [$route] + $params + $query;
+        // See Yii issues #8291 and #9161; the union keeps numeric query keys, and route parameters win over the query.
+        $params += $query;
 
-        $url = $this->createUrl($params);
+        // `createUrl()` reads the route from index `0`, so a parameter with that key is added after the URL is created.
+        $zero = array_key_exists(0, $params) ? [$params[0]] : null;
+
+        unset($params[0]);
+
+        $url = $this->createUrl([$route] + $params);
 
         // Prevents double slashes on root URLs.
-        if ($route === '' && count($params) === 1) {
+        if ($route === '' && $params === []) {
             $url = rtrim($url, '/') . '/';
         }
 
-        // `createUrl()` reads the route from index `0`, so a query parameter with that key is added afterwards, before
-        // the fragment.
-        if (array_key_exists(0, $query)) {
+        // The parameter goes before the fragment.
+        if ($zero !== null) {
             $fragmentPos = strpos($url, '#');
             $fragment = $fragmentPos === false ? '' : substr($url, $fragmentPos);
             $url = $fragmentPos === false ? $url : substr($url, 0, $fragmentPos);
-            $url .= (str_contains($url, '?') ? '&' : '?') . http_build_query([$query[0]]) . $fragment;
+            $url .= (str_contains($url, '?') ? '&' : '?') . http_build_query($zero) . $fragment;
         }
 
         return $url;

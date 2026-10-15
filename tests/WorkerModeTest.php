@@ -12,6 +12,7 @@ use yii\web\{NotFoundHttpException, Request, UrlNormalizer, UrlNormalizerRedirec
 use yii2\extensions\localeurls\tests\support\stub\{
     ExceptionUrlRule,
     ExtendedUrlLanguageManager,
+    ResultUrlRule,
     ServerParamsRequest,
     UrlRule,
 };
@@ -618,6 +619,19 @@ final class WorkerModeTest extends TestCase
      * @throws InvalidConfigException if the application configuration is invalid or incomplete.
      * @throws NotFoundHttpException if the requested resource can't be found.
      */
+    public function testPrefersParsedParameterZeroOverQueryParameterInLanguageRedirect(): void
+    {
+        $this->withCookies(['_language' => 'de']);
+
+        $this->mockResultRuleManager(['site/page', [0 => 'x', 'a' => 'b']], 'site/old');
+        $this->assertRedirect('/de/site/page?a=b&0=x', '/site/old?0=q');
+    }
+
+    /**
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the application configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
+     */
     public function testPreservesParameterKeysOfCustomRuleArrayRedirect(): void
     {
         $this->mockExceptionRuleManager(
@@ -625,6 +639,19 @@ final class WorkerModeTest extends TestCase
             'site/old',
         );
         $this->assertRedirect('/de/site/new?5=x&a=b', '/de/site/old', [], 301);
+    }
+
+    /**
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the application configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
+     */
+    public function testPreservesParsedParameterZeroInLanguageRedirect(): void
+    {
+        $this->withCookies(['_language' => 'de']);
+
+        $this->mockResultRuleManager(['site/page', [0 => 'x', 'a' => 'b']], 'site/old');
+        $this->assertRedirect('/de/site/page?a=b&0=x', '/site/old');
     }
 
     /**
@@ -836,6 +863,31 @@ final class WorkerModeTest extends TestCase
                         [
                             'exception' => $exception,
                             'pathInfo' => $pathInfo,
+                        ],
+                    ),
+                ],
+            ],
+        );
+    }
+
+    /**
+     * Configures the `en` and `de` languages with a rule that returns the given route and parameters for a path info.
+     *
+     * @param array $result Route and parameters returned by the rule.
+     * @param string $pathInfo Path info that the rule parses.
+     *
+     * @phpstan-param array{string, array<array-key, mixed>} $result
+     */
+    private function mockResultRuleManager(array $result, string $pathInfo): void
+    {
+        $this->mockUrlLanguageManager(
+            [
+                'languages' => ['en', 'de'],
+                'rules' => [
+                    new ResultUrlRule(
+                        [
+                            'pathInfo' => $pathInfo,
+                            'result' => $result,
                         ],
                     ),
                 ],

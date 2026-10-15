@@ -45,7 +45,7 @@ abstract class AbstractRedirect extends TestCase
      *
      * @phpstan-param array<string, mixed> $urlManager
      * @phpstan-param Fixtures $fixtures
-     * @phpstan-param array{string, array<string, string>} $route
+     * @phpstan-param array{string, array<array-key, string>} $route
      */
     #[DataProviderExternal(RedirectProvider::class, 'noRedirects')]
     public function testDoNotRedirect(

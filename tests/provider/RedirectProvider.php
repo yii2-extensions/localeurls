@@ -54,7 +54,7 @@ final class RedirectProvider
      *
      * @phpstan-return Generator<
      *   string,
-     *   array{array<string, mixed>, string, string, string, Fixtures, array{string, array<string, string>}},
+     *   array{array<string, mixed>, string, string, string, Fixtures, array{string, array<array-key, string>}},
      * >
      */
     public static function noRedirects(): Generator
@@ -622,6 +622,14 @@ final class RedirectProvider
             '',
             self::fixtures(),
             ['', []],
+        ];
+        yield 'normalizer: /de/?0=x' => [
+            $normalizer,
+            '/de/?0=x',
+            'de',
+            '',
+            self::fixtures(),
+            ['', [0 => 'x']],
         ];
         yield 'normalizer: /de' => [
             $normalizer,
@@ -1368,6 +1376,13 @@ final class RedirectProvider
             302,
             self::fixtures(),
         ];
+        yield 'suffix: /en?0=x' => [
+            $suffix,
+            '/en?0=x',
+            '/?0=x',
+            302,
+            self::fixtures(),
+        ];
         yield 'suffix: /en/site/page/' => [
             $suffix,
             '/en/site/page/',
@@ -1554,6 +1569,13 @@ final class RedirectProvider
             $normalizerSuffix,
             '/de',
             '/de/',
+            301,
+            self::fixtures(),
+        ];
+        yield 'normalizer-suffix: /de?0=x' => [
+            $normalizerSuffix,
+            '/de?0=x',
+            '/de/?0=x',
             301,
             self::fixtures(),
         ];
