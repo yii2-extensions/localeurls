@@ -709,9 +709,9 @@ abstract class AbstractUrlLanguageManager extends TestCase
         $this->assertRedirect('/at/site/page', '/AT/site/page');
 
         self::assertSame(
-            'en',
+            'de-AT',
             Yii::$app->language,
-            'Language must not change before the redirect.',
+            'Language of the URL must be active before the redirect.',
         );
         self::assertNull(
             Yii::$app->response->cookies->get('_language'),

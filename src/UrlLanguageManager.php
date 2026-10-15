@@ -508,13 +508,14 @@ class UrlLanguageManager extends UrlManager
         $request->setPathInfo(substr($pathInfo, strlen($code)));
         [$language, $isCanonical] = $this->resolveCode($code);
 
+        // The language applies before the URL rules parse the request, so they resolve the route for this language.
+        Yii::$app->language = $language;
+        Yii::debug("Language code found in URL. Setting application language to '{$language}'.", __METHOD__);
+
         // A code or alias spelled differently from its canonical form redirects to the lowercase spelling of the URL.
         if ($isCanonical === false && $this->keepUppercaseLanguageCode === false) {
             return strtolower($code);
         }
-
-        Yii::$app->language = $language;
-        Yii::debug("Language code found in URL. Setting application language to '{$language}'.", __METHOD__);
 
         if ($this->enableLanguagePersistence) {
             $this->persistLanguage($request, $language);
@@ -585,9 +586,13 @@ class UrlLanguageManager extends UrlManager
             $url = rtrim($url, '/') . '/';
         }
 
-        // `createUrl()` reads the route from index `0`, so a query parameter with that key is appended afterwards.
+        // `createUrl()` reads the route from index `0`, so a query parameter with that key is added afterwards, before
+        // the fragment.
         if (array_key_exists(0, $query)) {
-            $url .= (str_contains($url, '?') ? '&' : '?') . http_build_query([$query[0]]);
+            $fragmentPos = strpos($url, '#');
+            $fragment = $fragmentPos === false ? '' : substr($url, $fragmentPos);
+            $url = $fragmentPos === false ? $url : substr($url, 0, $fragmentPos);
+            $url .= (str_contains($url, '?') ? '&' : '?') . http_build_query([$query[0]]) . $fragment;
         }
 
         return $url;

@@ -108,6 +108,30 @@ final class WorkerModeTest extends TestCase
     }
 
     /**
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the application configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
+     */
+    public function testAppliesUrlLanguageBeforeRulesParseNonCanonicalCode(): void
+    {
+        $this->mockUrlLanguageManager(
+            [
+                'languages' => ['en', 'de'],
+                'rules' => [
+                    ['class' => UrlRule::class],
+                ],
+            ],
+        );
+        $this->assertRedirect('/de/ruleclass-deutsch', '/DE/ruleclass-deutsch');
+
+        self::assertSame(
+            'de',
+            Yii::$app->language,
+            'Language of the URL must be active while redirecting.',
+        );
+    }
+
+    /**
      * @throws InvalidConfigException if the application configuration is invalid or incomplete.
      * @throws NotFoundHttpException if the requested resource can't be found.
      */
@@ -351,6 +375,20 @@ final class WorkerModeTest extends TestCase
             $response->isSent,
             'Sending must be left to the application.',
         );
+    }
+
+    /**
+     * @throws Exception if an unexpected error occurs during execution.
+     * @throws InvalidConfigException if the application configuration is invalid or incomplete.
+     * @throws NotFoundHttpException if the requested resource can't be found.
+     */
+    public function testInsertsQueryKeyZeroBeforeFragmentOfCustomRuleArrayRedirect(): void
+    {
+        $this->mockExceptionRuleManager(
+            new UrlNormalizerRedirectException(['site/new', 'a' => 'b', '#' => 'section'], 301),
+            'site/old',
+        );
+        $this->assertRedirect('/de/site/new?a=b&0=x#section', '/de/site/old?0=x', [], 301);
     }
 
     /**
