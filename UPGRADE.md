@@ -4,6 +4,10 @@
 
 ### Breaking changes
 
+- Yii2 `2.0.55` or a later `2.0.x` release, or Yii2 `22.x`, is required. Yii2 2.0.55 fixes
+  [CVE-2026-39850](https://github.com/yiisoft/yii2/releases/tag/2.0.55). For a Yii 2.0 application, update its
+  framework requirement to `~2.0.55` and run `composer update yiisoft/yii2 --with-all-dependencies` before upgrading
+  this extension. Yii 22 applications keep their existing framework requirement.
 - PHP 8.3 or later is required (`composer.json`: `"php": ">=8.3"`). Applications on PHP 8.1 or 8.2 stay on the `0.1.x`
   releases.
 - `yii2\extensions\localeurls\UrlLanguageManager::parseRequest()` no longer sends redirects. It throws
