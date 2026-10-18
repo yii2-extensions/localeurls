@@ -52,9 +52,9 @@ final class UrlNormalizationRegressionTest extends TestCase
 
         $this->mockUrlLanguageManager(
             [
-            'languages' => ['en', 'de'],
-            'enableLanguagePersistence' => false,
-            'normalizer' => ['class' => UrlNormalizer::class, 'action' => $action],
+                'languages' => ['en', 'de'],
+                'enableLanguagePersistence' => false,
+                'normalizer' => ['class' => UrlNormalizer::class, 'action' => $action],
             ],
         );
 
