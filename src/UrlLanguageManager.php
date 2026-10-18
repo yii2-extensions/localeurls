@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace yii2\extensions\localeurls;
 
+use ReflectionProperty;
 use WeakMap;
 use Yii;
 use yii\base\InvalidConfigException;
@@ -426,7 +427,13 @@ class UrlLanguageManager extends UrlManager
             }
         }
 
-        return in_array($language, $this->languages, true) ? [$language, null] : [null, null];
+        foreach ($this->languages as $configured) {
+            if (strcasecmp($configured, $language) === 0) {
+                return [$configured, null];
+            }
+        }
+
+        return [null, null];
     }
 
     /**
@@ -504,8 +511,9 @@ class UrlLanguageManager extends UrlManager
 
         /** @phpstan-var array{string, string} $matches */
         $code = $matches[1];
-        // `setPathInfo()` removes the slash that follows the code.
-        $request->setPathInfo(substr($pathInfo, strlen($code)));
+
+        $this->removeLanguageCode($request, $pathInfo, $code);
+
         [$language, $isCanonical] = $this->resolveCode($code);
 
         // The language applies before the URL rules parse the request, so they resolve the route for this language.
@@ -753,16 +761,16 @@ class UrlLanguageManager extends UrlManager
         }
 
         /**
-         * If we have an absolute URL (a scheme at the start), the length of the host URL has to be added:
+         * For an absolute or protocol-relative URL, add the length of its authority:
          * - http://www.example.com
          * - http://www.example.com?x=y
          * - http://www.example.com#top
          * - http://www.example.com/foo/bar
          */
-        if (preg_match('#^[a-z][a-z0-9+.-]*://#i', $url, $matches) === 1) {
-            // The host URL ends at the first `/`, `?` or `#` after the scheme delimiter.
-            $schemeLength = strlen($matches[0]);
-            $insertPos += $schemeLength + strcspn($url, '/?#', $schemeLength);
+        if (preg_match('#^(?:[a-z][a-z0-9+.-]*:)?//#i', $url, $matches) === 1) {
+            // The host URL ends at the first `/`, `?` or `#` after the authority delimiter.
+            $authorityStart = strlen($matches[0]);
+            $insertPos += $authorityStart + strcspn($url, '/?#', $authorityStart);
         }
 
         return substr_replace($url, '/' . $code, $insertPos, 0);
@@ -891,6 +899,27 @@ class UrlLanguageManager extends UrlManager
         $params = method_exists($request, 'getServerParams') ? $request->getServerParams() : $_SERVER;
 
         return $params[$name] ?? null;
+    }
+
+    /**
+     * Removes one language segment and its delimiter without discarding extra slashes needed by URL normalizers.
+     *
+     * @param Request $request Request whose path info is updated.
+     * @param string $pathInfo Path info before the language code was removed.
+     * @param string $code Matched language code or alias.
+     *
+     * @throws \ReflectionException if the installed Yii request no longer exposes its path-info cache.
+     */
+    private function removeLanguageCode(Request $request, string $pathInfo, string $code): void
+    {
+        $remaining = substr($pathInfo, strlen($code));
+        $request->setPathInfo($remaining);
+
+        if (str_starts_with($remaining, '//')) {
+            // Yii's setter trims every leading slash; its path-info cache must retain the extra delimiters for rules.
+            // Use the supplied path info, which can differ from the URI after an application rewrite.
+            (new ReflectionProperty(Request::class, '_pathInfo'))->setValue($request, substr($remaining, 1));
+        }
     }
 
     /**
