@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.2.0 Under development
+## 0.2.0 October 18, 2026
 
 - fix: order class elements in methods and properties (#26).
 - fix: add `case` to the ordered class elements in ECS configuration (#27).

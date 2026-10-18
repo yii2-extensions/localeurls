@@ -42,8 +42,6 @@ Worker-mode requirements (sessions, cookies, event handlers) are listed in the
 composer require yii2-extensions/localeurls:^0.2
 ```
 
-To use the development line, require `^0.2@dev`.
-
 ### Quick start
 
 #### How it works
