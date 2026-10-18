@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - chore(deps): bump `php-forge/actions` from 1 to 2 (#34).
 - feat!: raise language redirects as `UrlNormalizerRedirectException` for worker mode, fix URL parsing and redirects, and require PHP `8.3`.
 - fix: require Yii2 `2.0.55` or later to exclude `CVE-2026-39850` while retaining Yii `22.0` support; see `UPGRADE.md`.
+- chore: add a configuration skill, exclude private files, streamline docs, fix URL language handling, and clarify GeoIP guidance.
 
 ## 0.1.2 July 4, 2025
 

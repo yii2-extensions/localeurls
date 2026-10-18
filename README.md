@@ -38,13 +38,11 @@ Worker-mode requirements (sessions, cookies, event handlers) are listed in the
 
 ### Installation
 
-Requires PHP 8.3 or later and Yii2 `2.0.55` or a later `2.0.x` release, or Yii2 `22.x`.
-
 ```bash
 composer require yii2-extensions/localeurls:^0.2
 ```
 
-Until `0.2.0` is tagged, require `^0.2@dev` instead.
+To use the development line, require `^0.2@dev`.
 
 ### Quick start
 
@@ -103,23 +101,25 @@ Url::to(['site/contact', 'language' => 'fr']); // /fr/site/contact
 
 ## Documentation
 
-- [Installation guide](docs/installation.md)
-- [Configuration guide](docs/configuration.md), including [worker mode](docs/configuration.md#worker-mode)
-- [Usage examples](docs/examples.md)
-- [Testing guide](docs/testing.md)
-- [Upgrade guide](UPGRADE.md)
+Practical guides and examples for language-aware URLs and worker isolation.
 
-The guides and the [API reference](https://yii2-framework.github.io/docs/extensions/localeurls/reference/) generated
-from the PHPDoc in `src/` are published at <https://yii2-framework.github.io/docs/extensions/localeurls/>.
+- 📚 [Installation Guide](docs/installation.md)
+- ⚙️ [Configuration Guide](docs/configuration.md), including
+  [worker mode](docs/configuration.md#worker-mode)
+- 💡 [Usage Examples](docs/examples.md)
+- 🔄 [Upgrade Guide](UPGRADE.md)
+- 🧪 [Testing Guide](docs/testing.md)
 
 ## AI assistance
 
-AI agents: read <https://yii2-framework.github.io/docs/llms.txt>, the index of the documentation site, and fetch the
-Markdown version of a page by appending `index.md` to its URL, for example
-<https://yii2-framework.github.io/docs/extensions/localeurls/installation/index.md>. For the Yii conventions this
-package builds on, install the
-[`yii2-framework` agent skill](https://github.com/yii2-framework/docs/blob/main/skills/yii2-framework/SKILL.md) with
-`npx skills add yii2-framework/docs --skill yii2-framework`.
+AI agents: use the repository guides and source for the installed revision.
+For a [documentation deployment](https://yii2-framework.github.io/docs/) with
+`llms.txt`, read that index first. When Markdown export is enabled, append
+`index.md` to a page URL. For Yii conventions, use the `yii2-framework` skill
+from a local framework documentation checkout.
+
+- 🤖 [yii2-localeurls-configuration skill](docs/agents.md): installation for
+  Claude Code, Codex, and OpenCode.
 
 If the hosted sources are unavailable, use the repository guides and locally available skills.
 

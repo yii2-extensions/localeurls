@@ -1,5 +1,8 @@
 # Local AI agent, editor, and GitHub CLI config (if present)
-.claude
+.claude/*
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/yii2-localeurls-configuration
 .codex
 .config/gh
 
@@ -63,3 +66,6 @@ phpunit.xml
 
 # yii3 config packages (if present)
 /config/packages
+
+# Private maintainer files
+/internal/

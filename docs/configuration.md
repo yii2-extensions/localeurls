@@ -1,8 +1,7 @@
 # Configuration guide
 
 `yii2\extensions\localeurls\UrlLanguageManager` extends `yii\web\UrlManager` and replaces the `urlManager` component.
-The [API reference](https://yii2-framework.github.io/docs/extensions/localeurls/reference/) lists every property with
-its type, default value, and description; this guide shows how to combine them.
+This guide shows how to combine its configuration properties.
 
 ## Basic configuration
 
@@ -259,6 +258,9 @@ Configure automatic language detection based on visitor's country.
 ],
 ```
 
+Country values must match the GeoIP provider exactly. For example, Cloudflare uses two-letter codes such as
+`DE` and `US`, so configure those values instead of `DEU` and `USA` when using `CF-IPCountry`.
+
 ### Custom header
 
 If using a different GeoIP service.
@@ -418,7 +420,9 @@ or exclude them with [ignore patterns](#ignore-patterns).
 
 ### URL normalizer integration
 
-Combine with Yii URL normalizer.
+Combine with Yii URL normalizer. Extra slashes after the language code remain available to the normalizer,
+including its redirect status or `ACTION_NOT_FOUND`. URL rules retain their own normalizer settings. Without a
+normalizer, the remaining path is parsed with its extra slashes instead of silently removing them.
 
 ```php
 <?php

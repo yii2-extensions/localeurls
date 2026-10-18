@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace yii2\extensions\localeurls\tests;
 
-use PHPUnit\Framework\Attributes\{DataProvider, Group};
+use PHPUnit\Framework\Attributes\{Group, TestWith};
 use RuntimeException;
 use Yii;
 use yii\base\{Exception, InvalidConfigException};
@@ -30,19 +30,6 @@ use function ltrim;
 #[Group('locale-urls')]
 final class WorkerModeTest extends TestCase
 {
-    /**
-     * Provides custom rule redirects whose URL has no string route at index `0`.
-     *
-     * @phpstan-return array<string, array{array<array-key, mixed>}>
-     */
-    public static function redirectUrlsWithoutRoute(): array
-    {
-        return [
-            'missing route' => [['page' => 'x']],
-            'non-string route' => [[5, 'page' => 'x']],
-        ];
-    }
-
     /**
      * @throws InvalidConfigException if the application configuration is invalid or incomplete.
      * @throws NotFoundHttpException if the requested resource can't be found.
@@ -671,7 +658,8 @@ final class WorkerModeTest extends TestCase
      *
      * @phpstan-param array<array-key, mixed> $url
      */
-    #[DataProvider('redirectUrlsWithoutRoute')]
+    #[TestWith([['page' => 'x']], 'missing route')]
+    #[TestWith([[5, 'page' => 'x']], 'non-string route')]
     public function testRethrowsCustomRuleRedirectWithoutStringRoute(array $url): void
     {
         $exception = new UrlNormalizerRedirectException($url);
