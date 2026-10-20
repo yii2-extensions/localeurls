@@ -1,5 +1,13 @@
 {
     "Exclude": [
+        "^composer\\.lock$",
+        "^runtime/",
+        "^vendor/",
+        "^internal/",
+        "^node_modules/",
+        "^foxy\\.lock$",
+        "^\\.phpunit\\.cache/",
+        "^code_coverage/",
         "\\.min\\.css$",
         "\\.min\\.js$",
         "^\\.claude/",
@@ -12,12 +20,7 @@
         "^\\.github/prompts/",
         "^\\.github/skills/",
         "^\\.vscode/",
-        "^code_coverage/",
-        "^composer\\.lock$",
-        "^internal/",
-        "^runtime/",
         "^tests/runtime/",
-        "^vendor/",
         "phpstan-baseline\\.neon$"
     ]
 }
