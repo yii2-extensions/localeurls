@@ -14,6 +14,9 @@
     <a href="https://github.com/yii2-extensions/localeurls/actions/workflows/build.yml" target="_blank">
         <img src="https://img.shields.io/github/actions/workflow/status/yii2-extensions/localeurls/build.yml?style=for-the-badge&label=PHPUnit&logo=github" alt="PHPUnit">
     </a>
+    <a href="https://dashboard.stryker-mutator.io/reports/github.com/yii2-extensions/localeurls/main" target="_blank">
+        <img src="https://img.shields.io/endpoint?style=for-the-badge&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fyii2-extensions%2Flocaleurls%2Fmain" alt="Mutation Testing">
+    </a>
     <a href="https://github.com/yii2-extensions/localeurls/actions/workflows/static.yml" target="_blank">
         <img src="https://img.shields.io/github/actions/workflow/status/yii2-extensions/localeurls/static.yml?style=for-the-badge&label=PHPStan&logo=github" alt="PHPStan">
     </a>
@@ -113,8 +116,9 @@ Practical guides and examples for language-aware URLs and worker isolation.
 AI agents: use the repository guides and source for the installed revision.
 For a [documentation deployment](https://yii2-framework.github.io/docs/) with
 `llms.txt`, read that index first. When Markdown export is enabled, append
-`index.md` to a page URL. For Yii conventions, use the `yii2-framework` skill
-from a local framework documentation checkout.
+`index.md` to a page URL. For Yii conventions, install the `yii2-framework`
+skill from [`yii2-extensions/skill`](https://github.com/yii2-extensions/skill)
+through the [shared Composer setup](https://yii2-framework.github.io/docs/project/ai-agents/#composer-installation).
 
 - 🤖 [yii2-localeurls-configuration skill](docs/agents.md): installation for
   Claude Code, Codex, and OpenCode.
@@ -124,7 +128,7 @@ If the hosted sources are unavailable, use the repository guides and locally ava
 ## Package information
 
 [![PHP](https://img.shields.io/badge/%3E%3D8.3-777BB4.svg?style=for-the-badge&logo=php&logoColor=white)](https://www.php.net/releases/8.3/en.php)
-[![Yii 2.0.x](https://img.shields.io/badge/2.0.55+-0073AA.svg?style=for-the-badge&logo=yii&logoColor=white)](https://packagist.org/packages/yiisoft/yii2)
+[![Yii 2.0.55+](https://img.shields.io/badge/%3E%3D2.0.55-0073AA.svg?style=for-the-badge&logo=yii&logoColor=white)](https://github.com/yiisoft/yii2/releases/tag/2.0.55)
 [![Yii 22.0.x](https://img.shields.io/badge/22.0.x-0073AA.svg?style=for-the-badge&logo=yii&logoColor=white)](https://github.com/yiisoft/yii2/tree/22.0)
 [![Latest Stable Version](https://img.shields.io/packagist/v/yii2-extensions/localeurls.svg?style=for-the-badge&logo=packagist&logoColor=white&label=Stable)](https://packagist.org/packages/yii2-extensions/localeurls)
 [![Total Downloads](https://img.shields.io/packagist/dt/yii2-extensions/localeurls.svg?style=for-the-badge&logo=composer&logoColor=white&label=Downloads)](https://packagist.org/packages/yii2-extensions/localeurls)

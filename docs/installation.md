@@ -14,3 +14,5 @@ composer require yii2-extensions/localeurls:^0.2
 
 The package has no frontend assets and no bootstrap class: replacing the `urlManager` component, as shown in the
 [configuration guide](configuration.md), enables it.
+
+[Back to documentation](../README.md#documentation)

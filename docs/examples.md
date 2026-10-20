@@ -122,3 +122,5 @@ $default = Yii::$app->urlManager->getDefaultLanguage(); // `en`, the configured 
 
 `getDefaultLanguage()` returns `defaultLanguage` when the manager sets it, otherwise the application language at the
 time the manager is created.
+
+[Back to documentation](../README.md#documentation)
