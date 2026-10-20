@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.2.1 Under development
 
+- chore: document bundled skill source, sync trusted skills via Composer, and pin CI workflows to `yii2-framework/actions` `v2.0.1` release commit.
+
 ## 0.2.0 October 18, 2026
 
 - fix: order class elements in methods and properties (#26).
