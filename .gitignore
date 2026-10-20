@@ -1,10 +1,9 @@
-# Local AI agent, editor, and GitHub CLI config (if present)
+# AI agents (if present)
+.codex
 .claude/*
 !.claude/skills/
 .claude/skills/*
 !.claude/skills/yii2-localeurls-configuration
-.codex
-.config/gh
 
 # codecoverage (if present)
 code_coverage
@@ -15,7 +14,10 @@ c3.php
 # composer
 composer.lock
 
-# GitHub Copilot config (if present)
+# gitHub cli config (if present)
+.config/gh
+
+# gitHub copilot config (if present)
 .github/agents/**
 .github/copilot-instructions.md
 .github/copilot/**
@@ -33,15 +35,22 @@ nbproject
 node_modules
 package-lock.json
 
-# phpstorm project (if present)
-.idea
-
 # phpactor (if present)
 .phpactor.*
+
+# phpstorm project (if present)
+.idea
 
 # phpunit (if present)
 .phpunit.cache
 .phpunit.result.cache
+
+# phpunit phar and local configuration override (if present)
+phpunit.phar
+phpunit.xml
+
+# private maintainer files (if present)
+/internal/
 
 # vagrant (if present)
 .vagrant
@@ -55,17 +64,10 @@ vendor
 # windows thumbnail cache (if present)
 Thumbs.db
 
+# yii3 config packages (if present)
+/config/packages
+
 # zend studio for eclipse project (if present)
 .buildpath
 .project
 .settings
-
-# phpunit phar and local configuration override (if present)
-phpunit.phar
-phpunit.xml
-
-# yii3 config packages (if present)
-/config/packages
-
-# Private maintainer files
-/internal/

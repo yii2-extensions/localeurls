@@ -32,7 +32,6 @@ jobs:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     with:
       composer-command: require yiisoft/yii2:~2.0.55
-      concurrency-group: |
-        phpunit-compatibility-${{ github.workflow }}-${{ github.ref }}
+      concurrency-group: phpunit-compatibility-${{ github.workflow }}-${{ github.ref }}
       extensions: mbstring, intl
       php-version: '["8.3","8.4","8.5"]'
