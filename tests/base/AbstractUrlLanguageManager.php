@@ -8,6 +8,7 @@ use Yii;
 use yii\base\{Exception, InvalidConfigException};
 use yii\helpers\Url;
 use yii\web\NotFoundHttpException;
+use yii2\extensions\localeurls\exception\Message;
 use yii2\extensions\localeurls\tests\support\TestCase;
 use yii2\extensions\localeurls\UrlLanguageManager;
 
@@ -963,7 +964,7 @@ abstract class AbstractUrlLanguageManager extends TestCase
         $this->mockWebApplication();
 
         $this->expectException(InvalidConfigException::class);
-        $this->expectExceptionMessage('Locale URL support requires enablePrettyUrl to be set to true.');
+        $this->expectExceptionMessage(Message::LOCALE_URLS_REQUIRE_PRETTY_URL->getMessage());
 
         new UrlLanguageManager(
             [

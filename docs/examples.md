@@ -1,7 +1,7 @@
 # Usage examples
 
-The examples assume this configuration: English is the application language and therefore the default language,
-which has no code in the URL, and `de` is reachable through the `deutsch` alias.
+The examples assume this configuration: English is the application language and therefore the default language, which
+has no code in the URL, and `de` is reachable through the `deutsch` alias.
 
 ```php
 // config/web.php
@@ -26,9 +26,8 @@ return [
 ## Creating URLs
 
 `Url::to()`, `Url::toRoute()`, and `Html::a()` with a route go through the manager, so URLs created in a view or a
-controller carry the code of the current language, except for the default language unless
-`enableDefaultLanguageUrlCode` is `true`. The `language` parameter selects another language, and an alias replaces
-its language in the URL.
+controller carry the code of the current language, except for the default language unless `enableDefaultLanguageUrlCode`
+is `true`. The `language` parameter selects another language, and an alias replaces its language in the URL.
 
 ```php
 use yii\helpers\Url;
@@ -50,9 +49,9 @@ echo Url::to(['/post/view', 'slug' => 'bye']); // /es/post/bye
 echo Url::to(['/site/index', 'language' => '']); // /
 ```
 
-Passing the default language explicitly creates a URL with its code (`/en`). While persistence or detection is
-enabled, that URL redirects to the URL without the code and stores the default language, so it is the way back to the
-default language from another one.
+Passing the default language explicitly creates a URL with its code (`/en`). While persistence or detection is enabled,
+that URL redirects to the URL without the code and stores the default language, so it is the way back to the default
+language from another one.
 
 ## Language switcher
 
@@ -88,8 +87,8 @@ Following one of them stores the choice in the session and the cookie and raises
 
 ## Alternate links for search engines
 
-Declare the translations of a page in the layout with absolute URLs. The default language links the URL without a
-code, its canonical form, instead of the `/en` URL that redirects:
+Declare the translations of a page in the layout with absolute URLs. The default language links the URL without a code,
+its canonical form, instead of the `/en` URL that redirects:
 
 ```php
 use yii\helpers\Url;
@@ -112,8 +111,8 @@ On `/es/post/hello`, the `href` values are `http://example.com/post/hello`, `htt
 
 ## Current and default language
 
-The manager sets `Yii::$app->language` from the URL before the request is routed, so controllers, views, and
-`Yii::t()` use it without further configuration:
+The manager sets `Yii::$app->language` from the URL before the request is routed, so controllers, views, and `Yii::t()`
+use it without further configuration:
 
 ```php
 $current = Yii::$app->language; // `es` on /es/post/hello

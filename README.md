@@ -56,8 +56,8 @@ composer require yii2-extensions/localeurls:^0.2
 
 #### Basic configuration
 
-Replace the `urlManager` component in `config/web.php`. The application language is the default language, which has
-no code in the URL; the `defaultLanguage` property of the manager sets it explicitly.
+Replace the `urlManager` component in `config/web.php`. The application language is the default language, which has no
+code in the URL; the `defaultLanguage` property of the manager sets it explicitly.
 
 ```php
 <?php
@@ -105,25 +105,28 @@ Url::to(['site/contact', 'language' => 'fr']); // /fr/site/contact
 Practical guides and examples for language-aware URLs and worker isolation.
 
 - 📚 [Installation Guide](docs/installation.md)
-- ⚙️ [Configuration Guide](docs/configuration.md), including
-  [worker mode](docs/configuration.md#worker-mode)
+- ⚙️ [Configuration Guide](docs/configuration.md), including [worker mode](docs/configuration.md#worker-mode)
 - 💡 [Usage Examples](docs/examples.md)
 - 🔄 [Upgrade Guide](UPGRADE.md)
 - 🧪 [Testing Guide](docs/testing.md)
 
+The guides and the [API reference](https://yii2-framework.github.io/docs/extensions/localeurls/reference/) generated
+from the PHPDoc in `src/` are published at <https://yii2-framework.github.io/docs/extensions/localeurls/>.
+
 ## AI assistance
 
-AI agents: use the repository guides and source for the installed revision.
-For a [documentation deployment](https://yii2-framework.github.io/docs/) with
-`llms.txt`, read that index first. When Markdown export is enabled, append
-`index.md` to a page URL. For Yii conventions, install the `yii2-framework`
-skill from [`yii2-extensions/skill`](https://github.com/yii2-extensions/skill)
-through the [shared Composer setup](https://yii2-framework.github.io/docs/project/ai-agents/#composer-installation).
+AI agents: read the [documentation index](https://yii2-framework.github.io/docs/llms.txt) and fetch the Markdown version
+of a page by appending `index.md` to its URL. The
+[AI agents guide](https://yii2-framework.github.io/docs/project/ai-agents/) covers skill installation, client setup and
+verification.
 
-- 🤖 [yii2-localeurls-configuration skill](docs/agents.md): installation for
-  Claude Code, Codex, and OpenCode.
+- 🤖 [`yii2-localeurls-configuration` skill](docs/agents.md): Language URLs.
+- 🧭 [`yii2-framework` skill](https://yii2-framework.github.io/docs/guide/skills/yii2-framework/): Yii 22.0 application
+  conventions.
 
-If the hosted sources are unavailable, use the repository guides and locally available skills.
+The hosted documentation covers Yii 22.0. If it does not match the installed revision or is unavailable, use the
+[repository guides](#documentation), the [skill source](skills/yii2-localeurls-configuration/SKILL.md), the source
+PHPDoc and the [changelog](CHANGELOG.md).
 
 ## Package information
 
