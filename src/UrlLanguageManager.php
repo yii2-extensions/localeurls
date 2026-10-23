@@ -9,6 +9,7 @@ use WeakMap;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\web\{Cookie, NotFoundHttpException, Request, UrlManager, UrlNormalizer, UrlNormalizerRedirectException};
+use yii2\extensions\localeurls\exception\Message;
 
 use function array_key_exists;
 use function array_keys;
@@ -258,7 +259,7 @@ class UrlLanguageManager extends UrlManager
     public function init(): void
     {
         if ($this->enableLocaleUrls && $this->languages !== [] && $this->enablePrettyUrl === false) {
-            throw new InvalidConfigException('Locale URL support requires enablePrettyUrl to be set to true.');
+            throw new InvalidConfigException(Message::LOCALE_URLS_REQUIRE_PRETTY_URL->getMessage());
         }
 
         $this->_defaultLanguage = $this->defaultLanguage ?? Yii::$app->language;

@@ -113,8 +113,8 @@ resolves to `es`.
 
 ### Default language
 
-The default language has no code in the URL unless `enableDefaultLanguageUrlCode` is `true`. Without
-`defaultLanguage`, the manager uses the application `language` at the time the manager is created.
+The default language has no code in the URL unless `enableDefaultLanguageUrlCode` is `true`. Without `defaultLanguage`,
+the manager uses the application `language` at the time the manager is created.
 
 ```php
 // Default: the application language when the manager is created
@@ -123,11 +123,11 @@ The default language has no code in the URL unless `enableDefaultLanguageUrlCode
 'defaultLanguage' => 'en',
 ```
 
-When `defaultLanguage` is set, the manager assigns it to `Yii::$app->language` once per request object, at the start
-of `parseRequest()` and before the `enableLocaleUrls`, `languages`, and ignore pattern checks. The URL code, the
-persisted language, or the detected language then replaces it as usual. A language set earlier in the same request,
-for example by a `beforeRequest` handler, is overwritten. Use one of the configured `languages`, and see
-[Worker mode](#worker-mode) for long-running workers.
+When `defaultLanguage` is set, the manager assigns it to `Yii::$app->language` once per request object, at the start of
+`parseRequest()` and before the `enableLocaleUrls`, `languages`, and ignore pattern checks. The URL code, the persisted
+language, or the detected language then replaces it as usual. A language set earlier in the same request, for example by
+a `beforeRequest` handler, is overwritten. Use one of the configured `languages`, and see [Worker mode](#worker-mode)
+for long-running workers.
 
 ## URL code configuration
 
@@ -153,8 +153,8 @@ Control case handling for language codes in URL.
 'keepUppercaseLanguageCode' => true,   // /de-AT/page
 ```
 
-With the default, `/de-AT/page` redirects to `/de-at/page`, and `/ES-MX/page` with `es-*` redirects to `/es-mx/page`.
-A language configured with a lowercase region, such as `de-at`, applies on `/de-at/page` without a redirect.
+With the default, `/de-AT/page` redirects to `/de-at/page`, and `/ES-MX/page` with `es-*` redirects to `/es-mx/page`. A
+language configured with a lowercase region, such as `de-at`, applies on `/de-at/page` without a redirect.
 
 A spelling that differs from its lowercase form redirects to the lowercase form of the alias or code used in the URL:
 with `['de', 'deutsch' => 'de']`, `/Deutsch/page` redirects to `/deutsch/page` and `/DE/page` redirects to `/de/page`.
@@ -208,9 +208,8 @@ Configure session-based language persistence.
 'languageSessionKey' => false,
 ```
 
-While `languageSessionKey` is a string, every request without a language code reads the session, which starts a
-session and sends its cookie even for visitors that had none. Set it to `false` to persist the language in the cookie
-only.
+While `languageSessionKey` is a string, every request without a language code reads the session, which starts a session
+and sends its cookie even for visitors that had none. Set it to `false` to persist the language in the cookie only.
 
 ### Cookie configuration
 
@@ -258,8 +257,8 @@ Configure automatic language detection based on visitor's country.
 ],
 ```
 
-Country values must match the GeoIP provider exactly. For example, Cloudflare uses two-letter codes such as
-`DE` and `US`, so configure those values instead of `DEU` and `USA` when using `CF-IPCountry`.
+Country values must match the GeoIP provider exactly. For example, Cloudflare uses two-letter codes such as `DE` and
+`US`, so configure those values instead of `DEU` and `USA` when using `CF-IPCountry`.
 
 ### Custom header
 
@@ -276,10 +275,10 @@ If using a different GeoIP service.
 
 The manager reads `geoIpServerVar` through the request:
 
-- A name that starts with `HTTP_` is read from `Request::getHeaders()` as the header it represents
-  (`HTTP_X_GEO_COUNTRY` is the `X-Geo-Country` header), never from the server parameters.
-- Any other name is read from the server parameters of the request: `getServerParams()` when the request provides it,
-  as under `psr-bridge`, otherwise `$_SERVER`.
+- A name that starts with `HTTP_` is read from `Request::getHeaders()` as the header it represents (`HTTP_X_GEO_COUNTRY`
+  is the `X-Geo-Country` header), never from the server parameters.
+- Any other name is read from the server parameters of the request: `getServerParams()` when the request provides it, as
+  under `psr-bridge`, otherwise `$_SERVER`.
 
 Yii builds the request headers from `getallheaders()` when PHP provides it. Behind Apache or PHP-FPM, a value that the
 web server sets only as a server variable with an `HTTP_` name, for example with `SetEnvIf` or
@@ -313,8 +312,8 @@ Pattern format: `'route_pattern' => 'url_pattern'`.
 - URL patterns (values) match the path info of the request in `parseRequest()`, which then resolves no language.
 
 Each URL pattern must match the URLs that the URL rules create for the routes of its key. When they disagree, for
-example with the `site/login` pattern above but without the `login` rule, `createUrl()` produces `/site/login` without
-a code, `parseRequest()` does not ignore it, and a language redirect targets `/site/login?language=de` instead of a
+example with the `site/login` pattern above but without the `login` rule, `createUrl()` produces `/site/login` without a
+code, `parseRequest()` does not ignore it, and a language redirect targets `/site/login?language=de` instead of a
 language URL.
 
 Ignored URLs resolve no language: they run in the default language, without the URL code, the persisted language, or
@@ -410,19 +409,19 @@ parameter named by `languageParam` is dropped, so it never selects the redirect 
 A custom URL rule may throw `yii\web\UrlNormalizerRedirectException` itself:
 
 - A string URL, relative or absolute, propagates unchanged, whether or not a language redirect is pending.
-- An array URL (`[route, ...params]`) is created through the manager, so it carries the language code of the request,
-  or the pending language when the request also needs a language redirect, and both become one redirect.
+- An array URL (`[route, ...params]`) is created through the manager, so it carries the language code of the request, or
+  the pending language when the request also needs a language redirect, and both become one redirect.
 
 A request whose URL lacks the code of the language that the manager selects is redirected whatever its HTTP method.
 Browsers repeat a `POST` request as a `GET` after a `301` or `302` redirect, so the request body is lost, and an AJAX
-request receives Yii's `X-Redirect` header instead of `Location`. Create form actions and AJAX URLs with `Url::to()`,
-or exclude them with [ignore patterns](#ignore-patterns).
+request receives Yii's `X-Redirect` header instead of `Location`. Create form actions and AJAX URLs with `Url::to()`, or
+exclude them with [ignore patterns](#ignore-patterns).
 
 ### URL normalizer integration
 
-Combine with Yii URL normalizer. Extra slashes after the language code remain available to the normalizer,
-including its redirect status or `ACTION_NOT_FOUND`. URL rules retain their own normalizer settings. Without a
-normalizer, the remaining path is parsed with its extra slashes instead of silently removing them.
+Combine with Yii URL normalizer. Extra slashes after the language code remain available to the normalizer, including its
+redirect status or `ACTION_NOT_FOUND`. URL rules retain their own normalizer settings. Without a normalizer, the
+remaining path is parsed with its extra slashes instead of silently removing them.
 
 ```php
 <?php
@@ -573,35 +572,35 @@ return [
 The manager runs unchanged in long-running workers, such as
 [`yii2-extensions/psr-bridge`](https://github.com/yii2-extensions/psr-bridge) under FrankenPHP or RoadRunner.
 `psr-bridge` creates new `request`, `response`, `session`, and `urlManager` components for every request; the rules
-below cover the state that outlives a request: the application language, PHP's session, class-level event handlers,
-and the server environment of the runtime.
+below cover the state that outlives a request: the application language, PHP's session, class-level event handlers, and
+the server environment of the runtime.
 
 ### Redirects and requests
 
 - Redirects are thrown from `parseRequest()` as `yii\web\UrlNormalizerRedirectException`, and
-  `yii\web\Application::handleRequest()` turns them into a redirect response. The manager never calls `exit()`.
-  String redirect URLs thrown by custom URL rules propagate unchanged; see [Redirect URLs](#redirect-urls).
+  `yii\web\Application::handleRequest()` turns them into a redirect response. The manager never calls `exit()`. String
+  redirect URLs thrown by custom URL rules propagate unchanged; see [Redirect URLs](#redirect-urls).
 - The manager keeps no request state: every step works on the request being parsed. Each `Request` object is processed
-  once, and later `parseRequest()` calls only parse it. `psr-bridge` creates a new `Request` for every request; a
-  runner or test that mutates and reuses one `Request` instance gets no language processing after its first request.
+  once, and later `parseRequest()` calls only parse it. `psr-bridge` creates a new `Request` for every request; a runner
+  or test that mutates and reuses one `Request` instance gets no language processing after its first request.
 - Do not list `urlManager` in `persistentComponents`: it is a core component, and `psr-bridge` would rebuild it as a
   plain `yii\web\UrlManager`.
 
 ### Application language
 
 Set `language` explicitly in the application configuration, or set [`defaultLanguage`](#default-language) on the
-manager. The application is reconfigured for every request, and a configuration without `language` keeps the language
-of the previous request, which also becomes the default language of the new manager. `defaultLanguage` resets
-`Yii::$app->language` at the start of every request and does not depend on the application language when the manager
-is created.
+manager. The application is reconfigured for every request, and a configuration without `language` keeps the language of
+the previous request, which also becomes the default language of the new manager. `defaultLanguage` resets
+`Yii::$app->language` at the start of every request and does not depend on the application language when the manager is
+created.
 
 ### Sessions
 
 - Keep the `psr-bridge` `useSession` flag at `true`, its default. The bridge then opens PHP's session with the session
   cookie of each request and closes it afterwards. With `useSession` set to `false`, nothing resets PHP's session state
-  between requests, and on RoadRunner later visitors receive the session id and the session data of earlier requests.
-  If the application must run with `useSession` set to `false`, set `languageSessionKey` to `false` so the manager
-  never opens a session.
+  between requests, and on RoadRunner later visitors receive the session id and the session data of earlier requests. If
+  the application must run with `useSession` set to `false`, set `languageSessionKey` to `false` so the manager never
+  opens a session.
 - Call `ini_set('session.use_cookies', '0')` in the entry script before the application runs. `psr-bridge` emits the
   session cookie itself; without this setting, PHP adds its own `Set-Cookie: PHPSESSID` header under FrankenPHP.
 - While `languageSessionKey` is a string, the manager reads the session on every request without a language code. A
@@ -624,15 +623,15 @@ TLS-terminating proxy, set `trustedHosts` on the `request` component to the prox
 
 ### Event handlers
 
-Attach `languageChanged` handlers in the `urlManager` configuration (`'on languageChanged' => ...`), which attaches
-them again to the manager of every request. `psr-bridge` calls `yii\base\Event::offAll()` after each request, so a
+Attach `languageChanged` handlers in the `urlManager` configuration (`'on languageChanged' => ...`), which attaches them
+again to the manager of every request. `psr-bridge` calls `yii\base\Event::offAll()` after each request, so a
 class-level handler attached with `Event::on(UrlLanguageManager::class, ...)` fires for the first request only.
 
 ### Server variables and runtimes
 
 The manager reads headers, cookies, and server parameters only through the `Request` object: `getHeaders()`,
-`getCookies()`, and `getServerParams()` when the request provides it. It falls back to `$_SERVER` only for a GeoIP
-name without the `HTTP_` prefix on a request without `getServerParams()`, such as a plain `yii\web\Request`.
+`getCookies()`, and `getServerParams()` when the request provides it. It falls back to `$_SERVER` only for a GeoIP name
+without the `HTTP_` prefix on a request without `getServerParams()`, such as a plain `yii\web\Request`.
 
 RoadRunner refreshes `$_SERVER` for every request through spiral's `PSR7Worker`, leaves `$_COOKIE` empty, and has no
 `getallheaders()`. FrankenPHP refreshes `$_SERVER`, `$_COOKIE`, and `getallheaders()` for every request. Under
