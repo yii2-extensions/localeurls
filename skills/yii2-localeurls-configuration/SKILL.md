@@ -76,6 +76,26 @@ sessions are used, attach language handlers in component configuration, and do n
 `persistentComponents`: the bridge rebuilds this core component per request. This skill does not replace the worker
 runner's isolation of response, session, identity, and other application state.
 
+## Intended behavior
+
+These look like bugs and are package contracts; do not "fix" them in package or application code:
+
+- A URL with the default language code redirects to the URL without it (`/en/page` -> `/page`) and persists the default
+  language, which resets the visitor's choice. Without a code, a persisted or detected value redirects only to its
+  configured form (a stale `es-MX` with `['en', 'es']` goes to `/es/...`); a value matching no configured language
+  causes no redirect.
+- When a language redirect is pending and no URL rule matches, `parseRequest()` throws `NotFoundHttpException` instead
+  of returning `false`. Requests of every HTTP method are redirected, including `POST`; exclude form or AJAX endpoints
+  with ignore patterns or create their URLs through the manager.
+- Language redirects use `languageRedirectCode` (`302`); a redirect required only by the URL normalizer keeps the
+  normalizer status code (`301` by default).
+- `UrlLanguageManager::EVENT_LANGUAGE_CHANGED` (`languageChanged`, a `LanguageChangedEvent`) fires only for a URL code
+  that differs from the persisted language while persistence is enabled, before the new value is stored; `oldLanguage`
+  is `null` when nothing was persisted. A default-code URL that resets the choice triggers it; URLs without a code,
+  including those redirected by persistence or detection, and case-only redirects do not.
+
+`exception\Message` only holds the text of the pretty-URL configuration error; read it only when matching that message.
+
 ## Verify behavior
 
 Exercise an alias URL, a URL without a code after a different language, the default-language URL policy, a canonical

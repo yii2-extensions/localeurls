@@ -283,9 +283,9 @@ class UrlLanguageManager extends UrlManager
      * normalizer action is `ACTION_NOT_FOUND` and the path info is not normalized.
      * @throws UrlNormalizerRedirectException if the request must be redirected.
      *
-     * @return array|bool Route and parameters, or `false` if no rule matches the request.
+     * @return array|false Route and parameters, or `false` if no rule matches the request.
      *
-     * @phpstan-return array<array-key, mixed>|bool
+     * @phpstan-return array<array-key, mixed>|false
      */
     public function parseRequest($request): array|bool
     {

@@ -1,9 +1,8 @@
-# AI agents (if present)
-.codex
-.claude/*
-!.claude/skills/
-.claude/skills/*
-!.claude/skills/yii2-localeurls-configuration
+# agents (if present)
+.agents
+
+# artifacts (if present)
+artifacts
 
 # codecoverage (if present)
 code_coverage
@@ -14,9 +13,6 @@ c3.php
 # composer
 composer.lock
 
-# gitHub cli config (if present)
-.config/gh
-
 # gitHub copilot config (if present)
 .github/agents/**
 .github/copilot-instructions.md
@@ -24,6 +20,16 @@ composer.lock
 .github/instructions/**
 .github/prompts/**
 .github/skills/**
+
+# local ai agent, editor, and github cli config (if present)
+.claude
+.codex
+.config
+
+# local environment files
+.env
+.env.*
+!.env.example
 
 # mac ds_store (if present)
 .DS_Store
@@ -33,24 +39,25 @@ nbproject
 
 # node_modules (if present)
 node_modules
-package-lock.json
-
-# phpactor (if present)
-.phpactor.*
 
 # phpstorm project (if present)
 .idea
+
+# phpactor (if present)
+.phpactor.*
 
 # phpunit (if present)
 .phpunit.cache
 .phpunit.result.cache
 
-# phpunit phar and local configuration override (if present)
-phpunit.phar
-phpunit.xml
-
 # private maintainer files (if present)
 /internal/
+
+# report (if present)
+reports
+
+# stryker (if present)
+.stryker-tmp
 
 # vagrant (if present)
 .vagrant
@@ -63,9 +70,6 @@ vendor
 
 # windows thumbnail cache (if present)
 Thumbs.db
-
-# yii3 config packages (if present)
-/config/packages
 
 # zend studio for eclipse project (if present)
 .buildpath

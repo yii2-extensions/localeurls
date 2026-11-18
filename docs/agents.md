@@ -44,4 +44,35 @@ guide is unavailable, say so and use the local guide; do not guess an API endpoi
 [package checks](testing.md) after changes. Keep session/CSRF/cookie validation and application routes intact, and
 distinguish direct manager tests from an actual worker or browser run.
 
+## Example prompts
+
+Start a fresh client session at the application root. The explicit example uses Codex's `$skill-name` notation; use
+`/yii2-localeurls-configuration` in Claude Code or the installed client's native skill mechanism. Do not paste the skill
+body and count that as native activation. These are tasks to execute and verify, not claims that an evaluation has
+passed.
+
+### Explicit invocation
+
+```text
+$yii2-localeurls-configuration
+Configure a language alias and explicit default language for the installed locale URL manager. Show checks for two
+successive request objects, an uncoded URL and a canonical redirect while retaining query parameters correctly.
+Inspect the installed revision first. Do not install dependencies or change files without authorization.
+```
+
+### Natural selection
+
+```text
+After a French request, an ignored URL keeps the wrong language in my long-lived application. How can I test default
+language reset and ensure that processed Request instances are not reused?
+```
+
+### Verify the outcome
+
+Assert route, language, generated URL and redirect target for separate request objects. Direct parsing does not prove
+browser cookie exchange. Record native loading evidence separately from configuration review, executable checks and
+browser/runtime results. For a negative selection control, ask an unrelated question in a fresh session and confirm this
+package skill is not loaded. Keep evaluation traces private; report unavailable checks rather than treating discovery as
+execution.
+
 [Back to documentation](../README.md#documentation)
