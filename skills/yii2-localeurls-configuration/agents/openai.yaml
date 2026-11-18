@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yii2 Locale URLs Configuration"
+  short_description: "Configure language URLs, redirects and persistence"
+  default_prompt: "Use $yii2-localeurls-configuration to configure or troubleshoot language URLs with UrlLanguageManager."
